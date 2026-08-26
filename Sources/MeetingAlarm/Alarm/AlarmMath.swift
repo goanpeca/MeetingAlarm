@@ -1,0 +1,20 @@
+import Foundation
+
+/// Pure scheduling arithmetic — no timers, no side effects, fully unit-tested.
+enum AlarmMath {
+    /// When the overlay should begin: `meetingStart − leadTime`.
+    static func fireTime(meetingStart: Date, leadTime: TimeInterval) -> Date {
+        meetingStart.addingTimeInterval(-leadTime)
+    }
+
+    /// The next snooze target, or `nil` if it would land at/after the meeting end
+    /// (snoozing past the meeting is pointless).
+    static func snoozeFireTime(
+        from now: Date,
+        interval: TimeInterval,
+        meetingEnd: Date
+    ) -> Date? {
+        let target = now.addingTimeInterval(interval)
+        return target < meetingEnd ? target : nil
+    }
+}
