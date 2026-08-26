@@ -9,7 +9,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 THRESHOLD="${COVERAGE_THRESHOLD:-70}"
-CORE_GLOB="${CORE_GLOB:-/Sources/MeetingAlarm/Models/}"
+CORE_GLOB="${CORE_GLOB:-/Sources/MeetingAlarm/}"
+# Thin AppKit/EventKit/URLSession/SwiftUI shells are verified manually (design §13),
+# so they are excluded from the measured pure-logic denominator.
+EXCLUDE="${EXCLUDE:-App.swift Logging.swift Keychain.swift SoundPlayer.swift OverlayController.swift OverlayView.swift EventKitSource.swift GoogleCalendarSource.swift GoogleAuth.swift AlarmScheduler.swift AppCoordinator.swift MenuContentView.swift SettingsView.swift AccountsView.swift}"
 
 BIN="$(swift build --show-bin-path)"
 PROFDATA="$BIN/codecov/default.profdata"
@@ -27,14 +30,16 @@ fi
 TEST_BIN="$XCTEST/Contents/MacOS/$(basename "${XCTEST%.xctest}")"
 
 xcrun llvm-cov export -instr-profile "$PROFDATA" "$TEST_BIN" \
-    | CORE_GLOB="$CORE_GLOB" THRESHOLD="$THRESHOLD" python3 -c '
+    | CORE_GLOB="$CORE_GLOB" THRESHOLD="$THRESHOLD" EXCLUDE="$EXCLUDE" python3 -c '
 import json, os, sys
 data = json.load(sys.stdin)
 glob = os.environ["CORE_GLOB"]
 threshold = float(os.environ["THRESHOLD"])
+excluded = os.environ.get("EXCLUDE", "").split()
 covered = total = 0
 for f in data["data"][0]["files"]:
-    if glob in f["filename"]:
+    name = f["filename"]
+    if glob in name and not any(name.endswith(e) for e in excluded):
         lines = f["summary"]["lines"]
         covered += lines["covered"]
         total += lines["count"]

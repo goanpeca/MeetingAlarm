@@ -9,4 +9,7 @@
 --trimwhitespace always
 --self remove
 --stripunusedargs closure-only
+# Keep the opening brace on the same line as a wrapped condition, so SwiftFormat and
+# SwiftLint's `opening_brace` rule agree.
+--disable wrapMultilineStatementBraces
 --exclude .build,Resources,MeetingAlarm.app

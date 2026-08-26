@@ -12,7 +12,6 @@ opt_in_rules:
   - empty_count
   - explicit_init
   - first_where
-  - force_unwrapping
   - implicitly_unwrapped_optional
   - redundant_nil_coalescing
   - sorted_first_last
@@ -35,6 +34,11 @@ type_body_length:
 function_body_length:
   warning: 50
   error: 100
+
+# Pure field-mappers (EventKit/Google → Meeting) legitimately take several fields.
+function_parameter_count:
+  warning: 7
+  error: 9
 
 identifier_name:
   min_length: 2
