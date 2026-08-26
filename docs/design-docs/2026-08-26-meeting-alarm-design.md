@@ -24,7 +24,10 @@ sensitivities / gets stuck in hyperfocus)?" — see §9.
 ### Goals
 - Read upcoming meetings from **both** the macOS Calendar (EventKit) **and** Google
   Calendar directly (OAuth), switchable behind one interface.
-- Per-meeting arming: choose which meetings get an extra alarm, and which preset.
+- **Day-scoped checklist (MVP core):** see the events for a chosen day — **default
+  today** — with a **‹ prev / Today / next ›** navigator, and **check/uncheck** each event to
+  arm or disarm its reminder. Choosing which meetings get an alarm *is* the primary screen.
+- Per-meeting arming: each checked meeting gets an alarm, with a selectable preset.
 - A full-screen, multi-display overlay that is loud/red when you want it and calm/gradual
   when you want it.
 - Optional sound, fully user-controllable (off / volume / which sound).
@@ -123,10 +126,13 @@ be driven from a Claude Code `/loop` or scheduled agent.)
 
 1. **App launch** → `Store` loads settings + armed set; `App` selects the active
    `CalendarSource` (EventKit or Google) from settings.
-2. **Sync** → active source `fetchUpcoming(next 24h)` returns `[Meeting]`. `MenuContentView`
-   lists them; armed meetings are checked. A repeating sync (default every 5 min) refreshes.
-3. **Arming** → toggling a meeting writes its key + chosen preset into `Store`, then asks
-   `AlarmScheduler` to (re)compute.
+2. **Sync** → for the **selected day** (default today), the active source
+   `fetchUpcoming(within: daysInterval)` returns that day's `[Meeting]`. `MenuContentView`
+   lists them with a checkbox each; armed meetings are checked. A repeating sync (default
+   every 5 min) refreshes; the day navigator changes the selected day and re-fetches.
+3. **Arming** → checking a meeting writes its key + chosen preset into `Store`; unchecking
+   removes it. Either way `AlarmScheduler` (re)computes. Arming spans days — a meeting armed
+   on a future day still fires even when the list is showing today.
 4. **Scheduling** → for each armed meeting, `AlarmScheduler` computes `fireTime`
    (`start − leadTime` for Gentle Ramp, `start` for Blast) and arms a timer. On wake or
    re-sync it recomputes; a fire time already passed (but meeting not yet ended) fires
@@ -151,8 +157,13 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 - **Interface:** knobs — `color`, `peakOpacity` (0…1), `leadTime` (seconds before start), `escalation` (`.instant` / `.easeIn`), `pulse` (Bool), `sound` (`SoundChoice?`), `volume` (0…1), `dismissal` (`.clickAnywhere` / `.keyPress` / `.auto(after:)`), `showCountdown` (Bool). Statics: `.blast`, `.gentleRamp`. `Codable` for persistence.
 - **Depends on:** nothing (pure). Directly unit-tested.
 
+### DayWindow — `Models/DayWindow.swift` · layer: Models
+- **What:** pure day math — the `[startOfDay, startOfNextDay)` `DateInterval` for a given date in a given `Calendar`, plus `previous`/`next`/`today` day navigation. Keeps the "which day" logic testable and free of UI.
+- **Interface:** `enum DayWindow { static func interval(for day: Date, calendar: Calendar) -> DateInterval; static func shift(_ day: Date, byDays: Int, calendar: Calendar) -> Date }`.
+- **Depends on:** `Foundation`. Directly unit-tested.
+
 ### CalendarSource — `Calendar/CalendarSource.swift` · layer: Services
-- **What:** the seam that hides *which* calendar backend is active.
+- **What:** the seam that hides *which* calendar backend is active. The UI passes the selected day's interval (from `DayWindow`) to `fetchUpcoming(within:)`.
 - **Interface:** `protocol CalendarSource { var kind: SourceKind { get }; func authorize() async throws; func fetchUpcoming(within: DateInterval) async throws -> [Meeting] }`.
 - **Depends on:** `Meeting`.
 
@@ -202,11 +213,12 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 - **Depends on:** `Security`.
 
 ### UI — `UI/MenuContentView.swift`, `UI/SettingsView.swift`, `UI/AccountsView.swift` · layer: Runtime/UI (`@MainActor`)
-- **What:** the menu-bar popover (meeting list with a toggle + preset picker per row, an
-  `accountLabel` badge when >1 account, a permission/error banner, and a **Test Alarm**
-  button); a settings pane (source picker, default preset, per-knob controls, **snooze
-  intervals** editor); and an **Accounts** pane to add/remove Google accounts and enter the
-  OAuth client id/secret.
+- **What:** the menu-bar popover — a **day navigator** (‹ prev / **Today** / next ›, default
+  today) above the selected day's **event checklist**: each row is a **checkbox** (arm/disarm)
+  + title + time + preset picker, with an `accountLabel` badge when >1 account; plus a
+  permission/error banner and a **Test Alarm** button. A settings pane (source picker, default
+  preset, per-knob controls, **snooze intervals** editor); and an **Accounts** pane to
+  add/remove Google accounts and enter the OAuth client id/secret.
 - **Depends on:** `Store`, active `CalendarSource`, `AlarmScheduler`, `OverlayController`,
   `GoogleAuth`, `GoogleAccountStore`.
 
