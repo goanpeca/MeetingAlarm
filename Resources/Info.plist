@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>MeetingAlarm</string>
+    <key>CFBundleDisplayName</key>
+    <string>Meeting Alarm</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.goanpeca.MeetingAlarm</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>MeetingAlarm</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <!-- Menu-bar-only app: no Dock icon. -->
+    <key>LSUIElement</key>
+    <true/>
+    <!-- Calendar access rationale (macOS 14+ full-access key + legacy key). -->
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>Meeting Alarm reads your upcoming events so it can alert you before meetings start.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Meeting Alarm reads your upcoming events so it can alert you before meetings start.</string>
+</dict>
+</plist>

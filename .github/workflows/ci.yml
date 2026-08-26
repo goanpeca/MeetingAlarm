@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build (warnings as errors)
+        run: swift build -Xswiftc -warnings-as-errors
+
+      - name: Test with coverage
+        run: swift test --enable-code-coverage
+
+      - name: Coverage gate
+        run: ./scripts/coverage-gate.sh
+
+      - name: Layer check
+        run: ./scripts/check-layers.sh
+
+      - name: Install SwiftFormat & SwiftLint
+        run: brew install swiftformat swiftlint
+
+      - name: Format check
+        run: swiftformat --lint .
+
+      - name: Lint
+        run: swiftlint --strict

@@ -1,0 +1,12 @@
+# SwiftFormat configuration — deterministic formatting for the whole repo.
+--swiftversion 6.0
+--indent 4
+--maxwidth 100
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--commas inline
+--trimwhitespace always
+--self remove
+--stripunusedargs closure-only
+--exclude .build,Resources,MeetingAlarm.app

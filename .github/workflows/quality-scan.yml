@@ -1,0 +1,37 @@
+name: Quality Scan
+
+# The local analog of OpenAI's recurring background refactor task: on a schedule,
+# scan the repo for drift (layer violations, lint/format drift, oversized files)
+# so problems surface as they appear rather than at review time. Can also be run
+# on demand, or driven from a Claude Code /loop or scheduled agent.
+on:
+  schedule:
+    - cron: "0 14 * * 1" # Mondays 14:00 UTC
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Layer check
+        run: ./scripts/check-layers.sh
+
+      - name: Install SwiftFormat & SwiftLint
+        run: brew install swiftformat swiftlint
+
+      - name: Format & lint drift
+        run: |
+          swiftformat --lint .
+          swiftlint --strict
+
+      - name: File-size drift (golden rule: <= 250 lines)
+        run: |
+          over=$(find Sources -name '*.swift' -exec awk 'END { if (NR > 250) print FILENAME ": " NR " lines" }' {} \;)
+          if [ -n "$over" ]; then
+            echo "Files over the 250-line golden limit:"
+            echo "$over"
+            exit 1
+          fi
+          echo "No oversized files."
