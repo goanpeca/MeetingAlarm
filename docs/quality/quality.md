@@ -6,25 +6,27 @@ coverage. Update this in the same change that moves a grade. Grades: **A** solid
 
 ## Coverage bar
 
-- **Gate:** `scripts/coverage-gate.sh`, threshold **70%** line coverage on the pure
-  core (`CORE_GLOB=/Sources/MeetingAlarm/Models/` today). Ratchet upward as pure
-  logic lands in Services (scheduler fire-time math, JSON mapping, PKCE helpers).
-- Thin AppKit/EventKit/URLSession shells are intentionally outside the measured
-  core; they are covered by the manual checklist in the design doc §11/§13.
+- **Gate:** `scripts/coverage-gate.sh`, threshold **70%** on the pure core
+  (`CORE_GLOB=/Sources/MeetingAlarm/`, with AppKit/EventKit/URLSession/SwiftUI shells in
+  `EXCLUDE`). Current: **~95%** (29 tests). The gate **fails on zero matches**, so it can
+  never pass vacuously.
+- Thin shells (overlay window, scheduler timers, EventKit/Google network, UI) are outside
+  the measured core; they are covered by the manual checklist in the design doc §11/§13.
 
 ## Grades
 
 | Domain | Grade | Notes / gaps |
 |--------|:-----:|--------------|
-| Models | A | `Meeting`, `SensoryProfile`, `RGBAColor` implemented; presets, Codable, and the Gentle-Ramp `overlayOpacity` curve (incl. Reduce-Motion) unit-tested at 100%. |
-| State | — | Not built yet (`Store`, `Keychain`). |
-| Calendar (Services) | — | `CalendarSource` protocol defined; EventKit/Google impls pending. |
-| Alarm (Services) | — | Scheduler/overlay/sound pending. Fire-time math must land with tests. |
-| Runtime/UI | B | Scaffold menu-bar shell only; menu/settings pending. |
+| Models | A | `Meeting`, `SensoryProfile` (+ `overlayOpacity`), `DayWindow`, `GoogleAccount`, `ArmedConfig` — presets, Codable, ramp, and day math unit-tested. |
+| State | A | `Store` (armed/snooze/settings) and `GoogleAccountStore` round-trip tested; `SecretStore` fake tested; `Keychain` is a thin Security shell (manual). |
+| Calendar (Services) | B | Pure `GoogleEventMapper`, `EventKitMapper`, `MeetingMerge`, `GoogleOAuth` (PKCE/URLs) unit-tested; EventKit query, Google REST fan-out, and OAuth loopback are shells verified manually (Google needs your OAuth client). |
+| Alarm (Services) | B | `AlarmMath` (fire/snooze) unit-tested; `AlarmScheduler` timers, `OverlayController` (multi-display, Esc), `SoundPlayer` are shells verified via **Test Alarm**. |
+| Runtime/UI | B | Day-list checklist, settings, and accounts implemented; verified by launching the app. |
 
 ## Open gaps (tracked)
 
-- Scheduler `fireTime` needs pure implementation + edge-case tests (overdue, wake,
-  all-day exclusion) before it counts toward the core coverage denominator.
-- Google JSON→`Meeting` mapping and PKCE/auth-URL helpers need unit tests.
-- Overlay Esc-dismiss safety needs an automated assertion once the overlay exists.
+- Overlay Esc-dismiss safety is verified manually; an automated UI/host test would harden it.
+- The Google end-to-end flow (loopback → token → fetch) is exercised manually — it needs a
+  real OAuth client id/secret, so it is not run in CI. See `docs/technical-debt/`.
+- `AlarmScheduler` uses `Task.sleep`; long sleeps across system sleep are backstopped by the
+  wake observer re-computing. A dedicated sleep/wake test would raise this grade to A.
