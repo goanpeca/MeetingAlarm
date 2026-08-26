@@ -16,4 +16,6 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
     let start: Date
     let end: Date
     let sourceKind: SourceKind
+    /// Owning account/calendar label (e.g. an email), shown when >1 account is present.
+    let accountLabel: String?
 }
