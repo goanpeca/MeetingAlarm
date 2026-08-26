@@ -12,22 +12,47 @@ final class AppCoordinator: ObservableObject {
     let store: Store
     let accounts: GoogleAccountStore
 
+    let auth: GoogleAuth
+
+    private let secrets: SecretStore
     private let overlay = OverlayController()
     private let sound = SoundPlayer()
     private let scheduler: AlarmScheduler
     private var source: CalendarSource
     private var syncTask: Task<Void, Never>?
+    private var cancellables = Set<AnyCancellable>()
     private let calendar = Calendar.current
     private let log = Log.make("coordinator")
 
     init(store: Store = Store(), accounts: GoogleAccountStore = GoogleAccountStore()) {
         self.store = store
         self.accounts = accounts
+        secrets = KeychainSecretStore()
+        auth = GoogleAuth(secrets: secrets, accounts: accounts)
         scheduler = AlarmScheduler(overlay: overlay, sound: sound)
         source = EventKitSource()
         configureScheduler()
+        rebuildSource()
+        observeSourceChanges()
         store.prunePastSnoozes(now: Date())
         start()
+    }
+
+    private func rebuildSource() {
+        switch store.activeSource {
+        case .eventKit: source = EventKitSource()
+        case .google: source = GoogleCalendarSource(auth: auth, accounts: accounts)
+        }
+    }
+
+    private func observeSourceChanges() {
+        store.$activeSource
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.rebuildSource()
+                Task { await self?.sync() }
+            }
+            .store(in: &cancellables)
     }
 
     private func configureScheduler() {
@@ -118,6 +143,36 @@ final class AppCoordinator: ObservableObject {
 
     var hasMultipleAccounts: Bool {
         accounts.accounts.count > 1
+    }
+
+    // MARK: Google accounts
+
+    var googleClientId: String {
+        auth.clientId
+    }
+
+    var isGoogleConfigured: Bool {
+        auth.isConfigured
+    }
+
+    func setGoogleCredentials(clientId: String, clientSecret: String) {
+        auth.setCredentials(clientId: clientId, clientSecret: clientSecret)
+    }
+
+    func addGoogleAccount() async {
+        do {
+            _ = try await auth.addAccount()
+            errorMessage = nil
+            await sync()
+        } catch {
+            errorMessage = error.localizedDescription
+            log.error("add account failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    func removeGoogleAccount(id: String) {
+        auth.removeAccount(id: id)
+        Task { await sync() }
     }
 
     // MARK: Test
