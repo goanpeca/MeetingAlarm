@@ -28,6 +28,10 @@ sensitivities / gets stuck in hyperfocus)?" — see §9.
 - A full-screen, multi-display overlay that is loud/red when you want it and calm/gradual
   when you want it.
 - Optional sound, fully user-controllable (off / volume / which sound).
+- **Manage multiple Google accounts at once** — add several, aggregate their meetings into
+  one list, add/remove them independently (see §5 GoogleAuth/GoogleCalendarSource, §16).
+- **Snooze an alarm**, not just dismiss it — configurable intervals, reliable re-fire, and
+  it survives relaunch/sleep (see §5 AlarmScheduler, §17).
 - Run quietly in the menu bar, survive sleep/wake, and never trap the user.
 - **Be a well-engineered, agent-navigable repo**: enforced structure, linting, formatting,
   meaningful test coverage, and CI (see §10–§13).
@@ -37,9 +41,7 @@ sensitivities / gets stuck in hyperfocus)?" — see §9.
 - Notification Center integration, Focus modes, or Shortcuts actions.
 - iOS / iPadOS.
 - Settings sync across machines.
-- Managing multiple Google accounts at once (one active account per source).
 - Notarized/distributable build (local ad-hoc signing only; distribution is future work).
-- Complex snooze scheduling (a single "dismiss" is v1; snooze is noted as future).
 
 ## 3. Repository organization (harness engineering)
 
@@ -141,7 +143,7 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 
 ### Meeting — `Models/Meeting.swift` · layer: Models
 - **What:** immutable value describing one meeting occurrence.
-- **Interface:** `struct Meeting { let id: String; let title: String; let start: Date; let end: Date; let sourceKind: SourceKind }`. `id` is stable per occurrence (EventKit: `eventIdentifier` + occurrence start; Google: event `id` + start).
+- **Interface:** `struct Meeting { let id: String; let title: String; let start: Date; let end: Date; let sourceKind: SourceKind; let accountLabel: String? }`. `id` is stable **and globally unique across accounts** (EventKit: `eventIdentifier` + occurrence start; Google: `accountId` + event `id` + start), so armed state never collides between two accounts. `accountLabel` (e.g. the account email) is shown in the list when more than one account is present.
 - **Depends on:** nothing (pure).
 
 ### SensoryProfile — `Models/SensoryProfile.swift` · layer: Models
@@ -160,23 +162,28 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 - **Depends on:** `EventKit`, `Meeting`. Requires `NSCalendarsFullAccessUsageDescription` (+ legacy `NSCalendarsUsageDescription`) in Info.plist and a proper app bundle.
 
 ### GoogleCalendarSource — `Calendar/GoogleCalendarSource.swift` · layer: Services
-- **What:** reads events straight from Google, independent of macOS Calendar.
-- **Interface:** implements `CalendarSource`. Uses `GoogleAuth` for a bearer token, then `GET https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=…&timeMax=…&singleEvents=true&orderBy=startTime`; decodes JSON → `[Meeting]`. Pure decode helper (`Meeting(fromGoogleJSON:)`) is unit-tested.
-- **Depends on:** `GoogleAuth`, `URLSession`, `Meeting`. Scope: `calendar.events.readonly`.
+- **What:** reads events straight from Google, independent of macOS Calendar, **across all connected accounts** (see §16).
+- **Interface:** implements `CalendarSource`. For each account in `GoogleAccountStore`, gets a bearer token via `GoogleAuth`, calls `GET https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=…&timeMax=…&singleEvents=true&orderBy=startTime`, decodes JSON → `[Meeting]` (stamped with that account's id/label), then **merges and sorts** the per-account results. A failing account is logged and skipped, not fatal to the others. Pure decode helper (`Meeting(fromGoogleJSON:accountId:accountLabel:)`) is unit-tested.
+- **Depends on:** `GoogleAuth`, `GoogleAccountStore`, `URLSession`, `Meeting`. Scope: `calendar.events.readonly` + `userinfo.email` (to label the account).
 
 ### GoogleAuth — `Calendar/GoogleAuth.swift` · layer: Services
-- **What:** OAuth 2.0 for a desktop app using the **loopback redirect + PKCE** flow (Google's current recommendation for native apps; OOB is deprecated).
-- **Interface:** `func signIn() async throws` (opens the system browser to the consent URL, runs a tiny `127.0.0.1:<ephemeral>` listener to catch the `code`, exchanges it with the PKCE `code_verifier`), `func accessToken() async throws -> String` (cached or refreshed). Pure helpers `makeAuthURL`, `makePKCE`, `parseTokenResponse` are extracted for unit tests.
-- **Depends on:** `URLSession`, a minimal loopback listener (`Network.NWListener`), `Keychain`. Client ID + client secret (from the user's downloaded OAuth JSON — for installed apps the "secret" is not truly confidential) and refresh token live in Keychain.
+- **What:** OAuth 2.0 for a desktop app using the **loopback redirect + PKCE** flow (Google's current recommendation for native apps; OOB is deprecated). Manages tokens **per account**.
+- **Interface:** `func addAccount() async throws -> GoogleAccount` (opens the system browser to the consent URL, runs a tiny `127.0.0.1:<ephemeral>` listener to catch the `code`, exchanges it with the PKCE `code_verifier`, fetches the account email to label it), `func accessToken(for accountId:) async throws -> String` (cached or refreshed per account), `func removeAccount(_:)`. Pure helpers `makeAuthURL`, `makePKCE`, `parseTokenResponse` are extracted for unit tests.
+- **Depends on:** `URLSession`, a minimal loopback listener (`Network.NWListener`), `Keychain`, `GoogleAccountStore`. Client ID + client secret (from the user's downloaded OAuth JSON — for installed apps the "secret" is not truly confidential) and **each account's** refresh token live in Keychain, keyed by account id.
+
+### GoogleAccountStore — `State/GoogleAccountStore.swift` · layer: State
+- **What:** the list of connected Google accounts (id + email label + order); the tokens themselves stay in Keychain.
+- **Interface:** `accounts: [GoogleAccount]`, `add`, `remove`, persisted via `UserDefaults`. `GoogleAccount { id: String; email: String }` is a `Models` value type.
+- **Depends on:** `Foundation`, `Models`.
 
 ### AlarmScheduler — `Alarm/AlarmScheduler.swift` · layer: Services
-- **What:** owns which meetings are armed and fires them at the right time.
-- **Interface:** `arm(_ meetings: [ArmedMeeting])`, `fireTime(for:profile:now:) -> Date` (pure, unit-tested), internal timers via `DispatchSourceTimer`. Observes `NSWorkspace.didWakeNotification` to recompute. Fires immediately for a fire time that elapsed during sleep if the meeting hasn't ended.
+- **What:** owns which meetings are armed, fires them at the right time, and manages **snooze** (see §17).
+- **Interface:** `arm(_ meetings: [ArmedMeeting])`, `fireTime(for:profile:now:) -> Date` and `snoozeFireTime(from:interval:meetingEnd:now:) -> Date?` (both pure, unit-tested), `snooze(_ meetingId:for:)`, `dismiss(_ meetingId:)`, internal timers via `DispatchSourceTimer`. Observes `NSWorkspace.didWakeNotification` to recompute. Fires immediately for a fire time that elapsed during sleep if the meeting hasn't ended; a snooze whose target passed during sleep also fires on wake. Snooze past the meeting end is refused (returns `nil`).
 - **Depends on:** `OverlayController`, `SoundPlayer`, `Store`, `Meeting`.
 
 ### OverlayController — `Alarm/OverlayController.swift` · layer: Services (`@MainActor`)
 - **What:** the visible alarm — a borderless window on **every** `NSScreen`.
-- **Interface:** `present(profile:meeting:)`, `dismiss()`. Each window: `.borderless`, `level` at screen-saver/maximum, `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]` so it covers other apps and Spaces; colored background animating `alphaValue` 0→`peakOpacity` over `leadTime` (`.easeIn`) or immediately (`.instant`); optional pulse; centered live countdown label. **Esc always dismisses.** Honors system **Reduce Motion** (no pulse/animation → stepped or steady).
+- **Interface:** `present(profile:meeting:onSnooze:onDismiss:)`, `dismiss()`. Each window: `.borderless`, `level` at screen-saver/maximum, `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]` so it covers other apps and Spaces; colored background animating `alphaValue` 0→`peakOpacity` over `leadTime` (`.easeIn`) or immediately (`.instant`); optional pulse; centered live countdown label; and **snooze buttons** (the configured intervals) plus a **Dismiss** button. **Esc always dismisses.** Honors system **Reduce Motion** (no pulse/animation → stepped or steady).
 - **Depends on:** `AppKit`, `SensoryProfile`, `Meeting`.
 
 ### SoundPlayer — `Alarm/SoundPlayer.swift` · layer: Services
@@ -185,20 +192,23 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 - **Depends on:** `AppKit` (`NSSound`).
 
 ### Store — `State/Store.swift` · layer: State
-- **What:** persists armed meetings + all settings.
-- **Interface:** `ObservableObject`; `armed: [String: ArmedConfig]`, `defaultPreset`, `activeSource`, `syncInterval`, plus profile overrides. Backed by `UserDefaults` (`Codable`). Round-trip unit-tested.
+- **What:** persists armed meetings, snooze state, and all settings.
+- **Interface:** `ObservableObject`; `armed: [String: ArmedConfig]`, `snoozes: [String: Date]` (meeting id → next snooze fire), `defaultPreset`, `activeSource`, `syncInterval`, `snoozeIntervals: [TimeInterval]`, plus profile overrides. Backed by `UserDefaults` (`Codable`). Round-trip unit-tested; a snooze whose target is in the past is pruned on load and re-evaluated by the scheduler.
 - **Depends on:** `Foundation`, `Models`.
 
 ### Keychain — `State/Keychain.swift` · layer: State
-- **What:** minimal `kSecClassGenericPassword` get/set/delete for Google tokens + creds.
+- **What:** minimal `kSecClassGenericPassword` get/set/delete for the shared OAuth client creds and **each account's** refresh token (keyed by account id).
 - **Interface:** `set(_:for:)`, `get(_:) -> Data?`, `delete(_:)`.
 - **Depends on:** `Security`.
 
-### UI — `UI/MenuContentView.swift`, `UI/SettingsView.swift` · layer: Runtime/UI (`@MainActor`)
-- **What:** the menu-bar popover (meeting list with a toggle + preset picker per row, a
-  permission/error banner, and a **Test Alarm** button) and a settings pane (source picker,
-  Google **Sign in** button + client-ID/secret fields, default preset, per-knob controls).
-- **Depends on:** `Store`, active `CalendarSource`, `AlarmScheduler`, `OverlayController`.
+### UI — `UI/MenuContentView.swift`, `UI/SettingsView.swift`, `UI/AccountsView.swift` · layer: Runtime/UI (`@MainActor`)
+- **What:** the menu-bar popover (meeting list with a toggle + preset picker per row, an
+  `accountLabel` badge when >1 account, a permission/error banner, and a **Test Alarm**
+  button); a settings pane (source picker, default preset, per-knob controls, **snooze
+  intervals** editor); and an **Accounts** pane to add/remove Google accounts and enter the
+  OAuth client id/secret.
+- **Depends on:** `Store`, active `CalendarSource`, `AlarmScheduler`, `OverlayController`,
+  `GoogleAuth`, `GoogleAccountStore`.
 
 ## 6. Scheduling & lifecycle details
 
@@ -214,11 +224,15 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 
 ## 7. Persistence & identity
 
-- **Armed state** keyed by `Meeting.id` (occurrence-stable) → `{ presetName or custom profile }`,
-  in `UserDefaults`.
-- **Settings** (active source, default preset, knob values, sync interval) in `UserDefaults`.
-- **Secrets** (Google client id/secret, refresh token) in **Keychain**, never in `UserDefaults`
-  or logs.
+- **Armed state** keyed by `Meeting.id` (occurrence-stable, account-unique) →
+  `{ presetName or custom profile }`, in `UserDefaults`.
+- **Snooze state** keyed by `Meeting.id` → next snooze fire `Date`, in `UserDefaults`; pruned
+  when past on load.
+- **Connected accounts** (`GoogleAccount` id + email + order) in `UserDefaults`.
+- **Settings** (active source, default preset, knob values, sync interval, snooze intervals) in
+  `UserDefaults`.
+- **Secrets** (OAuth client id/secret, and each account's refresh token keyed by account id) in
+  **Keychain**, never in `UserDefaults` or logs.
 
 ## 8. Error handling
 
@@ -300,9 +314,11 @@ wanted. Both live on the same engine and the user chooses per meeting.
 ## 13. Testing strategy & coverage
 
 - **Framework:** **Swift Testing** (`import Testing`, native to Swift 6.3 / Xcode 26).
-- **Unit (no network / no UI):** `SensoryProfile` preset values; `AlarmScheduler.fireTime`
-  math across Blast/Gentle and edge times (overdue, all-day excluded, wake); `Store` codable
-  round-trip; EventKit + Google JSON → `Meeting` mapping; `GoogleAuth` PKCE + auth-URL + token
+- **Unit (no network / no UI):** `SensoryProfile` preset values + `overlayOpacity` ramp;
+  `AlarmScheduler.fireTime` and `snoozeFireTime` math across Blast/Gentle and edge times
+  (overdue, all-day excluded, wake, snooze-past-end → `nil`); `Store` codable round-trip incl.
+  snooze/accounts + past-snooze pruning; EventKit + Google JSON → `Meeting` mapping with
+  account id/label; multi-account merge/sort ordering; `GoogleAuth` PKCE + auth-URL + token
   parsing.
 - **Coverage gate:** `swift test --enable-code-coverage`; `scripts/coverage-gate.sh` parses
   `llvm-cov export` and **fails CI below the threshold**. Start at **70%** measured against the
@@ -324,9 +340,42 @@ wanted. Both live on the same engine and the user chooses per meeting.
 
 ## 15. Open questions / future
 
-- **Snooze:** a simple "remind me again in 1 min" on dismiss — deferred to keep v1 lean.
 - **Login item:** auto-launch at login via `SMAppService` — easy to add later; default off.
 - **Per-calendar filtering:** choose which sub-calendars are eligible — future.
 - **Notarized distribution:** if this ever leaves your machine.
 - **CI runner:** GitHub Actions `macos-14`+ image; SwiftFormat/SwiftLint installed via Homebrew
   in the workflow (kept out of the build graph so builds stay fast).
+
+## 16. Multiple Google accounts
+
+Both sources support several accounts; the mechanics differ:
+
+- **EventKit** already aggregates every Google (and iCloud/Exchange) account added in System
+  Settings → Internet Accounts, so multi-account is inherent — no app-side account management.
+  Each event's owning calendar title supplies `accountLabel`.
+- **Direct Google** manages accounts itself. `GoogleAccountStore` holds the connected accounts
+  (`GoogleAccount { id, email }`); each account's refresh token lives in Keychain keyed by
+  account id. **Add account** runs the PKCE loopback flow, then calls the userinfo endpoint to
+  label the account by email. `GoogleCalendarSource.fetchUpcoming` fans out over all accounts
+  (token-refreshing each independently), **merges** the results, sorts by start, and **de-dupes
+  nothing across accounts** — the same meeting on two accounts is two rows, each labeled. A
+  single account failing (revoked token, network) is logged and skipped; the others still load.
+- **Identity:** `Meeting.id` embeds the account id so armed/snooze state never collides between
+  accounts. The list shows `accountLabel` only when more than one account is connected, to keep
+  the single-account UI clean.
+
+## 17. Snooze
+
+A firing alarm offers **Dismiss** plus **snooze** buttons for each configured interval
+(default `[1m, 5m, 10m]`, editable in Settings).
+
+- **Behavior:** snoozing records `now + interval` in `Store.snoozes[meetingId]`, tears down the
+  overlay, and arms a one-shot timer for that target. When it elapses the same alarm re-fires
+  with the meeting's profile. Dismiss clears any snooze for that meeting.
+- **Pure core:** `AlarmScheduler.snoozeFireTime(from:interval:meetingEnd:now:) -> Date?` computes
+  the target and **returns `nil` when it would land at/after the meeting end** (snoozing past
+  the meeting is pointless) — unit-tested across the boundaries.
+- **Durability:** snooze targets persist in `UserDefaults`, so a snooze survives relaunch; on
+  launch/wake the scheduler re-arms future snoozes and fires any whose target passed while the
+  app was closed or the machine asleep (if the meeting hasn't ended). Past targets are pruned.
+- **Safety:** Esc still dismisses outright; snooze never removes the Esc exit.
