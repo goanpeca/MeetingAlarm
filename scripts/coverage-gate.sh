@@ -12,7 +12,7 @@ THRESHOLD="${COVERAGE_THRESHOLD:-70}"
 CORE_GLOB="${CORE_GLOB:-/Sources/MeetingAlarm/}"
 # Thin AppKit/EventKit/URLSession/SwiftUI shells are verified manually (design §13),
 # so they are excluded from the measured pure-logic denominator.
-EXCLUDE="${EXCLUDE:-App.swift Logging.swift Keychain.swift SoundPlayer.swift OverlayController.swift OverlayView.swift EventKitSource.swift GoogleCalendarSource.swift GoogleAuth.swift AlarmScheduler.swift AppCoordinator.swift MenuContentView.swift SettingsView.swift AccountsView.swift}"
+EXCLUDE="${EXCLUDE:-App.swift Logging.swift Keychain.swift SoundPlayer.swift OverlayController.swift OverlayView.swift EventKitSource.swift GoogleCalendarSource.swift GoogleAuth.swift LoopbackServer.swift AlarmScheduler.swift AppCoordinator.swift MenuContentView.swift SettingsView.swift AccountsView.swift}"
 
 BIN="$(swift build --show-bin-path)"
 PROFDATA="$BIN/codecov/default.profdata"
