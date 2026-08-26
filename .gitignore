@@ -1,0 +1,21 @@
+# Swift / SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+
+# Build output
+MeetingAlarm.app/
+*.dSYM/
+
+# macOS
+.DS_Store
+
+# Coverage
+*.profdata
+*.profraw
+coverage.txt
