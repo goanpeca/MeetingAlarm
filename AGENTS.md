@@ -3,6 +3,10 @@
 > Navigation map, not an encyclopedia. This file is a **table of contents** with
 > progressive disclosure: it points to the real source of truth in `docs/`. Keep
 > it short (~100 lines). When something here would go stale, link instead of copy.
+>
+> Shared entry point for both agents: **OpenAI Codex** reads this file natively;
+> **Claude Code** reads it via `CLAUDE.md`, which imports it. Edit this file — not
+> `CLAUDE.md` — so guidance never drifts between the two.
 
 ## What this is
 
