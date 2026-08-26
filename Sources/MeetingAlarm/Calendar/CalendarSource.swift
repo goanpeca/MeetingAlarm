@@ -6,7 +6,11 @@ import Foundation
 /// the source can be switched in settings without touching callers.
 ///
 /// Implementations are added per `docs/execution-plans/`.
-protocol CalendarSource: Sendable {
+///
+/// `@MainActor`: sources are driven from the UI/coordinator and their async methods
+/// await network/EventKit off the main thread without extra actor hops.
+@MainActor
+protocol CalendarSource {
     /// Which backend this source represents.
     var kind: SourceKind { get }
 

@@ -1,32 +1,56 @@
 import AppKit
 import SwiftUI
 
-/// Entry point. A menu-bar-only app (`LSUIElement` in Resources/Info.plist) — no
-/// Dock icon. This is the scaffold shell: the meeting list, per-meeting arming,
-/// and the alarm engine are wired in per `docs/execution-plans/`. Rich menu and
-/// settings views belong to the UI layer (`Sources/MeetingAlarm/UI/`).
+/// Menu-bar-only app (`LSUIElement` in Resources/Info.plist) — no Dock icon.
 @main
 struct MeetingAlarmApp: App {
+    @StateObject private var coordinator = AppCoordinator()
+
     var body: some Scene {
         MenuBarExtra("Meeting Alarm", systemImage: "bell.badge") {
-            MenuScaffoldView()
+            RootView(coordinator: coordinator)
         }
         .menuBarExtraStyle(.window)
     }
 }
 
-/// Placeholder popover shown until calendar sync and alarms are implemented.
-private struct MenuScaffoldView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Meeting Alarm").font(.headline)
-            Text("Scaffold — calendar sync and alarms are not wired up yet.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Divider()
-            Button("Quit") { NSApplication.shared.terminate(nil) }
+/// Container: a pane switch above the active view, with a shared footer.
+struct RootView: View {
+    @ObservedObject var coordinator: AppCoordinator
+    @State private var pane: Pane = .meetings
+
+    enum Pane: String, CaseIterable, Identifiable {
+        case meetings = "Meetings"
+        case settings = "Settings"
+        var id: String {
+            rawValue
         }
-        .padding(12)
-        .frame(width: 260)
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Picker("", selection: $pane) {
+                ForEach(Pane.allCases) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding([.top, .horizontal], 12)
+
+            switch pane {
+            case .meetings:
+                MenuContentView(coordinator: coordinator, store: coordinator.store)
+            case .settings:
+                SettingsView(coordinator: coordinator, store: coordinator.store)
+            }
+
+            Divider()
+            HStack {
+                Button("Test Alarm") { coordinator.testAlarm() }
+                Spacer()
+                Button("Quit") { NSApplication.shared.terminate(nil) }
+            }
+            .padding([.bottom, .horizontal], 12)
+        }
+        .frame(width: 340)
     }
 }
