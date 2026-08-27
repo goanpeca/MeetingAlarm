@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Assemble MeetingAlarm.app from the built binary + Info.plist, code-sign it, and leave
-# it ready to `open`. Signs with a stable self-signed identity ("MeetingAlarm Dev") when
-# available so macOS keeps the Calendar (TCC) permission across rebuilds; otherwise falls
-# back to ad-hoc (e.g. in CI). Create the identity once — see README "Stable signing".
+# it ready to `open`. Signs with a stable self-signed identity ("MeetingAlarm Dev") so
+# macOS keeps the Calendar (TCC) permission across rebuilds. The identity is created
+# automatically on first run by scripts/ensure-signing-identity.sh; if it can't be
+# created (e.g. CI), signing falls back to ad-hoc.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -23,6 +24,8 @@ if compgen -G "Resources/Sounds/*.m4a" > /dev/null; then
 fi
 
 IDENTITY="${CODESIGN_IDENTITY:-MeetingAlarm Dev}"
+# Auto-create the stable identity on first run so the Calendar grant persists.
+./scripts/ensure-signing-identity.sh
 if security find-identity -p codesigning 2>/dev/null | grep -q "$IDENTITY"; then
     echo "==> Signing with stable identity: $IDENTITY"
     codesign --force --deep --sign "$IDENTITY" "${APP}"

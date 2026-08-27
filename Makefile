@@ -6,7 +6,7 @@ APP = MeetingAlarm.app
 build:
 	swift build
 
-## app: assemble + ad-hoc-sign MeetingAlarm.app
+## app: assemble + sign MeetingAlarm.app (auto-creates a stable dev identity)
 app:
 	./scripts/make_app.sh
 

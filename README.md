@@ -40,32 +40,41 @@ Click the menu-bar bell to open the popover:
 ## Build & run
 
 ```bash
-make test    # unit tests
-make app     # assemble + ad-hoc-sign MeetingAlarm.app
+make test    # unit tests (requires full Xcode — see below)
+make app     # build + sign MeetingAlarm.app
 make run     # build the app bundle and open it
 ```
 
 `Package.swift` also opens directly in Xcode 26.
 
-### Stable signing (recommended for local dev)
+### Stable signing (automatic)
 
-macOS ties the Calendar permission to the app's code signature. Ad-hoc signing changes
-every rebuild, so macOS keeps re-forgetting the grant. Create a **one-time self-signed
-identity** and `make app` will use it automatically (falling back to ad-hoc if it's absent),
-so Calendar access sticks across rebuilds:
+macOS ties the Calendar permission to the app's code signature. Ad-hoc signatures change
+every rebuild, so macOS keeps re-forgetting the grant. To avoid that, `make app` signs with
+a **stable, self-signed identity** named `MeetingAlarm Dev`. The first `make app` creates
+that identity for you (via `scripts/ensure-signing-identity.sh`) and reuses it on every
+later build, so Calendar access sticks across rebuilds. No manual setup — clone and
+`make app` and it just works. If the identity can't be created (e.g. CI), it falls back to
+ad-hoc automatically.
+
+The identity is self-signed and local: it lives only in your login keychain and is never
+committed or shared, so **each person who clones the repo gets their own on first build**.
+It shows as untrusted, which is fine for local use. Bring your own with
+`CODESIGN_IDENTITY="Developer ID Application: …" make app` if you have a real one. If
+Calendar access still misbehaves after a change, reset it once:
+`tccutil reset Calendar com.goanpeca.MeetingAlarm`.
+
+### Running the tests
+
+`make test` uses Apple's swift-testing framework (`import Testing`), which ships with
+**full Xcode**, not the Command Line Tools. If tests fail with `no such module 'Testing'`,
+point the toolchain at Xcode once:
 
 ```bash
-WORK=$(mktemp -d)
-printf '[req]\ndistinguished_name=dn\nx509_extensions=v3\nprompt=no\n[dn]\nCN=MeetingAlarm Dev\n[v3]\nbasicConstraints=critical,CA:false\nkeyUsage=critical,digitalSignature\nextendedKeyUsage=critical,codeSigning\n' > "$WORK/c.cnf"
-openssl req -x509 -newkey rsa:2048 -keyout "$WORK/k.pem" -out "$WORK/c.pem" -days 3650 -nodes -config "$WORK/c.cnf"
-openssl pkcs12 -export -inkey "$WORK/k.pem" -in "$WORK/c.pem" -out "$WORK/id.p12" -passout pass:tmp -name "MeetingAlarm Dev" -macalg sha1 -keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES
-security import "$WORK/id.p12" -k ~/Library/Keychains/login.keychain-db -P tmp -T /usr/bin/codesign -A
-rm -rf "$WORK"
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
-The identity is self-signed (shows as untrusted — that's fine for local use). Override with
-`CODESIGN_IDENTITY=…` if you have a real one. If Calendar access still misbehaves after a
-change, reset it once: `tccutil reset Calendar com.goanpeca.MeetingAlarm`.
+The app itself (`make app` / `make run`) builds fine under either toolchain.
 
 ## Calendar setup
 
