@@ -110,6 +110,11 @@ extension AppCoordinator {
         store.armOverrides[meeting.id] ?? AlarmOverrides()
     }
 
+    /// The alarm color this meeting will actually fire with (its override, else the global).
+    func effectiveColor(for meeting: Meeting) -> RGBAColor {
+        overrides(for: meeting).color ?? store.alarmColor
+    }
+
     /// Override (or clear, when `color` is nil) the alarm color for this meeting only.
     func setColorOverride(_ meeting: Meeting, color: RGBAColor?) {
         var current = overrides(for: meeting)

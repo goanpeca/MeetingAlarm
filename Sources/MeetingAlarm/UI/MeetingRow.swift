@@ -50,6 +50,7 @@ struct MeetingRow: View {
             }
             Spacer()
             if coordinator.isArmed(meeting) {
+                colorSwatch
                 overrideButton
             }
         }
@@ -70,6 +71,17 @@ struct MeetingRow: View {
         .popover(isPresented: $showOverrides, arrowEdge: .bottom) {
             MeetingOverridesView(coordinator: coordinator, store: store, meeting: meeting)
         }
+    }
+
+    /// A dot showing the color this alarm will fire with (its override, else the global), so a
+    /// customized color is visible at a glance without opening the gear.
+    private var colorSwatch: some View {
+        let rgb = coordinator.effectiveColor(for: meeting)
+        return Circle()
+            .fill(Color(.sRGB, red: rgb.red, green: rgb.green, blue: rgb.blue, opacity: 1))
+            .frame(width: 9, height: 9)
+            .overlay(Circle().strokeBorder(.secondary.opacity(0.5)))
+            .accessibilityLabel("Alarm color")
     }
 
     /// A chevron that expands the row. Rows with nothing to show still reserve its width so
