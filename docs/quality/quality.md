@@ -6,10 +6,10 @@ coverage. Update this in the same change that moves a grade. Grades: **A** solid
 
 ## Coverage bar
 
-- **Gate:** `scripts/coverage-gate.sh`, threshold **70%** on the pure core
+- **Gate:** `scripts/coverage-gate.sh`, threshold **85%** on the pure core
   (`CORE_GLOB=/Sources/MeetingAlarm/`, with AppKit/EventKit/URLSession/SwiftUI shells in
-  `EXCLUDE`). Current: **~95%** (29 tests). The gate **fails on zero matches**, so it can
-  never pass vacuously.
+  `EXCLUDE`). Current: **~90%** (49 tests). The threshold is **ratcheted** toward actual so a
+  real regression fails; the gate also **fails on zero matches**, so it can't pass vacuously.
 - Thin shells (overlay window, scheduler timers, EventKit/Google network, UI) are outside
   the measured core; they are covered by the manual checklist in the design doc §11/§13.
 

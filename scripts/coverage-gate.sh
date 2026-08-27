@@ -8,7 +8,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-THRESHOLD="${COVERAGE_THRESHOLD:-70}"
+THRESHOLD="${COVERAGE_THRESHOLD:-85}"
 CORE_GLOB="${CORE_GLOB:-/Sources/MeetingAlarm/}"
 # Thin AppKit/EventKit/URLSession/SwiftUI shells are verified manually (design §13),
 # so they are excluded from the measured pure-logic denominator.
