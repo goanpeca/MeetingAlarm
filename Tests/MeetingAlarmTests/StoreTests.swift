@@ -42,6 +42,43 @@ struct StoreTests {
         #expect(store.snoozes["future"] != nil)
     }
 
+    @Test("A pre-recurring saved snapshot still decodes; new fields take defaults")
+    func decodesLegacySnapshot() {
+        let defaults = makeDefaults()
+        // Frozen v1 blob: no fromSeries / seriesId / armedSeries / sound+appearance keys.
+        let legacy = """
+        {
+          "armed": {
+            "eventkit:E1:2026-08-26": {
+              "presetName": "Blast",
+              "meeting": {
+                "id": "eventkit:E1:2026-08-26", "title": "Standup",
+                "start": 776000000, "end": 776001800,
+                "sourceKind": "eventKit", "accountLabel": "Work",
+                "joinURLs": [], "attendees": ["Alice"]
+              }
+            }
+          },
+          "snoozes": {}, "activeSource": "eventKit",
+          "defaultPresetName": "Gentle Ramp", "syncInterval": 300,
+          "snoozeIntervals": [60, 300, 600]
+        }
+        """
+        defaults.set(Data(legacy.utf8), forKey: "state.v1")
+
+        let store = Store(defaults: defaults)
+        let entry = store.armed["eventkit:E1:2026-08-26"]
+        #expect(entry?.presetName == "Blast")
+        #expect(entry?.meeting.title == "Standup")
+        #expect(entry?.fromSeries == false)
+        #expect(entry?.meeting.seriesId == nil)
+        #expect(store.defaultPresetName == "Gentle Ramp")
+        #expect(store.soundEnabled == true)
+        #expect(store.alarmSound == .jewelDrop)
+        #expect(store.armedSeries.isEmpty)
+        #expect(store.handled.isEmpty)
+    }
+
     private func meeting(_ id: String, seriesId: String? = nil) -> Meeting {
         Meeting(
             id: id, title: "Event",
