@@ -27,9 +27,9 @@ only in a genuine emergency with `--no-verify`.
 ## Golden rules (mechanically enforced)
 
 - Files ≤ 250 lines; the pure core stays pure (`check-layers`); every source file appears in
-  the [module map](docs/architecture/modules.md) (`check-docs`); ≥ 70% coverage on the core.
+  the [module map](docs/generated/repo-map.md) (`check-docs`); ≥ 85% coverage on the core.
 - Commits: one line, < 72 chars, Conventional-Commit prefix (`feat:`/`fix:`/`docs:`/…),
   **no AI attribution of any kind**.
 - Behavior changes update the `[Unreleased]` section of [`CHANGELOG.md`](CHANGELOG.md).
 
-The full list is in [`docs/principles/golden-principles.md`](docs/principles/golden-principles.md).
+The full list is in [`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md).

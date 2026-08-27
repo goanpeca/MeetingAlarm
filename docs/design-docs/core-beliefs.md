@@ -42,7 +42,7 @@ from "reviewed" to "enforced" over time.
 ## Process
 
 10. **Docs don't silently drift.** When code diverges from a `current` design doc,
-    update the doc or mark it `stale` in `docs/design-docs/INDEX.md` in the same
+    update the doc or mark it `stale` in `docs/design-docs/index.md` in the same
     change.
 11. **Keep the gates green.** `make scan` (layers + format + lint) and the coverage
     gate pass before every commit.

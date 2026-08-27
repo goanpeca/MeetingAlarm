@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Keep the module map honest: fail if any Sources/*.swift file is missing from
-# docs/architecture/modules.md, or the map lists a file that no longer exists. This makes
+# docs/generated/repo-map.md, or the map lists a file that no longer exists. This makes
 # "document the new module" a mechanical gate, not a good intention — the same way
 # check-layers/coverage-gate enforce the other golden rules.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MAP="docs/architecture/modules.md"
+MAP="docs/generated/repo-map.md"
 if [ ! -f "$MAP" ]; then
     echo "check-docs: $MAP not found."
     exit 1

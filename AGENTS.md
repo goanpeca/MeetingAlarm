@@ -19,13 +19,13 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 ## Start here
 
 - **Design (system of record):** [`docs/design-docs/2026-08-26-meeting-alarm-design.md`](docs/design-docs/2026-08-26-meeting-alarm-design.md)
-  (catalog: [`docs/design-docs/INDEX.md`](docs/design-docs/INDEX.md))
-- **Architecture map & layers:** [`docs/architecture/overview.md`](docs/architecture/overview.md)
-- **Module map (every file, verified):** [`docs/architecture/modules.md`](docs/architecture/modules.md)
-- **Golden principles (mechanical rules):** [`docs/principles/golden-principles.md`](docs/principles/golden-principles.md)
-- **Quality grades & coverage bar:** [`docs/quality/quality.md`](docs/quality/quality.md)
-- **Known issues:** [`docs/technical-debt/README.md`](docs/technical-debt/README.md)
-- **Plans & progress:** [`docs/execution-plans/`](docs/execution-plans/)
+  (catalog: [`docs/design-docs/index.md`](docs/design-docs/index.md))
+- **Architecture map & layers:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- **Module map (every file, verified):** [`docs/generated/repo-map.md`](docs/generated/repo-map.md)
+- **Golden principles (mechanical rules):** [`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md)
+- **Quality grades & coverage bar:** [`docs/QUALITY_SCORE.md`](docs/QUALITY_SCORE.md)
+- **Known issues:** [`docs/exec-plans/tech-debt-tracker.md`](docs/exec-plans/tech-debt-tracker.md)
+- **Plans & progress:** [`docs/exec-plans/`](docs/exec-plans/)
 - **Human setup (Google, permissions):** [`README.md`](README.md)
 - **Contributing (hooks, the loop):** [`CONTRIBUTING.md`](CONTRIBUTING.md) · docs index: [`docs/README.md`](docs/README.md)
 
@@ -40,11 +40,11 @@ Runtime/UI  App entry, menu & settings views                — imports all belo
 
 Purity is enforced mechanically by `scripts/check-layers.sh` (Models/State may not
 import UI/EventKit/Network frameworks). Details:
-[`docs/architecture/overview.md`](docs/architecture/overview.md).
+[`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Where code lives
 
-Every file is catalogued in the **[module map](docs/architecture/modules.md)**, kept in sync
+Every file is catalogued in the **[module map](docs/generated/repo-map.md)**, kept in sync
 mechanically (see `check-docs`). By layer:
 
 - `Sources/MeetingAlarm/Models/` — pure value types (`Meeting`, `SensoryProfile`, …)
@@ -61,7 +61,7 @@ mechanically (see `check-docs`). By layer:
 ```bash
 make build         # swift build
 make test          # swift test
-make coverage      # tests + coverage gate (>= 70% on the pure core)
+make coverage      # tests + coverage gate (>= 85% on the pure core)
 make check-layers  # architectural import purity
 make check-docs    # module map (docs) stays in sync with Sources/
 make check-workflows # GitHub Actions workflow YAML is valid
@@ -89,13 +89,13 @@ Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-ver
 - **No `print`** in `Sources/` — use `os.Logger`. (Enforced by SwiftLint.)
 - **Files ≤ ~250 lines**; split when they grow. (Enforced by SwiftLint.)
 - **Pure logic stays pure** so it's testable without a screen/network.
-- **Every source file is in the [module map](docs/architecture/modules.md)** — a new file
+- **Every source file is in the [module map](docs/generated/repo-map.md)** — a new file
   needs a one-line row in the same change. (Enforced by `check-docs`.)
 
 ## Conventions for changes
 
 1. Read the design doc section you're touching; if code diverges, update the doc
-   or mark it `stale` in `docs/design-docs/INDEX.md` in the same change.
+   or mark it `stale` in `docs/design-docs/index.md` in the same change.
 2. Add tests for pure logic; keep the coverage gate green.
 3. Run `make scan` before committing.
 4. Commits: **one line only, under 72 chars, Conventional-Commit prefix**

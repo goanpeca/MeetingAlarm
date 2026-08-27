@@ -89,7 +89,7 @@ meeting-alarm/
 ### Layering (enforced)
 Strict bottom-up layer ordering; **imports may only point upward** — a lower layer never
 imports a higher one. Violations are caught by `scripts/check-layers.sh` (and documented in
-`docs/architecture/overview.md`), whose error messages tell you exactly how to fix them.
+`ARCHITECTURE.md`), whose error messages tell you exactly how to fix them.
 
 ```
 Models        (Meeting, SensoryProfile)                 — pure; imports no app-local layer
@@ -101,7 +101,7 @@ Services      (Calendar/*, Alarm/*, SoundPlayer)         — may import Models, 
 Runtime/UI    (App, UI/*)                                — may import everything below
 ```
 
-### Golden principles (`docs/principles/golden-principles.md`)
+### Golden principles (`docs/design-docs/core-beliefs.md`)
 Subjective taste encoded as mechanical, checkable rules, e.g.:
 - **Files ≤ ~250 lines.** Outgrowing it means the file does too much — split it.
 - **Pure logic stays pure.** Fire-time math, presets, JSON→model mapping, and OAuth
@@ -116,7 +116,7 @@ Subjective taste encoded as mechanical, checkable rules, e.g.:
 Each rule is enforced by SwiftLint, `check-layers.sh`, or a test — not left to good intentions.
 
 ### Quality doc & recurring scan
-`docs/quality/quality.md` grades each domain/layer (Models, State, Calendar, Alarm, UI) on
+`docs/QUALITY_SCORE.md` grades each domain/layer (Models, State, Calendar, Alarm, UI) on
 consistency + coverage, tracking gaps over time. `.github/workflows/quality-scan.yml` runs
 `scripts/*` on a schedule to flag drift (oversized files, layer violations, `print` usage,
 missing tests) — the local analog of OpenAI's recurring background refactor task. (It can also
@@ -339,7 +339,7 @@ wanted. Both live on the same engine and the user chooses per meeting.
   `llvm-cov export` and **fails CI below the threshold**. Start at **70%** measured against the
   pure-logic core (Models + the pure functions in Services); thin AppKit/EventKit/URLSession
   shells are excluded from the denominator and covered by the manual checklist below. The
-  threshold is recorded in `docs/quality/quality.md` and ratcheted upward over time.
+  threshold is recorded in `docs/QUALITY_SCORE.md` and ratcheted upward over time.
 - **Manual / integration:** EventKit read after permission; the Test-Alarm overlay across one
   and multiple displays; Esc-dismiss safety; the Google sign-in flow once credentials exist.
 

@@ -1,7 +1,7 @@
 # Design — Post-v1 Subsystems
 
 Design record for the subsystems added after the [v1 spec](2026-08-26-meeting-alarm-design.md).
-Contracts and rationale; the exhaustive file list is the [module map](../architecture/modules.md).
+Contracts and rationale; the exhaustive file list is the [module map](../generated/repo-map.md).
 
 ## 1. Recurring-series arming
 
@@ -53,7 +53,7 @@ Esc-dismiss and white-on-scrim contrast.
 
 ## 6. Harness additions
 
-Verified [module map](../architecture/modules.md) + `check-docs` drift gate; `make ci`
+Verified [module map](../generated/repo-map.md) + `check-docs` drift gate; `make ci`
 (CI-parity) + git hooks (`make hooks`); on-demand mutation testing (`make mutation`); a ratcheted
 coverage floor; a pinned Xcode (`.xcode-version` + `setup-xcode`); `CHANGELOG.md`; and a PR
 template carrying the Definition of Done. See [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md).

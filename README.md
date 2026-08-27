@@ -1,7 +1,7 @@
 # Meeting Alarm
 
 [![CI](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml/badge.svg)](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](docs/quality/quality.md)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](docs/QUALITY_SCORE.md)
 ![Platform](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-6.3-orange)
 
@@ -21,7 +21,7 @@ Two built-in alert styles (both fully adjustable):
 > Status: **v1 functional.** The menu-bar checklist, EventKit + multi-account Google
 > sources, the overlay engine, snooze, and persistence are implemented and tested.
 > Design lives in [`docs/design-docs/`](docs/design-docs/2026-08-26-meeting-alarm-design.md);
-> the build plan is in [`docs/execution-plans/`](docs/execution-plans/).
+> the build plan is in [`docs/exec-plans/`](docs/exec-plans/).
 
 ## How you use it
 
@@ -110,7 +110,7 @@ The app reads meetings from either source, switchable in settings:
 ## Project layout
 
 See [`AGENTS.md`](AGENTS.md) for the navigation map, and
-[`docs/architecture/overview.md`](docs/architecture/overview.md) for the layer
+[`ARCHITECTURE.md`](ARCHITECTURE.md) for the layer
 diagram. In short: `Models` (pure) → `State` → `Services` (calendar + alarm) →
 `Runtime/UI`, with imports pointing up only.
 
@@ -123,4 +123,4 @@ make coverage
 
 Conventions: files ≤ 250 lines, no `print` (use `os.Logger`), secrets only in
 Keychain, docs kept in sync. Details in
-[`docs/principles/golden-principles.md`](docs/principles/golden-principles.md).
+[`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md).

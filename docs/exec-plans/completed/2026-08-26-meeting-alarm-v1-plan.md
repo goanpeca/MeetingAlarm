@@ -1443,7 +1443,7 @@ git commit -m "feat: add menu, settings, and accounts UI"
 ## Task 16: Docs sync + README setup + quality grades
 
 **Files:**
-- Modify: `README.md` (fill the Google Cloud click-by-click steps), `docs/quality/quality.md` (grade State/Calendar/Alarm/UI), `docs/design-docs/INDEX.md` (keep `current`), `docs/technical-debt/README.md` (resolve/adjust rows).
+- Modify: `README.md` (fill the Google Cloud click-by-click steps), `docs/QUALITY_SCORE.md` (grade State/Calendar/Alarm/UI), `docs/design-docs/index.md` (keep `current`), `docs/exec-plans/tech-debt-tracker.md` (resolve/adjust rows).
 
 - [ ] **Step 1: Update README** with the exact Google Cloud OAuth desktop-client steps and the add-account flow.
 - [ ] **Step 2: Update quality grades** to reflect what's implemented + tested; note any shells excluded from coverage.

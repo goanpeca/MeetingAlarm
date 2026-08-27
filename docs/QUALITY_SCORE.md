@@ -27,6 +27,6 @@ coverage. Update this in the same change that moves a grade. Grades: **A** solid
 
 - Overlay Esc-dismiss safety is verified manually; an automated UI/host test would harden it.
 - The Google end-to-end flow (loopback → token → fetch) is exercised manually — it needs a
-  real OAuth client id/secret, so it is not run in CI. See `docs/technical-debt/`.
+  real OAuth client id/secret, so it is not run in CI. See `docs/exec-plans/`.
 - `AlarmScheduler` uses `Task.sleep`; long sleeps across system sleep are backstopped by the
   wake observer re-computing. A dedicated sleep/wake test would raise this grade to A.

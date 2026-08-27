@@ -4,7 +4,7 @@
 # Run `swift test --enable-code-coverage` first. The gate measures only the
 # testable core (files under CORE_GLOB) so thin AppKit/EventKit/URLSession shells
 # don't dilute or inflate the number. Threshold is recorded in
-# docs/quality/quality.md and ratcheted upward over time.
+# docs/QUALITY_SCORE.md and ratcheted upward over time.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
