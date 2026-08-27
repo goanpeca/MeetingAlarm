@@ -64,14 +64,26 @@ struct OverlayView: View {
             if let label = meeting.accountLabel {
                 Text(label).font(.title3).opacity(0.85)
             }
-            HStack(spacing: 14) {
-                ForEach(meeting.joinURLs, id: \.self) { url in
-                    Button(providerLabel(url)) { NSWorkspace.shared.open(url) }
+            VStack(spacing: 14) {
+                if !meeting.joinURLs.isEmpty {
+                    HStack(spacing: 14) {
+                        ForEach(meeting.joinURLs, id: \.self) { url in
+                            Button(providerLabel(url)) { NSWorkspace.shared.open(url) }
+                                .tint(brandColor(url))
+                        }
+                    }
                 }
-                ForEach(availableSnoozes(now: now), id: \.self) { interval in
-                    Button("Snooze \(Int(interval / 60))m") { onSnooze(interval) }
+                let snoozes = availableSnoozes(now: now)
+                if !snoozes.isEmpty {
+                    HStack(spacing: 14) {
+                        ForEach(snoozes, id: \.self) { interval in
+                            Button("Snooze \(Int(interval / 60))m") { onSnooze(interval) }
+                                .tint(.gray)
+                        }
+                    }
                 }
                 DismissChallengeView(challenge: challenge, onSolved: onDismiss)
+                    .tint(.red)
             }
             .font(.title3)
             .buttonStyle(.borderedProminent)
@@ -103,6 +115,35 @@ struct OverlayView: View {
             return "Join Whereby"
         }
         return "Join meeting"
+    }
+
+    /// Brand accent for each provider's Join button.
+    private func brandColor(_ url: URL) -> Color {
+        let host = url.host?.lowercased() ?? ""
+        if host.contains("zoom") {
+            return Color(red: 0.18, green: 0.55, blue: 1.0)
+        } // Zoom blue
+        if host.contains("meet.google") {
+            return Color(
+                red: 0.0,
+                green: 0.51,
+                blue: 0.18
+            )
+        } // Meet green
+        if host.contains("teams") {
+            return Color(
+                red: 0.35,
+                green: 0.36,
+                blue: 0.66
+            )
+        } // Teams purple
+        if host.contains("webex") {
+            return Color(red: 0.0, green: 0.44, blue: 0.55)
+        } // Webex teal
+        if host.contains("whereby") {
+            return Color(red: 0.35, green: 0.34, blue: 0.84)
+        }
+        return .accentColor
     }
 
     private func fraction(now: Date) -> Double {

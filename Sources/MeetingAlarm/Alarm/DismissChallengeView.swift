@@ -28,14 +28,18 @@ struct DismissChallengeView: View {
     }
 
     private var gate: some View {
-        HStack(spacing: 8) {
-            Text(prompt)
-            TextField("", text: $input)
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 120)
-                .onSubmit(check)
-            Button("OK") { check() }
+        VStack(spacing: 10) {
+            Text(prompt).font(.title2).bold()
+            HStack(spacing: 8) {
+                TextField("", text: $input)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 160)
+                    .onSubmit(check)
+                Button("OK") { check() }
+            }
         }
+        .padding(16)
+        .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private var prompt: String {

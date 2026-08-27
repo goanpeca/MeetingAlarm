@@ -47,6 +47,26 @@ make run     # build the app bundle and open it
 
 `Package.swift` also opens directly in Xcode 26.
 
+### Stable signing (recommended for local dev)
+
+macOS ties the Calendar permission to the app's code signature. Ad-hoc signing changes
+every rebuild, so macOS keeps re-forgetting the grant. Create a **one-time self-signed
+identity** and `make app` will use it automatically (falling back to ad-hoc if it's absent),
+so Calendar access sticks across rebuilds:
+
+```bash
+WORK=$(mktemp -d)
+printf '[req]\ndistinguished_name=dn\nx509_extensions=v3\nprompt=no\n[dn]\nCN=MeetingAlarm Dev\n[v3]\nbasicConstraints=critical,CA:false\nkeyUsage=critical,digitalSignature\nextendedKeyUsage=critical,codeSigning\n' > "$WORK/c.cnf"
+openssl req -x509 -newkey rsa:2048 -keyout "$WORK/k.pem" -out "$WORK/c.pem" -days 3650 -nodes -config "$WORK/c.cnf"
+openssl pkcs12 -export -inkey "$WORK/k.pem" -in "$WORK/c.pem" -out "$WORK/id.p12" -passout pass:tmp -name "MeetingAlarm Dev" -macalg sha1 -keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES
+security import "$WORK/id.p12" -k ~/Library/Keychains/login.keychain-db -P tmp -T /usr/bin/codesign -A
+rm -rf "$WORK"
+```
+
+The identity is self-signed (shows as untrusted — that's fine for local use). Override with
+`CODESIGN_IDENTITY=…` if you have a real one. If Calendar access still misbehaves after a
+change, reset it once: `tccutil reset Calendar com.goanpeca.MeetingAlarm`.
+
 ## Calendar setup
 
 The app reads meetings from either source, switchable in settings:
