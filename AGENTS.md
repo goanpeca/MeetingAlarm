@@ -81,4 +81,9 @@ Tooling: Swift 6.3 / Xcode 26, macOS 14+. Install lint/format once with
    or mark it `stale` in `docs/design-docs/INDEX.md` in the same change.
 2. Add tests for pure logic; keep the coverage gate green.
 3. Run `make scan` before committing.
-4. Commits: single line, `<72` chars, Conventional-Commit prefix, no AI attribution.
+4. Commits: **one line only, under 72 chars, Conventional-Commit prefix**
+   (`feat:`/`fix:`/`docs:`/`refactor:`/`test:`/`chore:`…), no body, no bullet list.
+5. **Never add AI attribution of any kind** to a commit or PR — no
+   `Co-Authored-By`, no `Signed-off-by`, no "Generated with Claude / Codex / …",
+   and never name Claude, Codex, Anthropic, OpenAI, or any AI tool anywhere in the
+   message. Check the message before finalizing so a trailer never slips back in.
