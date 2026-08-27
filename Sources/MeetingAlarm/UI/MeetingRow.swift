@@ -50,8 +50,10 @@ struct MeetingRow: View {
             }
             Spacer()
             if coordinator.isArmed(meeting) {
-                colorSwatch
-                overrideButton
+                HStack(spacing: 6) {
+                    colorSwatch
+                    overrideButton
+                }
             }
         }
     }
