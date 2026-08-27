@@ -16,6 +16,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/Models/DayWindow.swift` | Day → `DateInterval` window and day shifting, timezone-correct. |
 | `Sources/MeetingAlarm/Models/DismissChallenge.swift` | Dismiss-gate options (none / hold / math / type-phrase). |
 | `Sources/MeetingAlarm/Models/DurationText.swift` | Formats a meeting length as "30 min" / "1 hr 30 min". |
+| `Sources/MeetingAlarm/Models/AlarmOverrides.swift` | Per-meeting color/sound overrides of the global alarm settings (pure). |
 | `Sources/MeetingAlarm/Models/Meeting.swift` | Normalized meeting occurrence: stable id, join URLs, notes, attendees, `seriesId`. |
 | `Sources/MeetingAlarm/Models/OccurrenceKey.swift` | Stable per-day key so armed state survives same-day time edits. |
 | `Sources/MeetingAlarm/Models/ScopePrompt.swift` | Pending "this event / whole series" question for a recurring action. |
@@ -26,6 +27,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
+| `Sources/MeetingAlarm/State/Store+Series.swift` | Recurring-series arming (split from `Store`). |
 | `Sources/MeetingAlarm/State/Store.swift` | Persists armed meetings, series rules/skips, snoozes, and all settings (UserDefaults JSON). |
 
 ## Calendar (Services) — fetch meetings from a backend
@@ -59,7 +61,8 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/UI/ColorPanelController.swift` | Presents `NSColorPanel` in front for the accessory app. |
 | `Sources/MeetingAlarm/UI/HTMLText.swift` | HTML notes → plain, theme-aware text for the day list. |
 | `Sources/MeetingAlarm/UI/MeetingDetailView.swift` | Expanded row detail: attendees + full description. |
-| `Sources/MeetingAlarm/UI/MeetingRow.swift` | One meeting row: checkbox, time + duration, disclosure, preset. |
+| `Sources/MeetingAlarm/UI/MeetingRow.swift` | One meeting row: checkbox, time + duration, disclosure, customize gear. |
+| `Sources/MeetingAlarm/UI/MeetingOverridesView.swift` | Popover to override this meeting's alarm color/sound. |
 | `Sources/MeetingAlarm/UI/MenuContentView.swift` | Day list + navigator + calendar filter (menu popover). |
 | `Sources/MeetingAlarm/UI/QuickPanel.swift` | Floating panel summoned by the global hot key. |
 | `Sources/MeetingAlarm/UI/ScopePromptView.swift` | In-popover "this event / whole series" modal. |

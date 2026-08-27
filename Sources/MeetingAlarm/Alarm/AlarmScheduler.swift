@@ -13,7 +13,7 @@ final class AlarmScheduler {
     var soundRepeat = true
     var soundGap: TimeInterval = 1
     /// Resolve a preset name to a profile.
-    var resolveProfile: (String) -> SensoryProfile = { _ in .blast }
+    var resolveProfile: (ArmedConfig) -> SensoryProfile = { _ in .blast }
     /// Called when the user snoozes a fired alarm.
     var onSnooze: (String, TimeInterval) -> Void = { _, _ in }
     /// Called when the user dismisses a fired alarm.
@@ -41,7 +41,7 @@ final class AlarmScheduler {
         cancelAll()
         for (id, config) in armed {
             guard config.meeting.end > now else { continue } // meeting already over
-            let profile = resolveProfile(config.presetName)
+            let profile = resolveProfile(config)
             let target = snoozes[id]
                 ?? AlarmMath.fireTime(
                     meetingStart: config.meeting.start,

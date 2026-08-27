@@ -15,6 +15,8 @@ final class Store: ObservableObject {
     @Published var armedSeries: [String: String] = [:]
     /// Per-series occurrence ids the user chose to skip ("this event only").
     @Published var seriesExceptions: [String: Set<String>] = [:]
+    /// Per-meeting alarm overrides (color/sound), keyed by occurrence id.
+    @Published var armOverrides: [String: AlarmOverrides] = [:]
     @Published var activeSource: SourceKind = .eventKit {
         didSet { save() }
     }
@@ -83,6 +85,7 @@ final class Store: ObservableObject {
         var handled: [String]?
         var armedSeries: [String: String]?
         var seriesExceptions: [String: [String]]?
+        var armOverrides: [String: AlarmOverrides]?
         var activeSource: SourceKind
         var defaultPresetName: String
         var syncInterval: TimeInterval
@@ -116,6 +119,13 @@ final class Store: ObservableObject {
     func disarm(_ id: String) {
         armed[id] = nil
         handled.remove(id)
+        armOverrides[id] = nil
+        save()
+    }
+
+    /// Set (or clear, when `isEmpty`) the per-meeting color/sound override for an occurrence.
+    func setOverrides(_ id: String, _ overrides: AlarmOverrides) {
+        armOverrides[id] = overrides.isEmpty ? nil : overrides
         save()
     }
 
@@ -132,46 +142,6 @@ final class Store: ObservableObject {
         armed[meeting.id] = ArmedConfig(presetName: config.presetName, meeting: meeting)
         handled.remove(meeting.id)
         save()
-    }
-
-    // MARK: Series arming
-
-    /// Arm a whole recurring series with `preset`. Clears any prior per-occurrence skips.
-    func armSeries(_ seriesId: String, preset: String) {
-        armedSeries[seriesId] = preset
-        seriesExceptions[seriesId] = nil
-        save()
-    }
-
-    /// Disarm a whole series and drop its materialized occurrences and skips.
-    func disarmSeries(_ seriesId: String) {
-        armedSeries[seriesId] = nil
-        seriesExceptions[seriesId] = nil
-        armed = armed.filter { !($0.value.fromSeries && $0.value.meeting.seriesId == seriesId) }
-        save()
-    }
-
-    /// Skip a single occurrence of an armed series ("this event only").
-    func addSeriesException(seriesId: String, occurrenceId: String) {
-        seriesExceptions[seriesId, default: []].insert(occurrenceId)
-        armed[occurrenceId] = nil
-        save()
-    }
-
-    /// Replace all series-materialized entries with a freshly computed set, leaving
-    /// explicitly-armed occurrences untouched. Returns true only when something changed
-    /// (so callers can skip a needless reschedule).
-    func setMaterializedSeries(_ entries: [SeriesMaterializer.Entry]) -> Bool {
-        var next = armed.filter { !$0.value.fromSeries }
-        for entry in entries {
-            next[entry.meeting.id] = ArmedConfig(
-                presetName: entry.preset, meeting: entry.meeting, fromSeries: true
-            )
-        }
-        guard next != armed else { return false }
-        armed = next
-        save()
-        return true
     }
 
     func setSnooze(_ id: String, at date: Date) {
@@ -199,6 +169,7 @@ final class Store: ObservableObject {
         handled = Set(snap.handled ?? [])
         armedSeries = snap.armedSeries ?? [:]
         seriesExceptions = (snap.seriesExceptions ?? [:]).mapValues(Set.init)
+        armOverrides = snap.armOverrides ?? [:]
         activeSource = snap.activeSource
         defaultPresetName = snap.defaultPresetName
         syncInterval = snap.syncInterval
@@ -216,7 +187,7 @@ final class Store: ObservableObject {
         loading = false
     }
 
-    private func save() {
+    func save() {
         guard !loading else { return }
         let snap = Snapshot(
             armed: armed,
@@ -224,6 +195,7 @@ final class Store: ObservableObject {
             handled: Array(handled),
             armedSeries: armedSeries,
             seriesExceptions: seriesExceptions.mapValues(Array.init),
+            armOverrides: armOverrides,
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
             syncInterval: syncInterval,

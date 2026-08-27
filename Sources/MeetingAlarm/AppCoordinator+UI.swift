@@ -103,6 +103,29 @@ extension AppCoordinator {
         reschedule()
     }
 
+    // MARK: Per-meeting overrides
+
+    /// This meeting's color/sound overrides (empty = fully inherits the global settings).
+    func overrides(for meeting: Meeting) -> AlarmOverrides {
+        store.armOverrides[meeting.id] ?? AlarmOverrides()
+    }
+
+    /// Override (or clear, when `color` is nil) the alarm color for this meeting only.
+    func setColorOverride(_ meeting: Meeting, color: RGBAColor?) {
+        var current = overrides(for: meeting)
+        current.color = color
+        store.setOverrides(meeting.id, current)
+        reschedule()
+    }
+
+    /// Override (or clear, when `sound` is nil) the alarm sound for this meeting only.
+    func setSoundOverride(_ meeting: Meeting, sound: SoundOverride?) {
+        var current = overrides(for: meeting)
+        current.sound = sound
+        store.setOverrides(meeting.id, current)
+        reschedule()
+    }
+
     func setPreset(_ meeting: Meeting, preset: String) {
         if isArmedViaSeries(meeting), let seriesId = meeting.seriesId {
             store.armSeries(seriesId, preset: preset)

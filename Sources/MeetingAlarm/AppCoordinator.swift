@@ -61,8 +61,8 @@ final class AppCoordinator: ObservableObject {
 
     private func configureScheduler() {
         scheduler.snoozeIntervals = store.snoozeIntervals
-        scheduler.resolveProfile = { [weak self] name in
-            self?.effectiveProfile(named: name) ?? .blast
+        scheduler.resolveProfile = { [weak self] config in
+            self?.effectiveProfile(for: config) ?? .blast
         }
         scheduler.onSnooze = { [weak self] id, interval in
             self?.handleSnooze(id: id, interval: interval)
@@ -162,6 +162,22 @@ final class AppCoordinator: ObservableObject {
         profile.leadTime = TimeInterval(store.leadTimeMinutes * 60)
         profile.sound = store.soundEnabled ? store.alarmSound : nil
         profile.volume = store.alarmVolume
+        return profile
+    }
+
+    /// The global profile for an armed meeting, with its per-meeting color/sound overrides
+    /// applied on top.
+    private func effectiveProfile(for config: ArmedConfig) -> SensoryProfile {
+        var profile = effectiveProfile(named: config.presetName)
+        guard let overrides = store.armOverrides[config.meeting.id] else { return profile }
+        if let color = overrides.color {
+            profile.color = color
+        }
+        switch overrides.sound {
+        case .silent: profile.sound = nil
+        case let .sound(choice): profile.sound = choice
+        case nil: break
+        }
         return profile
     }
 

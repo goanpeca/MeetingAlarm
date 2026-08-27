@@ -11,6 +11,7 @@ struct MeetingRow: View {
     var showAccount: Bool = true
 
     @State private var isExpanded = false
+    @State private var showOverrides = false
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -49,8 +50,25 @@ struct MeetingRow: View {
             }
             Spacer()
             if coordinator.isArmed(meeting) {
-                presetPicker
+                overrideButton
             }
+        }
+    }
+
+    /// Gear that opens a popover to customize this meeting's alarm (color/sound), overriding
+    /// the global settings. Replaces the old per-row preset picker.
+    private var overrideButton: some View {
+        Button {
+            showOverrides.toggle()
+        } label: {
+            Image(systemName: coordinator.overrides(for: meeting).isEmpty
+                ? "gearshape" : "gearshape.fill")
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Customize alarm for \(meeting.title)")
+        .help("Customize this alarm's color and sound")
+        .popover(isPresented: $showOverrides, arrowEdge: .bottom) {
+            MeetingOverridesView(coordinator: coordinator, store: store, meeting: meeting)
         }
     }
 
@@ -90,18 +108,5 @@ struct MeetingRow: View {
         }
         .font(.caption)
         .foregroundStyle(.secondary)
-    }
-
-    private var presetPicker: some View {
-        Picker("", selection: Binding(
-            get: { coordinator.presetName(for: meeting) },
-            set: { coordinator.setPreset(meeting, preset: $0) }
-        )) {
-            ForEach(SensoryProfile.presets, id: \.name) { preset in
-                Text(preset.name).tag(preset.name)
-            }
-        }
-        .labelsHidden()
-        .frame(width: 120)
     }
 }
