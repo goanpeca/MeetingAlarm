@@ -28,6 +28,7 @@ final class AppCoordinator: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     let calendar = Calendar.current
     private let log = Log.make("coordinator")
+    private var quickPanel: QuickPanelController?
     /// How far ahead a whole armed series is pre-scheduled, plus a throttle so the extra
     /// horizon fetch doesn't run on every poll. Internal so `AppCoordinator+Scheduling` uses them.
     let seriesHorizon: TimeInterval = 60 * 24 * 60 * 60
@@ -44,6 +45,7 @@ final class AppCoordinator: ObservableObject {
         rebuildSource()
         observeSourceChanges()
         store.prunePastSnoozes(now: Date())
+        quickPanel = QuickPanelController(coordinator: self)
         start()
     }
 
