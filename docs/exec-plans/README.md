@@ -12,11 +12,9 @@ writing-plans workflow and will land here as
 Expected build order (from the design):
 
 1. **Models** — `Meeting`, `SensoryProfile` (+ presets). ✅ done in scaffold.
-2. **State** — `Store` (UserDefaults), `Keychain` wrapper.
+2. **State** — `Store` (UserDefaults).
 3. **Alarm engine** — `AlarmScheduler.fireTime` (pure, TDD first), `OverlayController`
    (multi-display, Esc-dismiss, Reduce-Motion), `SoundPlayer`. Wire a **Test Alarm**.
 4. **EventKit source** — permission flow + `fetchUpcoming`. First end-to-end path.
-5. **Google source** — `GoogleAuth` (PKCE loopback) + `GoogleCalendarSource`, behind
-   the same protocol; settings field for the OAuth client id/secret.
-6. **UI** — meeting list with per-meeting toggle + preset picker; settings pane.
-7. **Polish** — sleep/wake handling, error banners, README setup docs.
+5. **UI** — meeting list with per-meeting toggle + per-alarm overrides; settings pane.
+6. **Polish** — sleep/wake handling, error banners, README setup docs.

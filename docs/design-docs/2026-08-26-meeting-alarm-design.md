@@ -1,5 +1,10 @@
 # meeting-alarm — Design Spec
 
+> **Post-v1:** direct Google Calendar (OAuth/PKCE, `GoogleAuth`, Keychain-stored secrets) was
+> removed — the app is **EventKit-only** now, reading Google/iCloud via macOS Internet Accounts.
+> Treat the Google/secrets sections below as historical v1 context; see
+> [Post-v1 Subsystems](2026-08-27-post-v1-subsystems.md).
+
 **Date:** 2026-08-26
 **Status:** Draft for review
 **Verification:** current

@@ -10,13 +10,13 @@ whole series" choice (mirroring macOS Calendar).
 
 **Design.**
 - `Meeting.seriesId` identifies a series across occurrences — EventKit: the shared event
-  identifier (`hasRecurrenceRules`); Google: `recurringEventId`. `nil` = one-off.
+  identifier (`hasRecurrenceRules`). `nil` = one-off.
 - Arming a series stores a rule (`Store.armedSeries: seriesId → preset`) plus per-occurrence
   skips (`seriesExceptions`). We do **not** enumerate future occurrences (unbounded).
 - `SeriesMaterializer` (pure, tested) decides which occurrences to schedule; `AppCoordinator+`
   `Scheduling.materializeSeries` fetches a **rolling 60-day horizon** each sync (throttled ≥120s)
   and writes them into `Store.armed` with `fromSeries = true`, so the existing snapshot-based
-  scheduler fires them unchanged. See TD-7 for the Google cost.
+  scheduler fires them unchanged. See TD-7.
 - **Scope prompt is an in-popover overlay** (`ScopePromptView`), not a system
   `confirmationDialog` — the latter's buttons are unclickable inside a `MenuBarExtra(.window)`.
 

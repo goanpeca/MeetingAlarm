@@ -33,7 +33,7 @@ check() {
 
 # Models: pure values only.
 check Models AppKit SwiftUI EventKit Network Security
-# State: persistence only — no UI, calendar, or networking (Security is allowed
+# State: persistence only — no UI, calendar, or networking (no secret store remains; Security stays allowed
 # here for the Keychain wrapper).
 check State AppKit SwiftUI EventKit Network
 

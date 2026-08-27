@@ -105,6 +105,6 @@ make scan    # layers + format-check + lint (run before committing)
 make coverage
 ```
 
-Conventions: files ≤ 250 lines, no `print` (use `os.Logger`), secrets only in
-Keychain, docs kept in sync. Details in
+Conventions: files ≤ 250 lines, no `print` (use `os.Logger`), docs kept in
+sync. Details in
 [`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md).

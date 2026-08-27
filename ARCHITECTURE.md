@@ -10,8 +10,8 @@ For the exhaustive, mechanically-verified list of every file see the
 | Domain | Responsibility | Key types |
 |--------|----------------|-----------|
 | Models | Normalized value types, pure | `Meeting`, `SensoryProfile`, `RGBAColor` |
-| State | Persistence of settings/secrets | `Store` (UserDefaults), `Keychain` |
-| Calendar (Services) | Fetch meetings from a backend | `CalendarSource`, `EventKitSource`, `GoogleCalendarSource`, `GoogleAuth` |
+| State | Persistence of settings | `Store` (UserDefaults) |
+| Calendar (Services) | Fetch meetings from a backend | `CalendarSource`, `EventKitSource`, `EventKitMapper` |
 | Alarm (Services) | Fire alarms, draw overlay, play sound | `AlarmScheduler`, `OverlayController`, `SoundPlayer` |
 | Runtime/UI | App lifecycle + menu/settings | `MeetingAlarmApp`, `AppCoordinator`, `MenuContentView`, `SettingsView`, `QuickPanel` |
 
@@ -32,7 +32,7 @@ A **lower** layer must never depend on a **higher** one. Concretely:
 - **Models** import nothing app-local and no UI/IO frameworks — pure and testable
   without a screen, calendar DB, or network. Colors are plain components
   (`RGBAColor`), not `NSColor`, precisely to keep this true.
-- **State** imports Models only (plus `Security` for the Keychain wrapper). No UI,
+- **State** imports Models only. No UI,
   calendar, or networking here.
 - **Services** may import Models + State and the platform frameworks they need
   (EventKit, Network, URLSession, AppKit for the overlay).

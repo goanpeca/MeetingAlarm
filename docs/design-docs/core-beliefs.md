@@ -17,10 +17,9 @@ from "reviewed" to "enforced" over time.
 
 ## Purity & testability
 
-4. **Pure logic stays pure.** Fire-time math, preset definitions, JSON→model
-   mapping, and OAuth PKCE/URL construction live in functions with **no**
-   AppKit/EventKit/URLSession import, so they unit-test without a screen or
-   network. *Enforced:* layer check + the coverage gate targets this core.
+4. **Pure logic stays pure.** Fire-time math, preset definitions, and JSON→model
+   mapping live in functions with **no** AppKit/EventKit/URLSession import, so they
+   unit-test without a screen or network. *Enforced:* layer check + coverage gate.
 5. **Represent data as plain values at the boundary.** e.g. color is `RGBAColor`
    (components), not `NSColor`. *Reviewed;* see `RGBAColor` for the pattern.
 
@@ -29,8 +28,8 @@ from "reviewed" to "enforced" over time.
 6. **The overlay is always dismissible with Esc.** It can never trap the user,
    regardless of a profile's configured dismissal. *Reviewed + tested* (overlay
    tests assert an Esc path once the overlay lands).
-7. **Secrets only in Keychain** — Google tokens and client secret never touch
-   `UserDefaults` or logs. *Reviewed;* `State/Keychain` is the only store.
+7. **No stored credentials.** EventKit-only — the app holds no OAuth tokens or
+   secrets, so there's nothing sensitive to leak. *Reviewed.*
 8. **Calendar access is read-only.** The app never writes to a calendar.
 
 ## Observability

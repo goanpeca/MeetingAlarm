@@ -26,14 +26,14 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 - **Quality grades & coverage bar:** [`docs/QUALITY_SCORE.md`](docs/QUALITY_SCORE.md)
 - **Known issues:** [`docs/exec-plans/tech-debt-tracker.md`](docs/exec-plans/tech-debt-tracker.md)
 - **Plans & progress:** [`docs/exec-plans/`](docs/exec-plans/)
-- **Human setup (Google, permissions):** [`README.md`](README.md)
+- **Human setup (Calendar permission):** [`README.md`](README.md)
 - **Contributing (hooks, the loop):** [`CONTRIBUTING.md`](CONTRIBUTING.md) · docs index: [`docs/README.md`](docs/README.md)
 
 ## Layers (imports point up only)
 
 ```
 Models      pure value types (Meeting, SensoryProfile)      — no UI/IO
-State       persistence (Store, Keychain)                   — imports Models
+State       persistence (Store)                   — imports Models
 Services    calendar sources, alarm scheduler, overlay      — imports Models, State
 Runtime/UI  App entry, menu & settings views                — imports all below
 ```
@@ -48,7 +48,7 @@ Every file is catalogued in the **[module map](docs/generated/repo-map.md)**, ke
 mechanically (see `check-docs`). By layer:
 
 - `Sources/MeetingAlarm/Models/` — pure value types (`Meeting`, `SensoryProfile`, …)
-- `Sources/MeetingAlarm/State/` — persistence (`Store`, `Keychain`)
+- `Sources/MeetingAlarm/State/` — persistence (`Store`)
 - `Sources/MeetingAlarm/Calendar/` — `CalendarSource` protocol + EventKit (macOS Calendar) impl
 - `Sources/MeetingAlarm/Alarm/` — scheduler, overlay, sound
 - `Sources/MeetingAlarm/UI/` — menu popover, settings, summonable quick panel
@@ -86,7 +86,6 @@ Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-ver
 ## Non-negotiable invariants
 
 - **Esc always dismisses** the overlay — it can never trap the user.
-- **Secrets only in Keychain** — never `UserDefaults`, never logs.
 - **No `print`** in `Sources/` — use `os.Logger`. (Enforced by SwiftLint.)
 - **Files ≤ ~250 lines**; split when they grow. (Enforced by SwiftLint.)
 - **Pure logic stays pure** so it's testable without a screen/network.

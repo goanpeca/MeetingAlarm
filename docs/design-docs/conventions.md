@@ -12,7 +12,6 @@ Mechanically-enforced where possible; the enforcer is named in parentheses.
 - Files **≤ 250 lines**; split when they grow (SwiftLint `file_length`).
 - **No `print`** in `Sources/` — use `os.Logger` (SwiftLint custom rule).
 - **Pure core stays pure**: `Models`/`State` never import UI/EventKit/Network (`check-layers`).
-- Secrets **only** in the Keychain — never `UserDefaults`, never logs.
 - Format with SwiftFormat; lint clean under `swiftlint --strict`.
 
 ## Docs
