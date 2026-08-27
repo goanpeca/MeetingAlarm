@@ -17,4 +17,6 @@ Format: `| id | domain/layer | description | severity | added |`
 | TD-7 | Calendar | When any series is armed, `materializeSeries` fetches a 60-day horizon on each sync (throttled ≥120s). Cheap on EventKit (local) but a real API call on Google. Consider event-driven materialization or a longer throttle for the Google source. | low | 2026-08-27 |
 | TD-8 | UI | `QuickPanel` hosts a second `RootView` instance observing the same coordinator (duplicate view tree). Functionally fine; minor extra memory. Revisit if a shared presentation is warranted. | low | 2026-08-27 |
 
+| TD-9 | Harness/CI | Continuous garbage collection is **drift-detection only**: the scheduled Quality Scan plus the commit/push/CI gates *block* mechanical drift (format, lint, layers, docs, links, workflow YAML), but nothing auto-opens *refactor* PRs for semantic pattern drift the way the harness-engineering model does. That needs a scheduled coding agent (Codex/Claude) with CI credentials — deferred until that runner is set up. | low | 2026-08-27 |
+
 _No high-severity debt outstanding._

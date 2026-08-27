@@ -1,8 +1,9 @@
 # generated/
 
-Machine-maintained docs — **do not hand-edit for content that a tool owns**; regenerate or fix
-the generator. Each file is verified by a gate so it can't drift from the code.
+Docs whose **completeness/consistency is machine-enforced**, so they can't silently drift from
+the code — even where the one-line summaries are human-curated (auto-extracting them from
+doc-comments was tried and produced worse, truncated text).
 
 | File | What | Gate |
 | --- | --- | --- |
-| [repo-map.md](repo-map.md) | Every source file, one line each | `check-docs` (a new file must have a row) |
+| [repo-map.md](repo-map.md) | Every source file, one curated line each | `check-docs` — a new file must have a row, a deleted one must lose it |
