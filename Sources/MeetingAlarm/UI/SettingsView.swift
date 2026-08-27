@@ -7,9 +7,16 @@ struct SettingsView: View {
     @ObservedObject var store: Store
 
     private let addableMinutes = [1, 2, 5, 10, 15, 30]
+    @State private var launchAtLogin = false
 
     var body: some View {
         Form {
+            Section("Startup") {
+                Toggle("Launch at login", isOn: Binding(
+                    get: { launchAtLogin },
+                    set: { launchAtLogin = LoginItem.setEnabled($0) ? $0 : LoginItem.isEnabled }
+                ))
+            }
             Picker("Default alarm", selection: bind(\.defaultPresetName)) {
                 ForEach(SensoryProfile.presets, id: \.name) { Text($0.name).tag($0.name) }
             }
@@ -58,6 +65,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 360, height: 470)
+        .onAppear { launchAtLogin = LoginItem.isEnabled }
     }
 
     // MARK: Bindings
