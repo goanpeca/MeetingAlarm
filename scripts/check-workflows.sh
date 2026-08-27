@@ -7,7 +7,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 shopt -s nullglob
-files=(.github/workflows/*.yml .github/workflows/*.yaml)
+# Workflow files plus top-level .github config YAML (e.g. dependabot.yml).
+files=(.github/workflows/*.yml .github/workflows/*.yaml .github/*.yml .github/*.yaml)
 if [ ${#files[@]} -eq 0 ]; then
     echo "check-workflows: no workflow files."
     exit 0

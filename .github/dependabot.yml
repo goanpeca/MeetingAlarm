@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keep the GitHub Actions we pin (checkout, setup-xcode) current and patched.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7 # wait a week before proposing a newly-published version (supply-chain safety)
+    commit-message:
+      prefix: "ci" # match the repo's Conventional-Commit convention
