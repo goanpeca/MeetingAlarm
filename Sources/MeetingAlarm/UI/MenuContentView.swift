@@ -5,6 +5,7 @@ import SwiftUI
 struct MenuContentView: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
+    @State private var showFilter = false
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -26,6 +27,10 @@ struct MenuContentView: View {
         VStack(alignment: .leading, spacing: 8) {
             navigator
             Divider()
+            if showFilter {
+                calendarFilterList
+                Divider()
+            }
             if coordinator.needsPermission {
                 banner("Calendar access needed — enable it in System Settings › Privacy.")
             } else if let error = coordinator.errorMessage {
@@ -65,29 +70,43 @@ struct MenuContentView: View {
         .buttonStyle(.borderless)
     }
 
-    /// A funnel menu to show/hide calendars, grouped by their source so you can see where
-    /// each one (e.g. a subscribed gym schedule) actually comes from.
+    /// Funnel button that toggles the inline calendar filter panel.
     private var calendarFilter: some View {
-        Menu {
-            if coordinator.availableCalendars.isEmpty {
-                Text("No calendars")
-            } else {
-                ForEach(groupedCalendars, id: \.source) { group in
-                    Section(group.source) {
+        Button {
+            showFilter.toggle()
+        } label: {
+            Image(systemName: showFilter
+                ? "line.3.horizontal.decrease.circle.fill"
+                : "line.3.horizontal.decrease.circle")
+        }
+    }
+
+    /// Inline, stays-open panel to show/hide calendars, grouped by source. Toggling a
+    /// calendar keeps the panel open (unlike a Menu, which closes on each click).
+    private var calendarFilterList: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                if coordinator.availableCalendars.isEmpty {
+                    Text("No calendars").font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ForEach(groupedCalendars, id: \.source) { group in
+                        Text(group.source.uppercased())
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 4)
                         ForEach(group.calendars) { cal in
                             Toggle(cal.title, isOn: Binding(
                                 get: { coordinator.isCalendarShown(cal.id) },
                                 set: { _ in coordinator.toggleCalendar(cal.id) }
                             ))
+                            .toggleStyle(.checkbox)
+                            .font(.callout)
                         }
                     }
                 }
             }
-        } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
         }
-        .menuIndicator(.hidden)
-        .fixedSize()
+        .frame(height: min(CGFloat(coordinator.availableCalendars.count) * 26 + 44, 240))
     }
 
     private var groupedCalendars: [(source: String, calendars: [CalendarInfo])] {
