@@ -68,7 +68,7 @@ struct OverlayView: View {
                 if !meeting.joinURLs.isEmpty {
                     HStack(spacing: 14) {
                         ForEach(meeting.joinURLs, id: \.self) { url in
-                            Button(providerLabel(url)) { NSWorkspace.shared.open(url) }
+                            Button(providerLabel(url)) { join(url) }
                                 .tint(brandColor(url))
                         }
                     }
@@ -90,6 +90,14 @@ struct OverlayView: View {
         }
         .foregroundStyle(.white)
         .padding(40)
+    }
+
+    /// Joining = the alarm did its job. Tear down the modal overlay first (which restores
+    /// app switching and normal focus), THEN open the link so the browser/app comes to the
+    /// front cleanly instead of fighting the kiosk-mode overlay.
+    private func join(_ url: URL) {
+        onDismiss()
+        NSWorkspace.shared.open(url)
     }
 
     /// Only snooze options whose target still lands before the meeting starts.
