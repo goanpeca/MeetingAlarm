@@ -77,8 +77,8 @@ make run           # build app bundle and open it
 Run `make hooks` once after cloning: commits are then gated by `make scan` and pushes by
 `make ci`, so drift and build/test breakage never reach CI.
 
-Tooling: Swift 6.3 / Xcode 26, macOS 14+. Install lint/format once with
-`brew install swiftformat swiftlint`.
+Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-version` and via
+`setup-xcode` in CI), macOS 14+. Install lint/format once with `brew install swiftformat swiftlint`.
 
 ## Non-negotiable invariants
 

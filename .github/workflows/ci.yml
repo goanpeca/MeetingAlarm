@@ -11,6 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pin the toolchain so a green build is reproducible (macos-latest's Xcode drifts).
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
       - name: Swift version
         run: swift --version
 
