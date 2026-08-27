@@ -57,6 +57,7 @@ final class EventKitSource: CalendarSource {
     }
 
     func fetchUpcoming(within interval: DateInterval) async throws -> [Meeting] {
+        store.refreshSourcesIfNecessary() // pull the freshest server data into our view
         let calendars = store.calendars(for: .event)
             .filter { !hiddenCalendarIds.contains($0.calendarIdentifier) }
         guard !calendars.isEmpty else { return [] }

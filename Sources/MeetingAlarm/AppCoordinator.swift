@@ -88,7 +88,8 @@ final class AppCoordinator: ObservableObject {
         syncTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.sync()
-                let interval = self?.store.syncInterval ?? 300
+                // Poll at least every 30s so edited events surface promptly.
+                let interval = min(self?.store.syncInterval ?? 60, 30)
                 try? await Task.sleep(for: .seconds(interval))
             }
         }
@@ -101,6 +102,7 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
+            reconcileArmed()
             availableCalendars = await source.availableCalendars()
             errorMessage = nil
             let count = meetings.count
@@ -208,6 +210,21 @@ final class AppCoordinator: ObservableObject {
             store.setSnooze(id, at: target)
         }
         reschedule()
+    }
+
+    /// Update armed occurrences whose underlying event changed (e.g. its time was edited),
+    /// so the checked row shows the new time and the alarm re-times.
+    private func reconcileArmed() {
+        var changed = false
+        for meeting in meetings {
+            if let config = store.armed[meeting.id], config.meeting != meeting {
+                store.updateArmed(meeting)
+                changed = true
+            }
+        }
+        if changed {
+            reschedule()
+        }
     }
 
     func reschedule() {

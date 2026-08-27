@@ -52,7 +52,7 @@ enum GoogleEventMapper {
             else { return nil } // skip all-day / unparseable
             let title = item.summary.flatMap { $0.isEmpty ? nil : $0 } ?? "(No title)"
             return Meeting(
-                id: "google:\(accountId):\(item.id):\(startISO)",
+                id: "google:\(accountId):\(item.id):\(OccurrenceKey.day(start))",
                 title: title,
                 start: start,
                 end: end,

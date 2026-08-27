@@ -115,6 +115,15 @@ final class Store: ObservableObject {
         save()
     }
 
+    /// Refresh an armed occurrence's snapshot (e.g. its time was edited) so the alarm
+    /// re-times; a moved event also un-handles so it can fire again.
+    func updateArmed(_ meeting: Meeting) {
+        guard let config = armed[meeting.id] else { return }
+        armed[meeting.id] = ArmedConfig(presetName: config.presetName, meeting: meeting)
+        handled.remove(meeting.id)
+        save()
+    }
+
     func setSnooze(_ id: String, at date: Date) {
         snoozes[id] = date
         save()

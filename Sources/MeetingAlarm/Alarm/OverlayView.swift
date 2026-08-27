@@ -71,7 +71,7 @@ struct OverlayView: View {
                 ScrollView {
                     NotesView(html: notes)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: 720)
+                        .frame(maxWidth: .infinity)
                 }
                 .frame(maxHeight: 150)
                 .opacity(0.9)
@@ -96,8 +96,8 @@ struct OverlayView: View {
             }
         }
         .foregroundStyle(.white)
-        .frame(maxWidth: 760)
-        .padding(40)
+        .frame(width: 480)
+        .padding(32)
         .background(
             RoundedRectangle(cornerRadius: 28)
                 .fill(.black.opacity(0.6))

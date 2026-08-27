@@ -24,7 +24,7 @@ struct GoogleEventMapperTests {
         #expect(meeting.title == "Standup")
         #expect(meeting.sourceKind == .google)
         #expect(meeting.accountLabel == "me@example.com")
-        #expect(meeting.id == "google:acc-1:e1:2026-08-26T09:00:00Z")
+        #expect(meeting.id == "google:acc-1:e1:2026-08-26")
     }
 
     @Test("A missing summary becomes a sensible placeholder title")

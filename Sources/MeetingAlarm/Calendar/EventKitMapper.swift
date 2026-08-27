@@ -20,15 +20,13 @@ enum EventKitMapper {
 
     static func meeting(_ fields: Fields) -> Meeting? {
         guard !fields.isAllDay else { return nil }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
         let resolvedTitle = fields.title.flatMap { $0.isEmpty ? nil : $0 } ?? "(No title)"
         let joinURLs = MeetingLink.detectAll(
             explicit: fields.url,
             texts: [fields.location, fields.notes]
         )
         return Meeting(
-            id: "eventkit:\(fields.identifier):\(formatter.string(from: fields.occurrenceStart))",
+            id: "eventkit:\(fields.identifier):\(OccurrenceKey.day(fields.occurrenceStart))",
             title: resolvedTitle,
             start: fields.start,
             end: fields.end,
