@@ -6,6 +6,8 @@ struct MenuContentView: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
     @State private var showFilter = false
+    /// Scales the list's viewport with the user's Dynamic Type size so rows aren't clipped.
+    @ScaledMetric private var rowHeight: CGFloat = 46
 
     private var dayLabel: String {
         if Calendar.current.isDateInToday(coordinator.selectedDay) {
@@ -41,7 +43,7 @@ struct MenuContentView: View {
                         }
                     }
                 }
-                .frame(height: min(CGFloat(coordinator.meetings.count) * 46 + 8, 320))
+                .frame(height: min(CGFloat(coordinator.meetings.count) * rowHeight + 8, 340))
             }
         }
         .padding(12)
@@ -57,19 +59,30 @@ struct MenuContentView: View {
     private var navigator: some View {
         HStack {
             Button { coordinator.prevDay() } label: { Image(systemName: "chevron.left") }
+                .keyboardShortcut(.leftArrow, modifiers: .command)
+                .accessibilityLabel("Previous day")
+                .help("Previous day (⌘←)")
             Spacer()
             Button(dayLabel) { coordinator.today() }
                 .font(.headline)
                 .buttonStyle(.plain)
+                .keyboardShortcut("t", modifiers: .command)
+                .help("Jump to today (⌘T)")
             Spacer()
             Button { coordinator.nextDay() } label: { Image(systemName: "chevron.right") }
+                .keyboardShortcut(.rightArrow, modifiers: .command)
+                .accessibilityLabel("Next day")
+                .help("Next day (⌘→)")
             Group {
                 if coordinator.isRefreshing {
-                    ProgressView().controlSize(.small)
+                    ProgressView().controlSize(.small).accessibilityLabel("Refreshing")
                 } else {
                     Button { Task { await coordinator.refresh() } } label: {
                         Image(systemName: "arrow.clockwise")
                     }
+                    .keyboardShortcut("r", modifiers: .command)
+                    .accessibilityLabel("Refresh")
+                    .help("Refresh calendar (⌘R)")
                 }
             }
             .frame(width: 20, height: 16) // fixed slot so the spinner swap doesn't shift icons
@@ -87,6 +100,8 @@ struct MenuContentView: View {
                 ? "line.3.horizontal.decrease.circle.fill"
                 : "line.3.horizontal.decrease.circle")
         }
+        .accessibilityLabel("Filter calendars")
+        .help("Show or hide calendars")
     }
 
     /// Inline, stays-open panel to show/hide calendars, grouped by source. Toggling a

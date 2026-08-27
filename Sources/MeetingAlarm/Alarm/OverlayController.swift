@@ -72,6 +72,7 @@ final class OverlayController {
         }
 
         NSApp.activate(ignoringOtherApps: true)
+        announce(meeting)
         // Kiosk-style: cover everything and block escaping to other apps.
         NSApp.presentationOptions = [.hideDock, .hideMenuBar, .disableProcessSwitching]
 
@@ -85,6 +86,18 @@ final class OverlayController {
                 return event
             }
         }
+    }
+
+    /// Ask VoiceOver to speak the alarm as it appears, so it isn't silent for blind users.
+    private func announce(_ meeting: Meeting) {
+        NSAccessibility.post(
+            element: NSApp as Any,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: "Meeting alarm. \(meeting.title).",
+                .priority: NSAccessibilityPriorityLevel.high.rawValue
+            ]
+        )
     }
 
     func dismiss() {

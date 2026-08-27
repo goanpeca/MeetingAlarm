@@ -21,6 +21,7 @@ struct ScopePromptView: View {
                 choices
                 Button("Cancel", role: .cancel) { dismiss() }
                     .frame(maxWidth: .infinity)
+                    .keyboardShortcut(.cancelAction)
             }
             .padding(18)
             .frame(width: 280)
@@ -59,7 +60,7 @@ struct ScopePromptView: View {
         }
         .frame(maxWidth: .infinity)
         if prominent {
-            button.buttonStyle(.borderedProminent)
+            button.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
         } else {
             button.buttonStyle(.bordered)
         }

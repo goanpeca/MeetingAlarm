@@ -51,9 +51,20 @@ struct RootView: View {
                 Button("Test Alarm") { coordinator.testAlarm() }
                 Spacer()
                 Button("Quit") { NSApplication.shared.terminate(nil) }
+                    .keyboardShortcut("q")
             }
             .padding([.bottom, .horizontal], 12)
         }
         .frame(width: 360)
+        // Escape cancels an open recurring prompt, otherwise closes the popover.
+        .onExitCommand { handleEscape() }
+    }
+
+    private func handleEscape() {
+        if coordinator.scopePrompt != nil {
+            coordinator.scopePrompt = nil
+        } else {
+            NSApp.keyWindow?.close()
+        }
     }
 }

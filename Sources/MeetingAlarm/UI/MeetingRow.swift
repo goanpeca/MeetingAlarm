@@ -38,6 +38,7 @@ struct MeetingRow: View {
             ))
             .labelsHidden()
             .disabled(coordinator.isPast(meeting))
+            .accessibilityLabel("Arm alarm for \(meeting.title)")
             disclosure
             VStack(alignment: .leading, spacing: 2) {
                 Text(meeting.title).font(.body)
@@ -66,8 +67,10 @@ struct MeetingRow: View {
                 chevron.rotationEffect(.degrees(isExpanded ? 90 : 0))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(isExpanded ? "Hide details" : "Show details")
+            .help(isExpanded ? "Hide details" : "Show attendees and description")
         } else {
-            chevron.opacity(0)
+            chevron.opacity(0).accessibilityHidden(true)
         }
     }
 
