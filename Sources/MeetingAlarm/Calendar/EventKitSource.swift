@@ -27,7 +27,7 @@ final class EventKitSource: CalendarSource {
         // Fire `onChange` whenever the calendar DB changes (a fresh account sync, an
         // edited/added/removed event) so the list refreshes immediately.
         NotificationCenter.default.addObserver(
-            forName: .EKEventStoreChanged, object: store, queue: .main
+            forName: .EKEventStoreChanged, object: nil, queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.onChange?() }
         }
