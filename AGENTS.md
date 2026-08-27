@@ -49,7 +49,7 @@ mechanically (see `check-docs`). By layer:
 
 - `Sources/MeetingAlarm/Models/` — pure value types (`Meeting`, `SensoryProfile`, …)
 - `Sources/MeetingAlarm/State/` — persistence (`Store`, `Keychain`)
-- `Sources/MeetingAlarm/Calendar/` — `CalendarSource` protocol, EventKit + Google impls
+- `Sources/MeetingAlarm/Calendar/` — `CalendarSource` protocol + EventKit (macOS Calendar) impl
 - `Sources/MeetingAlarm/Alarm/` — scheduler, overlay, sound
 - `Sources/MeetingAlarm/UI/` — menu popover, settings, summonable quick panel
 - `Sources/MeetingAlarm/App.swift` + `AppCoordinator*` — `@main` entry + coordination

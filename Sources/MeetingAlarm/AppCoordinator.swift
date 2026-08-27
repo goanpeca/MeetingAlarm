@@ -15,11 +15,6 @@ final class AppCoordinator: ObservableObject {
     @Published var scopePrompt: ScopePrompt?
 
     let store: Store
-    let accounts: GoogleAccountStore
-
-    let auth: GoogleAuth
-
-    private let secrets: SecretStore
     private let overlay = OverlayController()
     private let sound = SoundPlayer()
     private let scheduler: AlarmScheduler
@@ -34,11 +29,8 @@ final class AppCoordinator: ObservableObject {
     let seriesHorizon: TimeInterval = 60 * 24 * 60 * 60
     var lastSeriesMaterialize = Date.distantPast
 
-    init(store: Store = Store(), accounts: GoogleAccountStore = GoogleAccountStore()) {
+    init(store: Store = Store()) {
         self.store = store
-        self.accounts = accounts
-        secrets = KeychainSecretStore()
-        auth = GoogleAuth(secrets: secrets, accounts: accounts)
         scheduler = AlarmScheduler(overlay: overlay, sound: sound)
         source = EventKitSource()
         configureScheduler()
@@ -50,10 +42,7 @@ final class AppCoordinator: ObservableObject {
     }
 
     private func rebuildSource() {
-        switch store.activeSource {
-        case .eventKit: source = EventKitSource()
-        case .google: source = GoogleCalendarSource(auth: auth, accounts: accounts)
-        }
+        source = EventKitSource()
         source.hiddenCalendarIds = store.hiddenCalendarIds
         source.onChange = { [weak self] in
             Task { await self?.sync() }
@@ -137,23 +126,6 @@ final class AppCoordinator: ObservableObject {
         await sync()
         try? await Task.sleep(for: .milliseconds(400))
         isRefreshing = false
-    }
-
-    var hasMultipleAccounts: Bool {
-        accounts.accounts.count > 1
-    }
-
-    // MARK: Google accounts
-
-    func addGoogleAccount() async {
-        do {
-            _ = try await auth.addAccount()
-            errorMessage = nil
-            await sync()
-        } catch {
-            errorMessage = error.localizedDescription
-            log.error("add account failed: \(error.localizedDescription, privacy: .public)")
-        }
     }
 
     // MARK: Test

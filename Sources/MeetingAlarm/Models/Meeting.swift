@@ -3,7 +3,6 @@ import Foundation
 /// Which backend a ``Meeting`` was read from.
 enum SourceKind: String, Codable, Sendable {
     case eventKit
-    case google
 }
 
 /// One meeting occurrence, normalized across calendar sources.

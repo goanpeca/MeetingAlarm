@@ -11,7 +11,7 @@ struct MeetingTests {
             title: "Standup",
             start: Date(timeIntervalSince1970: 1_756_200_000),
             end: Date(timeIntervalSince1970: 1_756_201_800),
-            sourceKind: .google,
+            sourceKind: .eventKit,
             accountLabel: "me@example.com"
         )
         let data = try JSONEncoder().encode(meeting)

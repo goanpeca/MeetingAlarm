@@ -4,14 +4,6 @@ import Testing
 
 @Suite("Models Codable")
 struct ModelsCodableTests {
-    @Test("GoogleAccount round-trips and is identified by id")
-    func googleAccount() throws {
-        let account = GoogleAccount(id: "acc-1", email: "me@example.com")
-        let data = try JSONEncoder().encode(account)
-        #expect(try JSONDecoder().decode(GoogleAccount.self, from: data) == account)
-        #expect(account.id == "acc-1")
-    }
-
     @Test("ArmedConfig carries its meeting and round-trips")
     func armedConfig() throws {
         let meeting = Meeting(

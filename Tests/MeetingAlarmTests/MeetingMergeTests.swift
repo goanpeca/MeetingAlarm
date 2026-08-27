@@ -9,7 +9,7 @@ struct MeetingMergeTests {
             id: id, title: id,
             start: Date(timeIntervalSince1970: time),
             end: Date(timeIntervalSince1970: time + 60),
-            sourceKind: .google, accountLabel: nil
+            sourceKind: .eventKit, accountLabel: nil
         )
     }
 
