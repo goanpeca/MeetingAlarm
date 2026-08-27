@@ -19,3 +19,6 @@ MeetingAlarm.app/
 *.profdata
 *.profraw
 coverage.txt
+
+# Distribution
+dist/
