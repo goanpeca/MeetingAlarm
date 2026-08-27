@@ -27,5 +27,6 @@ only in a genuine emergency with `--no-verify`.
   the [module map](docs/architecture/modules.md) (`check-docs`); ≥ 70% coverage on the core.
 - Commits: one line, < 72 chars, Conventional-Commit prefix (`feat:`/`fix:`/`docs:`/…),
   **no AI attribution of any kind**.
+- Behavior changes update the `[Unreleased]` section of [`CHANGELOG.md`](CHANGELOG.md).
 
 The full list is in [`docs/principles/golden-principles.md`](docs/principles/golden-principles.md).
