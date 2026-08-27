@@ -4,7 +4,10 @@ import SwiftUI
 /// Menu-bar-only app (`LSUIElement` in Resources/Info.plist) — no Dock icon.
 @main
 struct MeetingAlarmApp: App {
-    @StateObject private var coordinator = AppCoordinator()
+    /// Default the alarm color to the OS accent (System Settings › Appearance › Theme Color).
+    @StateObject private var coordinator = AppCoordinator(
+        store: Store(defaultAlarmColor: SystemAccent.rgba())
+    )
 
     var body: some Scene {
         MenuBarExtra("Meeting Alarm", systemImage: "bell.badge") {
@@ -51,6 +54,6 @@ struct RootView: View {
             }
             .padding([.bottom, .horizontal], 12)
         }
-        .frame(width: 340)
+        .frame(width: 360)
     }
 }

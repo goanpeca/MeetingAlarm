@@ -7,13 +7,6 @@ struct MenuContentView: View {
     @ObservedObject var store: Store
     @State private var showFilter = false
 
-    private static let timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        formatter.dateStyle = .none
-        return formatter
-    }()
-
     private var dayLabel: String {
         if Calendar.current.isDateInToday(coordinator.selectedDay) {
             return "Today"
@@ -44,7 +37,7 @@ struct MenuContentView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(coordinator.meetings) { meeting in
-                            row(for: meeting)
+                            MeetingRow(coordinator: coordinator, store: store, meeting: meeting)
                         }
                     }
                 }
@@ -52,7 +45,7 @@ struct MenuContentView: View {
             }
         }
         .padding(12)
-        .frame(width: 340)
+        .frame(width: 360)
         .task { await coordinator.sync() }
     }
 
@@ -65,13 +58,16 @@ struct MenuContentView: View {
                 .buttonStyle(.plain)
             Spacer()
             Button { coordinator.nextDay() } label: { Image(systemName: "chevron.right") }
-            if coordinator.isRefreshing {
-                ProgressView().controlSize(.small)
-            } else {
-                Button { Task { await coordinator.refresh() } } label: {
-                    Image(systemName: "arrow.clockwise")
+            Group {
+                if coordinator.isRefreshing {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Button { Task { await coordinator.refresh() } } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
                 }
             }
+            .frame(width: 20, height: 16) // fixed slot so the spinner swap doesn't shift icons
             calendarFilter
         }
         .buttonStyle(.borderless)
@@ -120,43 +116,6 @@ struct MenuContentView: View {
         Dictionary(grouping: coordinator.availableCalendars, by: \.sourceTitle)
             .map { (source: $0.key, calendars: $0.value.sorted { $0.title < $1.title }) }
             .sorted { $0.source < $1.source }
-    }
-
-    private func row(for meeting: Meeting) -> some View {
-        let armed = coordinator.isArmed(meeting)
-        return HStack(alignment: .top, spacing: 8) {
-            Toggle("", isOn: Binding(
-                get: { coordinator.isArmed(meeting) },
-                set: { _ in coordinator.toggleArm(meeting) }
-            ))
-            .labelsHidden()
-            .disabled(coordinator.isPast(meeting))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(meeting.title).font(.body)
-                HStack(spacing: 6) {
-                    Text(Self.timeFormatter.string(from: meeting.start))
-                    if let label = meeting.accountLabel {
-                        Text("· \(label)").foregroundStyle(.secondary)
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            Spacer()
-            if armed {
-                Picker("", selection: Binding(
-                    get: { store.armed[meeting.id]?.presetName ?? store.defaultPresetName },
-                    set: { coordinator.setPreset(meeting, preset: $0) }
-                )) {
-                    ForEach(SensoryProfile.presets, id: \.name) { preset in
-                        Text(preset.name).tag(preset.name)
-                    }
-                }
-                .labelsHidden()
-                .frame(width: 120)
-            }
-        }
-        .padding(.vertical, 2)
     }
 
     private func banner(_ text: String) -> some View {

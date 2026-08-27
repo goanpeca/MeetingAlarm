@@ -48,6 +48,7 @@ struct SettingsView: View {
                     ForEach(Effect.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
+                Button("Use system accent color") { store.alarmColor = SystemAccent.rgba() }
                 Picker("Dismiss", selection: bind(\.dismissChallenge)) {
                     ForEach(DismissChallenge.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
@@ -56,7 +57,7 @@ struct SettingsView: View {
             Section("Snooze options") { snoozeRows }
         }
         .formStyle(.grouped)
-        .frame(width: 340, height: 470)
+        .frame(width: 360, height: 470)
     }
 
     // MARK: Bindings

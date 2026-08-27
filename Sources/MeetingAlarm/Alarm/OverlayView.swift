@@ -95,12 +95,14 @@ struct OverlayView: View {
                 actionRows(now: now)
             }
         }
+        // White text always sits on this dark scrim, so the alarm stays readable over any
+        // alarm color, ramp opacity, or system (light/dark) appearance behind it.
         .foregroundStyle(.white)
         .frame(width: 480)
         .padding(32)
         .background(
             RoundedRectangle(cornerRadius: 28)
-                .fill(.black.opacity(0.6))
+                .fill(.black.opacity(0.72))
         )
         .padding(40)
     }

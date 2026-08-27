@@ -46,7 +46,7 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
-    @Published var alarmColor: RGBAColor = .red {
+    @Published var alarmColor: RGBAColor {
         didSet { save() }
     }
 
@@ -69,6 +69,7 @@ final class Store: ObservableObject {
 
     private let defaults: UserDefaults
     private let key = "state.v1"
+    private let defaultAlarmColor: RGBAColor
     private var loading = false
 
     private struct Snapshot: Codable {
@@ -92,8 +93,10 @@ final class Store: ObservableObject {
         var hiddenCalendarIds: [String]?
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, defaultAlarmColor: RGBAColor = .red) {
         self.defaults = defaults
+        self.defaultAlarmColor = defaultAlarmColor
+        alarmColor = defaultAlarmColor
         load()
     }
 
@@ -156,7 +159,7 @@ final class Store: ObservableObject {
         soundRepeat = snap.soundRepeat ?? true
         soundGapSeconds = snap.soundGapSeconds ?? 1
         alarmVolume = snap.alarmVolume ?? 1
-        alarmColor = snap.alarmColor ?? .red
+        alarmColor = snap.alarmColor ?? defaultAlarmColor
         alarmEffect = snap.alarmEffect ?? .solid
         leadTimeMinutes = snap.leadTimeMinutes ?? 5
         dismissChallenge = snap.dismissChallenge ?? .math
