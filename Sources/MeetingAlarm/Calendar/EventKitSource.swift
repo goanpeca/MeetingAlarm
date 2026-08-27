@@ -18,7 +18,19 @@ enum CalendarError: LocalizedError {
 @MainActor
 final class EventKitSource: CalendarSource {
     let kind: SourceKind = .eventKit
+    var onChange: (() -> Void)?
+
     private let store = EKEventStore()
+
+    init() {
+        // Fire `onChange` whenever the calendar DB changes (a fresh account sync, an
+        // edited/added/removed event) so the list refreshes immediately.
+        NotificationCenter.default.addObserver(
+            forName: .EKEventStoreChanged, object: store, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.onChange?() }
+        }
+    }
 
     func authorize() async throws {
         let granted = try await store.requestFullAccessToEvents()

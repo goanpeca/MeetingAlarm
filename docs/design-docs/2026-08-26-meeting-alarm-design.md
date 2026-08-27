@@ -224,7 +224,10 @@ Each unit lists **what it does / interface / depends on**, and its layer.
 
 ## 6. Scheduling & lifecycle details
 
-- **Sync cadence:** default 5 min; also on launch, on wake, and right after arming/disarming.
+- **Sync cadence:** event-driven first — re-fetch **immediately** on `EKEventStoreChanged`
+  (a `CalendarSource.onChange` hook, so a fresh account sync or edited event shows at once)
+  and when the Meetings view appears; the 5-min poll is only a backstop. Also on launch, on
+  wake, and right after arming/disarming.
 - **Timers:** `DispatchSourceTimer` per armed meeting (not one polling loop), recomputed on
   each sync so calendar edits (time change / cancellation) are respected.
 - **Sleep/wake:** on `didWakeNotification`, recompute all fire times; fire overdue-but-not-ended

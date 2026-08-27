@@ -43,6 +43,9 @@ final class AppCoordinator: ObservableObject {
         case .eventKit: source = EventKitSource()
         case .google: source = GoogleCalendarSource(auth: auth, accounts: accounts)
         }
+        source.onChange = { [weak self] in
+            Task { await self?.sync() }
+        }
     }
 
     private func observeSourceChanges() {

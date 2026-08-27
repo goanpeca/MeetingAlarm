@@ -48,6 +48,7 @@ struct MenuContentView: View {
         }
         .padding(12)
         .frame(width: 340)
+        .task { await coordinator.sync() }
     }
 
     private var navigator: some View {

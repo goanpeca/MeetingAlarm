@@ -14,6 +14,10 @@ protocol CalendarSource {
     /// Which backend this source represents.
     var kind: SourceKind { get }
 
+    /// Invoked when the underlying calendar data changes (e.g. an EventKit sync pulls new
+    /// events), so the owner can re-fetch immediately instead of waiting for the next poll.
+    var onChange: (() -> Void)? { get set }
+
     /// Request access (EventKit permission, or Google OAuth sign-in). Throws if
     /// access is denied or sign-in fails.
     func authorize() async throws

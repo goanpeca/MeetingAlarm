@@ -5,6 +5,7 @@ import Foundation
 @MainActor
 final class GoogleCalendarSource: CalendarSource {
     let kind: SourceKind = .google
+    var onChange: (() -> Void)?
 
     private let auth: GoogleAuth
     private let accounts: GoogleAccountStore
