@@ -12,12 +12,14 @@ struct EventKitMapperTests {
         url: URL? = nil,
         notes: String? = nil,
         location: String? = nil,
-        attendees: [String] = []
+        attendees: [String] = [],
+        isRecurring: Bool = false
     ) -> EventKitMapper.Fields {
         EventKitMapper.Fields(
             identifier: "E1", title: title, start: start, end: start.addingTimeInterval(900),
             isAllDay: isAllDay, calendarTitle: "Work", occurrenceStart: start,
-            url: url, notes: notes, location: location, attendees: attendees
+            url: url, notes: notes, location: location, attendees: attendees,
+            isRecurring: isRecurring
         )
     }
 
@@ -47,5 +49,13 @@ struct EventKitMapperTests {
             fields(notes: "Dial in here: https://zoom.us/j/123456789 thanks")
         ))
         #expect(meeting.joinURLs.first?.host == "zoom.us")
+    }
+
+    @Test("A recurring event carries a series id; a one-off does not")
+    func recurrenceSeriesId() throws {
+        let recurring = try #require(EventKitMapper.meeting(fields(isRecurring: true)))
+        #expect(recurring.seriesId == "eventkit-series:E1")
+        let oneOff = try #require(EventKitMapper.meeting(fields(isRecurring: false)))
+        #expect(oneOff.seriesId == nil)
     }
 }

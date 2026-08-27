@@ -78,7 +78,8 @@ final class EventKitSource: CalendarSource {
                 url: event.url,
                 notes: event.notes,
                 location: event.location,
-                attendees: (event.attendees ?? []).compactMap(\.name)
+                attendees: (event.attendees ?? []).compactMap(\.name),
+                isRecurring: event.hasRecurrenceRules
             ))
         }
         .sorted { $0.start < $1.start }

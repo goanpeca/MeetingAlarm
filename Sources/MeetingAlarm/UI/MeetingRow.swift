@@ -34,7 +34,7 @@ struct MeetingRow: View {
         HStack(alignment: .top, spacing: 6) {
             Toggle("", isOn: Binding(
                 get: { coordinator.isArmed(meeting) },
-                set: { _ in coordinator.toggleArm(meeting) }
+                set: { _ in coordinator.requestArmToggle(meeting) }
             ))
             .labelsHidden()
             .disabled(coordinator.isPast(meeting))
@@ -75,6 +75,9 @@ struct MeetingRow: View {
         HStack(spacing: 6) {
             Text(Self.timeFormatter.string(from: meeting.start))
             Text("· \(DurationText.format(from: meeting.start, to: meeting.end))")
+            if coordinator.isRecurring(meeting) {
+                Text("· Repeats")
+            }
             if let label = meeting.accountLabel {
                 Text("· \(label)").lineLimit(1)
             }
@@ -85,7 +88,7 @@ struct MeetingRow: View {
 
     private var presetPicker: some View {
         Picker("", selection: Binding(
-            get: { store.armed[meeting.id]?.presetName ?? store.defaultPresetName },
+            get: { coordinator.presetName(for: meeting) },
             set: { coordinator.setPreset(meeting, preset: $0) }
         )) {
             ForEach(SensoryProfile.presets, id: \.name) { preset in

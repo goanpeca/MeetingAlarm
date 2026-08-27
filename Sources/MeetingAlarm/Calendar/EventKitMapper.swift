@@ -16,6 +16,7 @@ enum EventKitMapper {
         let notes: String?
         let location: String?
         let attendees: [String]
+        let isRecurring: Bool
     }
 
     static func meeting(_ fields: Fields) -> Meeting? {
@@ -34,7 +35,9 @@ enum EventKitMapper {
             accountLabel: fields.calendarTitle,
             joinURLs: joinURLs,
             notes: NotesSanitizer.clean(fields.notes),
-            attendees: fields.attendees
+            attendees: fields.attendees,
+            // All occurrences of a recurring EKEvent share its identifier — that's the series id.
+            seriesId: fields.isRecurring ? "eventkit-series:\(fields.identifier)" : nil
         )
     }
 }

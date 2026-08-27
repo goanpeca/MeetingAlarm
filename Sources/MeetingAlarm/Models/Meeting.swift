@@ -25,6 +25,9 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
     let notes: String?
     /// Invited people's display names, shown on the alarm splash.
     let attendees: [String]
+    /// Stable identifier shared by every occurrence of a recurring series (nil for a
+    /// one-off event). Lets the user arm/disarm a whole series, not just one day.
+    let seriesId: String?
 
     init(
         id: String,
@@ -35,7 +38,8 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         accountLabel: String?,
         joinURLs: [URL] = [],
         notes: String? = nil,
-        attendees: [String] = []
+        attendees: [String] = [],
+        seriesId: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -46,5 +50,6 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         self.joinURLs = joinURLs
         self.notes = notes
         self.attendees = attendees
+        self.seriesId = seriesId
     }
 }

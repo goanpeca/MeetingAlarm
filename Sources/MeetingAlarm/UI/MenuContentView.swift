@@ -46,6 +46,11 @@ struct MenuContentView: View {
         }
         .padding(12)
         .frame(width: 360)
+        .overlay {
+            if let prompt = coordinator.scopePrompt {
+                ScopePromptView(coordinator: coordinator, prompt: prompt)
+            }
+        }
         .task { await coordinator.sync() }
     }
 

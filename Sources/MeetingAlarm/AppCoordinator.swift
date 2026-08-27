@@ -11,6 +11,8 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var needsPermission = false
     @Published private(set) var isRefreshing = false
     @Published private(set) var isPreviewingSound = false
+    /// A pending recurring-scope question, shown as an in-popover overlay.
+    @Published var scopePrompt: ScopePrompt?
 
     let store: Store
     let accounts: GoogleAccountStore
@@ -26,6 +28,10 @@ final class AppCoordinator: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     let calendar = Calendar.current
     private let log = Log.make("coordinator")
+    /// How far ahead a whole armed series is pre-scheduled, plus a throttle so the extra
+    /// horizon fetch doesn't run on every poll. Internal so `AppCoordinator+Scheduling` uses them.
+    let seriesHorizon: TimeInterval = 60 * 24 * 60 * 60
+    var lastSeriesMaterialize = Date.distantPast
 
     init(store: Store = Store(), accounts: GoogleAccountStore = GoogleAccountStore()) {
         self.store = store
@@ -103,6 +109,7 @@ final class AppCoordinator: ObservableObject {
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
             reconcileArmed()
+            await materializeSeries()
             availableCalendars = await source.availableCalendars()
             errorMessage = nil
             let count = meetings.count
@@ -210,21 +217,6 @@ final class AppCoordinator: ObservableObject {
             store.setSnooze(id, at: target)
         }
         reschedule()
-    }
-
-    /// Update armed occurrences whose underlying event changed (e.g. its time was edited),
-    /// so the checked row shows the new time and the alarm re-times.
-    private func reconcileArmed() {
-        var changed = false
-        for meeting in meetings {
-            if let config = store.armed[meeting.id], config.meeting != meeting {
-                store.updateArmed(meeting)
-                changed = true
-            }
-        }
-        if changed {
-            reschedule()
-        }
     }
 
     func reschedule() {

@@ -27,6 +27,26 @@ struct GoogleEventMapperTests {
         #expect(meeting.id == "google:acc-1:e1:2026-08-26")
     }
 
+    @Test("A recurring instance carries a series id; a one-off has none")
+    func recurringSeriesId() throws {
+        let data = Data("""
+        {"items":[
+          {"id":"e1_20260826T090000Z","summary":"Standup","recurringEventId":"masterABC",
+           "start":{"dateTime":"2026-08-26T09:00:00Z"},
+           "end":{"dateTime":"2026-08-26T09:30:00Z"}},
+          {"id":"solo","summary":"One-off",
+           "start":{"dateTime":"2026-08-26T11:00:00Z"},
+           "end":{"dateTime":"2026-08-26T11:30:00Z"}}
+        ]}
+        """.utf8)
+        let meetings = try GoogleEventMapper.meetings(
+            fromEventsJSON: data, accountId: "acc-1", accountLabel: "me@example.com"
+        )
+        #expect(meetings.first { $0.title == "Standup" }?
+            .seriesId == "google:acc-1:series:masterABC")
+        #expect(meetings.first { $0.title == "One-off" }?.seriesId == nil)
+    }
+
     @Test("A missing summary becomes a sensible placeholder title")
     func missingSummary() throws {
         let data = Data("""

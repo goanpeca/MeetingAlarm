@@ -15,6 +15,7 @@ enum GoogleEventMapper {
         let description: String?
         let conferenceData: ConferenceData?
         let attendees: [Attendee]?
+        let recurringEventId: String?
     }
 
     private struct Attendee: Decodable {
@@ -61,7 +62,9 @@ enum GoogleEventMapper {
                 joinURLs: joinURLs(for: item),
                 notes: NotesSanitizer.clean(item.description),
                 attendees: (item.attendees ?? [])
-                    .compactMap { $0.displayName ?? $0.email }
+                    .compactMap { $0.displayName ?? $0.email },
+                // Instances of a recurring event carry the master event's id here.
+                seriesId: item.recurringEventId.map { "google:\(accountId):series:\($0)" }
             )
         }
     }

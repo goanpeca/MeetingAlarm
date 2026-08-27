@@ -10,6 +10,11 @@ final class Store: ObservableObject {
     /// Ids that already fired + were dismissed: kept armed (checked, as history) but not
     /// re-scheduled, so an overdue alarm can't re-fire.
     @Published var handled: Set<String> = []
+    /// Series ids the user armed wholesale → preset name. Individual occurrences are
+    /// materialized from these each sync (see `AppCoordinator.materializeSeries`).
+    @Published var armedSeries: [String: String] = [:]
+    /// Per-series occurrence ids the user chose to skip ("this event only").
+    @Published var seriesExceptions: [String: Set<String>] = [:]
     @Published var activeSource: SourceKind = .eventKit {
         didSet { save() }
     }
@@ -76,6 +81,8 @@ final class Store: ObservableObject {
         var armed: [String: ArmedConfig]
         var snoozes: [String: Date]
         var handled: [String]?
+        var armedSeries: [String: String]?
+        var seriesExceptions: [String: [String]]?
         var activeSource: SourceKind
         var defaultPresetName: String
         var syncInterval: TimeInterval
@@ -127,6 +134,46 @@ final class Store: ObservableObject {
         save()
     }
 
+    // MARK: Series arming
+
+    /// Arm a whole recurring series with `preset`. Clears any prior per-occurrence skips.
+    func armSeries(_ seriesId: String, preset: String) {
+        armedSeries[seriesId] = preset
+        seriesExceptions[seriesId] = nil
+        save()
+    }
+
+    /// Disarm a whole series and drop its materialized occurrences and skips.
+    func disarmSeries(_ seriesId: String) {
+        armedSeries[seriesId] = nil
+        seriesExceptions[seriesId] = nil
+        armed = armed.filter { !($0.value.fromSeries && $0.value.meeting.seriesId == seriesId) }
+        save()
+    }
+
+    /// Skip a single occurrence of an armed series ("this event only").
+    func addSeriesException(seriesId: String, occurrenceId: String) {
+        seriesExceptions[seriesId, default: []].insert(occurrenceId)
+        armed[occurrenceId] = nil
+        save()
+    }
+
+    /// Replace all series-materialized entries with a freshly computed set, leaving
+    /// explicitly-armed occurrences untouched. Returns true only when something changed
+    /// (so callers can skip a needless reschedule).
+    func setMaterializedSeries(_ entries: [SeriesMaterializer.Entry]) -> Bool {
+        var next = armed.filter { !$0.value.fromSeries }
+        for entry in entries {
+            next[entry.meeting.id] = ArmedConfig(
+                presetName: entry.preset, meeting: entry.meeting, fromSeries: true
+            )
+        }
+        guard next != armed else { return false }
+        armed = next
+        save()
+        return true
+    }
+
     func setSnooze(_ id: String, at date: Date) {
         snoozes[id] = date
         save()
@@ -150,6 +197,8 @@ final class Store: ObservableObject {
         armed = snap.armed
         snoozes = snap.snoozes
         handled = Set(snap.handled ?? [])
+        armedSeries = snap.armedSeries ?? [:]
+        seriesExceptions = (snap.seriesExceptions ?? [:]).mapValues(Set.init)
         activeSource = snap.activeSource
         defaultPresetName = snap.defaultPresetName
         syncInterval = snap.syncInterval
@@ -173,6 +222,8 @@ final class Store: ObservableObject {
             armed: armed,
             snoozes: snoozes,
             handled: Array(handled),
+            armedSeries: armedSeries,
+            seriesExceptions: seriesExceptions.mapValues(Array.init),
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
             syncInterval: syncInterval,
