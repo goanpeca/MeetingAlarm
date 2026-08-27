@@ -18,8 +18,9 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
     let sourceKind: SourceKind
     /// Owning account/calendar label (e.g. an email), shown when >1 account is present.
     let accountLabel: String?
-    /// Video/join link for the meeting, if one was found — surfaced as a Join button.
-    let joinURL: URL?
+    /// Video/join links found for the meeting — one Join button each (e.g. Meet AND Zoom
+    /// if both were pasted on the event by mistake, so you can pick the right one).
+    let joinURLs: [URL]
 
     init(
         id: String,
@@ -28,7 +29,7 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         end: Date,
         sourceKind: SourceKind,
         accountLabel: String?,
-        joinURL: URL? = nil
+        joinURLs: [URL] = []
     ) {
         self.id = id
         self.title = title
@@ -36,6 +37,6 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         self.end = end
         self.sourceKind = sourceKind
         self.accountLabel = accountLabel
-        self.joinURL = joinURL
+        self.joinURLs = joinURLs
     }
 }

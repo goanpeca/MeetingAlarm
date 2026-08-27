@@ -1,8 +1,22 @@
 import AppKit
 import SwiftUI
 
-/// Presents the alarm overlay as a borderless window on every screen, and guarantees
-/// the safety invariant: **Esc always dismisses**.
+/// A borderless window that can still become key, so the dismiss puzzle's text field can
+/// receive typing.
+private final class OverlayWindow: NSWindow {
+    override var canBecomeKey: Bool {
+        true
+    }
+
+    override var canBecomeMain: Bool {
+        true
+    }
+}
+
+/// Presents the alarm overlay on every screen as a modal, can't-escape surface: it covers
+/// all displays, hides the Dock/menu bar, and disables app switching — the only ways out
+/// are Snooze, a Join link, or Dismiss (which may require solving the configured puzzle).
+/// Esc dismisses only when no dismiss challenge is set.
 @MainActor
 final class OverlayController {
     private var windows: [NSWindow] = []
@@ -12,6 +26,7 @@ final class OverlayController {
         profile: SensoryProfile,
         meeting: Meeting,
         snoozeIntervals: [TimeInterval],
+        challenge: DismissChallenge,
         onSnooze: @escaping (TimeInterval) -> Void,
         onDismiss: @escaping () -> Void
     ) {
@@ -26,15 +41,16 @@ final class OverlayController {
             onSnooze(interval)
         }
 
-        for screen in NSScreen.screens {
+        for (index, screen) in NSScreen.screens.enumerated() {
             let view = OverlayView(
                 profile: profile,
                 meeting: meeting,
                 snoozeIntervals: snoozeIntervals,
+                challenge: challenge,
                 onSnooze: snooze,
                 onDismiss: dismissAll
             )
-            let window = NSWindow(
+            let window = OverlayWindow(
                 contentRect: screen.frame,
                 styleMask: .borderless,
                 backing: .buffered,
@@ -47,17 +63,27 @@ final class OverlayController {
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
             window.contentView = NSHostingView(rootView: view)
             window.setFrame(screen.frame, display: true)
-            window.makeKeyAndOrderFront(nil)
+            if index == 0 {
+                window.makeKeyAndOrderFront(nil)
+            } else {
+                window.orderFrontRegardless()
+            }
             windows.append(window)
         }
-        NSApp.activate(ignoringOtherApps: true)
 
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.keyCode == 53 { // Esc
-                dismissAll()
-                return nil
+        NSApp.activate(ignoringOtherApps: true)
+        // Kiosk-style: cover everything and block escaping to other apps.
+        NSApp.presentationOptions = [.hideDock, .hideMenuBar, .disableProcessSwitching]
+
+        // Esc is a safe exit only when dismissal isn't puzzle-gated.
+        if challenge == .none {
+            keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.keyCode == 53 { // Esc
+                    dismissAll()
+                    return nil
+                }
+                return event
             }
-            return event
         }
     }
 
@@ -66,6 +92,7 @@ final class OverlayController {
             NSEvent.removeMonitor(keyMonitor)
         }
         keyMonitor = nil
+        NSApp.presentationOptions = []
         windows.forEach { $0.orderOut(nil) }
         windows.removeAll()
     }

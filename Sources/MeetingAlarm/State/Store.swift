@@ -35,6 +35,14 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    @Published var leadTimeMinutes: Int = 5 {
+        didSet { save() }
+    }
+
+    @Published var dismissChallenge: DismissChallenge = .none {
+        didSet { save() }
+    }
+
     private let defaults: UserDefaults
     private let key = "state.v1"
     private var loading = false
@@ -50,6 +58,8 @@ final class Store: ObservableObject {
         var soundEnabled: Bool?
         var alarmColor: RGBAColor?
         var alarmEffect: Effect?
+        var leadTimeMinutes: Int?
+        var dismissChallenge: DismissChallenge?
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -96,6 +106,8 @@ final class Store: ObservableObject {
         soundEnabled = snap.soundEnabled ?? true
         alarmColor = snap.alarmColor ?? .red
         alarmEffect = snap.alarmEffect ?? .solid
+        leadTimeMinutes = snap.leadTimeMinutes ?? 5
+        dismissChallenge = snap.dismissChallenge ?? .none
         loading = false
     }
 
@@ -110,7 +122,9 @@ final class Store: ObservableObject {
             snoozeIntervals: snoozeIntervals,
             soundEnabled: soundEnabled,
             alarmColor: alarmColor,
-            alarmEffect: alarmEffect
+            alarmEffect: alarmEffect,
+            leadTimeMinutes: leadTimeMinutes,
+            dismissChallenge: dismissChallenge
         )
         if let data = try? JSONEncoder().encode(snap) {
             defaults.set(data, forKey: key)

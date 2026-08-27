@@ -52,16 +52,16 @@ enum GoogleEventMapper {
                 end: end,
                 sourceKind: .google,
                 accountLabel: accountLabel,
-                joinURL: joinURL(for: item)
+                joinURLs: joinURLs(for: item)
             )
         }
     }
 
-    private static func joinURL(for item: Item) -> URL? {
+    private static func joinURLs(for item: Item) -> [URL] {
         let videoEntry = item.conferenceData?.entryPoints?
             .first { $0.entryPointType == "video" }?.uri
         let explicit = item.hangoutLink.flatMap(URL.init(string:))
             ?? videoEntry.flatMap(URL.init(string:))
-        return MeetingLink.detect(explicit: explicit, texts: [item.location, item.description])
+        return MeetingLink.detectAll(explicit: explicit, texts: [item.location, item.description])
     }
 }

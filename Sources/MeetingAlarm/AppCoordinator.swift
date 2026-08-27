@@ -189,14 +189,18 @@ final class AppCoordinator: ObservableObject {
     func testAlarm() {
         let sample = Meeting(
             id: "test", title: "Test Alarm",
-            start: Date().addingTimeInterval(2),
-            end: Date().addingTimeInterval(3600),
+            start: Date().addingTimeInterval(360),
+            end: Date().addingTimeInterval(3960),
             sourceKind: .eventKit, accountLabel: nil,
-            joinURL: URL(string: "https://meet.google.com/lookup/demo")
+            joinURLs: [
+                URL(string: "https://meet.google.com/lookup/demo"),
+                URL(string: "https://zoom.us/j/1234567890")
+            ].compactMap(\.self)
         )
         let profile = effectiveProfile(named: store.defaultPresetName)
         overlay.present(
             profile: profile, meeting: sample, snoozeIntervals: store.snoozeIntervals,
+            challenge: store.dismissChallenge,
             onSnooze: { [weak self] _ in self?.sound.stop() },
             onDismiss: { [weak self] in self?.sound.stop() }
         )
@@ -208,6 +212,7 @@ final class AppCoordinator: ObservableObject {
         var profile = SensoryProfile.presets.first { $0.name == name } ?? .blast
         profile.color = store.alarmColor
         profile.effect = store.alarmEffect
+        profile.leadTime = TimeInterval(store.leadTimeMinutes * 60)
         if !store.soundEnabled {
             profile.sound = nil
         }
@@ -219,7 +224,7 @@ final class AppCoordinator: ObservableObject {
     private func handleSnooze(id: String, interval: TimeInterval) {
         if let config = store.armed[id],
            let target = AlarmMath.snoozeFireTime(
-               from: Date(), interval: interval, meetingEnd: config.meeting.end
+               from: Date(), interval: interval, meetingStart: config.meeting.start
            ) {
             store.setSnooze(id, at: target)
         }
@@ -228,6 +233,7 @@ final class AppCoordinator: ObservableObject {
 
     private func reschedule() {
         scheduler.snoozeIntervals = store.snoozeIntervals
+        scheduler.dismissChallenge = store.dismissChallenge
         scheduler.reschedule(armed: store.armed, snoozes: store.snoozes, now: Date())
     }
 }

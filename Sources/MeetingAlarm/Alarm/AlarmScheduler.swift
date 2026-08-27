@@ -7,6 +7,8 @@ import Foundation
 final class AlarmScheduler {
     /// Snooze options offered on the overlay.
     var snoozeIntervals: [TimeInterval] = [60, 300, 600]
+    /// Optional puzzle gating the Dismiss button.
+    var dismissChallenge: DismissChallenge = .none
     /// Resolve a preset name to a profile.
     var resolveProfile: (String) -> SensoryProfile = { _ in .blast }
     /// Called when the user snoozes a fired alarm.
@@ -62,6 +64,7 @@ final class AlarmScheduler {
             profile: profile,
             meeting: config.meeting,
             snoozeIntervals: snoozeIntervals,
+            challenge: dismissChallenge,
             onSnooze: { [weak self] interval in
                 self?.sound.stop()
                 self?.onSnooze(id, interval)

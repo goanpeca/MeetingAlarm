@@ -7,14 +7,14 @@ enum AlarmMath {
         meetingStart.addingTimeInterval(-leadTime)
     }
 
-    /// The next snooze target, or `nil` if it would land at/after the meeting end
-    /// (snoozing past the meeting is pointless).
+    /// The next snooze target, or `nil` if it would land at/after the meeting **start**
+    /// — a snooze must re-remind you *before* the meeting begins, never after.
     static func snoozeFireTime(
         from now: Date,
         interval: TimeInterval,
-        meetingEnd: Date
+        meetingStart: Date
     ) -> Date? {
         let target = now.addingTimeInterval(interval)
-        return target < meetingEnd ? target : nil
+        return target < meetingStart ? target : nil
     }
 }

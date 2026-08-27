@@ -15,19 +15,21 @@ struct AlarmMathTests {
         )
     }
 
-    @Test("snoozeFireTime returns now + interval when before meeting end")
-    func snoozeWithinMeeting() {
-        let end = start.addingTimeInterval(1800)
+    @Test("snoozeFireTime returns now + interval when before meeting start")
+    func snoozeBeforeStart() {
+        let meetingStart = start.addingTimeInterval(1800)
         #expect(
-            AlarmMath.snoozeFireTime(from: start, interval: 60, meetingEnd: end)
+            AlarmMath.snoozeFireTime(from: start, interval: 60, meetingStart: meetingStart)
                 == start.addingTimeInterval(60)
         )
     }
 
-    @Test("snoozeFireTime refuses a target at or past the meeting end")
-    func snoozePastEnd() {
-        let end = start.addingTimeInterval(60)
-        #expect(AlarmMath.snoozeFireTime(from: start, interval: 60, meetingEnd: end) == nil)
-        #expect(AlarmMath.snoozeFireTime(from: start, interval: 120, meetingEnd: end) == nil)
+    @Test("snoozeFireTime refuses a target at or past the meeting start")
+    func snoozePastStart() {
+        let meetingStart = start.addingTimeInterval(60)
+        #expect(AlarmMath
+            .snoozeFireTime(from: start, interval: 60, meetingStart: meetingStart) == nil)
+        #expect(AlarmMath
+            .snoozeFireTime(from: start, interval: 120, meetingStart: meetingStart) == nil)
     }
 }

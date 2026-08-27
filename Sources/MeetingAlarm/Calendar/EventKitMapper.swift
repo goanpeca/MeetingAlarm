@@ -22,7 +22,7 @@ enum EventKitMapper {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         let resolvedTitle = fields.title.flatMap { $0.isEmpty ? nil : $0 } ?? "(No title)"
-        let joinURL = MeetingLink.detect(
+        let joinURLs = MeetingLink.detectAll(
             explicit: fields.url,
             texts: [fields.location, fields.notes]
         )
@@ -33,7 +33,7 @@ enum EventKitMapper {
             end: fields.end,
             sourceKind: .eventKit,
             accountLabel: fields.calendarTitle,
-            joinURL: joinURL
+            joinURLs: joinURLs
         )
     }
 }

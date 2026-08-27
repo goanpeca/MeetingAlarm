@@ -28,6 +28,15 @@ struct SettingsView: View {
                 }
             }
 
+            picker("Start alarm", selection: Binding(
+                get: { store.leadTimeMinutes },
+                set: { store.leadTimeMinutes = $0 }
+            )) {
+                ForEach([0, 1, 2, 3, 5, 10, 15, 30], id: \.self) { minutes in
+                    Text(minutes == 0 ? "At meeting time" : "\(minutes) min before").tag(minutes)
+                }
+            }
+
             Toggle("Play sound", isOn: Binding(
                 get: { store.soundEnabled },
                 set: { store.soundEnabled = $0 }
@@ -43,6 +52,15 @@ struct SettingsView: View {
             }
 
             ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
+
+            picker("Dismiss", selection: Binding(
+                get: { store.dismissChallenge },
+                set: { store.dismissChallenge = $0 }
+            )) {
+                ForEach(DismissChallenge.allCases, id: \.self) { challenge in
+                    Text(challenge.displayName).tag(challenge)
+                }
+            }
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Snooze options").font(.headline)

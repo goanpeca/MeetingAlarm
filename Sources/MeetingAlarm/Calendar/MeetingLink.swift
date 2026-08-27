@@ -8,9 +8,9 @@ enum MeetingLink {
         "webex.com", "whereby.com", "meet.jit.si", "around.co"
     ]
 
-    /// Pick a join link: a preferred video-conferencing URL if one appears anywhere,
-    /// otherwise the explicit URL, otherwise the first URL found in the text.
-    static func detect(explicit: URL?, texts: [String?]) -> URL? {
+    /// All join links, deduped in order: every preferred video-conferencing URL found
+    /// (so Meet *and* Zoom both surface), or a single fallback URL if none are preferred.
+    static func detectAll(explicit: URL?, texts: [String?]) -> [URL] {
         var candidates: [URL] = []
         if let explicit {
             candidates.append(explicit)
@@ -18,10 +18,10 @@ enum MeetingLink {
         for text in texts.compactMap(\.self) {
             candidates.append(contentsOf: urls(in: text))
         }
-        if let preferred = candidates.first(where: isPreferred) {
-            return preferred
-        }
-        return candidates.first
+        var seen = Set<String>()
+        let unique = candidates.filter { seen.insert($0.absoluteString).inserted }
+        let preferred = unique.filter(isPreferred)
+        return preferred.isEmpty ? Array(unique.prefix(1)) : preferred
     }
 
     /// All http(s) URLs in `text`, in order.

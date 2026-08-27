@@ -40,11 +40,11 @@ struct EventKitMapperTests {
         #expect(meeting.title == "(No title)")
     }
 
-    @Test("A video link in the notes becomes the join URL")
+    @Test("A video link in the notes becomes a join URL")
     func extractsJoinURL() throws {
         let meeting = try #require(EventKitMapper.meeting(
             fields(notes: "Dial in here: https://zoom.us/j/123456789 thanks")
         ))
-        #expect(meeting.joinURL?.host == "zoom.us")
+        #expect(meeting.joinURLs.first?.host == "zoom.us")
     }
 }

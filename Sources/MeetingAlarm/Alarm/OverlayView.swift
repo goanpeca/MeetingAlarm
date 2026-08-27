@@ -7,6 +7,7 @@ struct OverlayView: View {
     let profile: SensoryProfile
     let meeting: Meeting
     let snoozeIntervals: [TimeInterval]
+    let challenge: DismissChallenge
     let onSnooze: (TimeInterval) -> Void
     let onDismiss: () -> Void
 
@@ -64,20 +65,44 @@ struct OverlayView: View {
                 Text(label).font(.title3).opacity(0.85)
             }
             HStack(spacing: 14) {
-                if let url = meeting.joinURL {
-                    Button("Join meeting") { NSWorkspace.shared.open(url) }
+                ForEach(meeting.joinURLs, id: \.self) { url in
+                    Button(providerLabel(url)) { NSWorkspace.shared.open(url) }
                 }
-                ForEach(snoozeIntervals, id: \.self) { interval in
+                ForEach(availableSnoozes(now: now), id: \.self) { interval in
                     Button("Snooze \(Int(interval / 60))m") { onSnooze(interval) }
                 }
-                Button("Dismiss", role: .cancel) { onDismiss() }
+                DismissChallengeView(challenge: challenge, onSolved: onDismiss)
             }
             .font(.title3)
             .buttonStyle(.borderedProminent)
-            Text("Press Esc to dismiss").font(.callout).opacity(0.7)
         }
         .foregroundStyle(.white)
         .padding(40)
+    }
+
+    /// Only snooze options whose target still lands before the meeting starts.
+    private func availableSnoozes(now: Date) -> [TimeInterval] {
+        snoozeIntervals.filter { now.addingTimeInterval($0) < meeting.start }
+    }
+
+    private func providerLabel(_ url: URL) -> String {
+        let host = url.host?.lowercased() ?? ""
+        if host.contains("zoom") {
+            return "Join Zoom"
+        }
+        if host.contains("meet.google") {
+            return "Join Meet"
+        }
+        if host.contains("teams") {
+            return "Join Teams"
+        }
+        if host.contains("webex") {
+            return "Join Webex"
+        }
+        if host.contains("whereby") {
+            return "Join Whereby"
+        }
+        return "Join meeting"
     }
 
     private func fraction(now: Date) -> Double {
