@@ -22,6 +22,9 @@ cp Resources/Info.plist "${APP}/Contents/Info.plist"
 if compgen -G "Resources/Sounds/*.m4a" > /dev/null; then
     cp Resources/Sounds/*.m4a "${APP}/Contents/Resources/"
 fi
+if [ -f Resources/AppIcon.icns ]; then
+    cp Resources/AppIcon.icns "${APP}/Contents/Resources/AppIcon.icns"
+fi
 
 IDENTITY="${CODESIGN_IDENTITY:-MeetingAlarm Dev}"
 # Auto-create the stable identity on first run so the Calendar grant persists.
