@@ -1,5 +1,10 @@
 # Meeting Alarm
 
+[![CI](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml/badge.svg)](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](docs/quality/quality.md)
+![Platform](https://img.shields.io/badge/macOS-14%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-6.3-orange)
+
 A macOS **menu-bar app** that makes meetings impossible to miss while you're at the
 computer. Arm an extra alarm on any upcoming meeting and, at the moment you choose,
 it throws a **full-screen overlay across every display** with an optional sound.
