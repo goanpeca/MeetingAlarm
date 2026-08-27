@@ -8,6 +8,7 @@ struct SettingsView: View {
 
     private let addableMinutes = [1, 2, 5, 10, 15, 30]
     @State private var launchAtLogin = false
+    @State private var colorPanel = ColorPanelController()
 
     var body: some View {
         Form {
@@ -54,7 +55,19 @@ struct SettingsView: View {
                 Picker("Effect", selection: bind(\.alarmEffect)) {
                     ForEach(Effect.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-                ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
+                LabeledContent("Alarm color") {
+                    Button { openColorPanel() } label: {
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(currentColor)
+                            .frame(width: 46, height: 22)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .strokeBorder(.secondary.opacity(0.4))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Alarm color")
+                }
                 Button("Use system accent color") { store.alarmColor = SystemAccent.rgba() }
                 Picker("Dismiss", selection: bind(\.dismissChallenge)) {
                     ForEach(DismissChallenge.allCases, id: \.self) { Text($0.displayName).tag($0) }
@@ -74,27 +87,30 @@ struct SettingsView: View {
         Binding(get: { store[keyPath: keyPath] }, set: { store[keyPath: keyPath] = $0 })
     }
 
-    private var colorBinding: Binding<Color> {
-        Binding(
-            get: {
-                Color(
-                    .sRGB,
-                    red: store.alarmColor.red,
-                    green: store.alarmColor.green,
-                    blue: store.alarmColor.blue,
-                    opacity: 1
-                )
-            },
-            set: { newColor in
-                let converted = NSColor(newColor).usingColorSpace(.sRGB) ?? .red
-                store.alarmColor = RGBAColor(
-                    red: Double(converted.redComponent),
-                    green: Double(converted.greenComponent),
-                    blue: Double(converted.blueComponent),
-                    alpha: 1
-                )
-            }
+    private var currentColor: Color {
+        Color(
+            .sRGB,
+            red: store.alarmColor.red,
+            green: store.alarmColor.green,
+            blue: store.alarmColor.blue,
+            opacity: 1
         )
+    }
+
+    private func openColorPanel() {
+        let current = NSColor(
+            srgbRed: store.alarmColor.red, green: store.alarmColor.green,
+            blue: store.alarmColor.blue, alpha: 1
+        )
+        colorPanel.show(current: current) { newColor in
+            let converted = newColor.usingColorSpace(.sRGB) ?? newColor
+            store.alarmColor = RGBAColor(
+                red: Double(converted.redComponent),
+                green: Double(converted.greenComponent),
+                blue: Double(converted.blueComponent),
+                alpha: 1
+            )
+        }
     }
 
     // MARK: Snooze editor
