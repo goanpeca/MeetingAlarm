@@ -127,7 +127,7 @@ struct OverlayView: View {
                 }
             }
             Button("Dismiss", role: .cancel) { request(onDismiss) }
-                .tint(.red)
+                .tint(.gray)
         }
         .font(.title3)
         .buttonStyle(.borderedProminent)

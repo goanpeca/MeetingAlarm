@@ -25,6 +25,9 @@ struct ChallengeGateView: View {
                 HStack(spacing: 8) {
                     TextField("", text: $input)
                         .textFieldStyle(.roundedBorder)
+                        // The gate forces white text; the input sits on a system (light-in-
+                        // light-mode) field, so its text must use the adaptive label color.
+                        .foregroundStyle(.primary)
                         .frame(width: 160)
                         .focused($fieldFocused)
                         .onSubmit(check)
