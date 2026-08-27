@@ -14,6 +14,12 @@ enum GoogleEventMapper {
         let location: String?
         let description: String?
         let conferenceData: ConferenceData?
+        let attendees: [Attendee]?
+    }
+
+    private struct Attendee: Decodable {
+        let email: String?
+        let displayName: String?
     }
 
     private struct When: Decodable {
@@ -52,7 +58,10 @@ enum GoogleEventMapper {
                 end: end,
                 sourceKind: .google,
                 accountLabel: accountLabel,
-                joinURLs: joinURLs(for: item)
+                joinURLs: joinURLs(for: item),
+                notes: item.description,
+                attendees: (item.attendees ?? [])
+                    .compactMap { $0.displayName ?? $0.email }
             )
         }
     }

@@ -22,7 +22,6 @@ struct RootView: View {
     enum Pane: String, CaseIterable, Identifiable {
         case meetings = "Meetings"
         case settings = "Settings"
-        case accounts = "Accounts"
         var id: String {
             rawValue
         }
@@ -42,8 +41,6 @@ struct RootView: View {
                 MenuContentView(coordinator: coordinator, store: coordinator.store)
             case .settings:
                 SettingsView(coordinator: coordinator, store: coordinator.store)
-            case .accounts:
-                AccountsView(coordinator: coordinator, accounts: coordinator.accounts)
             }
 
             Divider()

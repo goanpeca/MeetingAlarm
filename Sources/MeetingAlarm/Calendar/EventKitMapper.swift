@@ -15,6 +15,7 @@ enum EventKitMapper {
         let url: URL?
         let notes: String?
         let location: String?
+        let attendees: [String]
     }
 
     static func meeting(_ fields: Fields) -> Meeting? {
@@ -33,7 +34,9 @@ enum EventKitMapper {
             end: fields.end,
             sourceKind: .eventKit,
             accountLabel: fields.calendarTitle,
-            joinURLs: joinURLs
+            joinURLs: joinURLs,
+            notes: fields.notes,
+            attendees: fields.attendees
         )
     }
 }

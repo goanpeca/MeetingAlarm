@@ -28,6 +28,10 @@ protocol CalendarSource {
     /// The calendars this source can show, for the filter UI.
     func availableCalendars() async -> [CalendarInfo]
 
+    /// Ask the backend to pull the latest from the server (e.g. EventKit refetches Google),
+    /// so newly-created events show without waiting for the OS's periodic sync.
+    func refresh() async
+
     /// Fetch timed meetings that overlap `interval`, sorted by start time.
     func fetchUpcoming(within interval: DateInterval) async throws -> [Meeting]
 }

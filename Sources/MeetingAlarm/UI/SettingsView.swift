@@ -1,8 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Preferences: which calendar source is active, the default preset new arms use, and
-/// the snooze intervals offered on the overlay.
+/// Preferences, laid out as a grouped `Form` so labels and controls align cleanly.
 struct SettingsView: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
@@ -10,78 +9,54 @@ struct SettingsView: View {
     private let addableMinutes = [1, 2, 5, 10, 15, 30]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            picker("Calendar source", selection: Binding(
-                get: { store.activeSource },
-                set: { store.activeSource = $0 }
-            )) {
-                Text("macOS Calendar").tag(SourceKind.eventKit)
-                Text("Google (direct)").tag(SourceKind.google)
+        Form {
+            Picker("Default alarm", selection: bind(\.defaultPresetName)) {
+                ForEach(SensoryProfile.presets, id: \.name) { Text($0.name).tag($0.name) }
             }
-
-            picker("Default alarm", selection: Binding(
-                get: { store.defaultPresetName },
-                set: { store.defaultPresetName = $0 }
-            )) {
-                ForEach(SensoryProfile.presets, id: \.name) { preset in
-                    Text(preset.name).tag(preset.name)
-                }
-            }
-
-            picker("Start alarm", selection: Binding(
-                get: { store.leadTimeMinutes },
-                set: { store.leadTimeMinutes = $0 }
-            )) {
+            Picker("Start alarm", selection: bind(\.leadTimeMinutes)) {
                 ForEach([0, 1, 2, 3, 5, 10, 15, 30], id: \.self) { minutes in
                     Text(minutes == 0 ? "At meeting time" : "\(minutes) min before").tag(minutes)
                 }
             }
 
-            Toggle("Play sound", isOn: Binding(
-                get: { store.soundEnabled },
-                set: { store.soundEnabled = $0 }
-            ))
-
-            picker("Sound", selection: Binding(
-                get: { store.alarmSound },
-                set: { store.alarmSound = $0 }
-            )) {
-                ForEach(SoundChoice.allCases, id: \.self) { sound in
-                    Text(sound.displayName).tag(sound)
+            Section("Sound") {
+                Toggle("Play sound", isOn: bind(\.soundEnabled))
+                Picker("Sound", selection: bind(\.alarmSound)) {
+                    ForEach(SoundChoice.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-            }
-            .disabled(!store.soundEnabled)
-
-            Button("Play sample") { coordinator.previewSound() }
                 .disabled(!store.soundEnabled)
+                Toggle("Repeat until dismissed", isOn: bind(\.soundRepeat))
+                    .disabled(!store.soundEnabled)
+                Picker("Gap between repeats", selection: bind(\.soundGapSeconds)) {
+                    ForEach([0.0, 1, 2, 3, 5], id: \.self) { seconds in
+                        Text(seconds == 0 ? "None" : "\(Int(seconds))s").tag(seconds)
+                    }
+                }
+                .disabled(!store.soundEnabled || !store.soundRepeat)
+                Button("Play sample") { coordinator.previewSound() }
+                    .disabled(!store.soundEnabled)
+            }
 
-            picker("Effect", selection: Binding(
-                get: { store.alarmEffect },
-                set: { store.alarmEffect = $0 }
-            )) {
-                ForEach(Effect.allCases, id: \.self) { effect in
-                    Text(effect.displayName).tag(effect)
+            Section("Appearance") {
+                Picker("Effect", selection: bind(\.alarmEffect)) {
+                    ForEach(Effect.allCases, id: \.self) { Text($0.displayName).tag($0) }
+                }
+                ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
+                Picker("Dismiss", selection: bind(\.dismissChallenge)) {
+                    ForEach(DismissChallenge.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
             }
 
-            ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
-
-            picker("Dismiss", selection: Binding(
-                get: { store.dismissChallenge },
-                set: { store.dismissChallenge = $0 }
-            )) {
-                ForEach(DismissChallenge.allCases, id: \.self) { challenge in
-                    Text(challenge.displayName).tag(challenge)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Snooze options").font(.headline)
-                snoozeChips
-            }
+            Section("Snooze options") { snoozeRows }
         }
-        .padding(12)
-        .frame(width: 340, alignment: .leading)
+        .formStyle(.grouped)
+        .frame(width: 340, height: 470)
+    }
+
+    // MARK: Bindings
+
+    private func bind<Value>(_ keyPath: ReferenceWritableKeyPath<Store, Value>) -> Binding<Value> {
+        Binding(get: { store[keyPath: keyPath] }, set: { store[keyPath: keyPath] = $0 })
     }
 
     private var colorBinding: Binding<Color> {
@@ -107,44 +82,23 @@ struct SettingsView: View {
         )
     }
 
-    private func picker(
-        _ title: String,
-        selection: Binding<some Hashable>,
-        @ViewBuilder content: () -> some View
-    ) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Picker(title, selection: selection, content: content)
-                .labelsHidden()
-                .frame(maxWidth: 180)
-        }
-    }
+    // MARK: Snooze editor
 
-    private var snoozeChips: some View {
+    @ViewBuilder
+    private var snoozeRows: some View {
         let minutes = store.snoozeIntervals.map { Int($0 / 60) }.sorted()
-        return VStack(alignment: .leading, spacing: 6) {
-            if minutes.isEmpty {
-                Text("None").foregroundStyle(.secondary).font(.caption)
-            }
-            ForEach(minutes, id: \.self) { minute in
-                HStack {
-                    Text("\(minute) min")
-                    Spacer()
-                    Button {
-                        remove(minutes: minute)
-                    } label: {
-                        Image(systemName: "minus.circle")
-                    }
+        ForEach(minutes, id: \.self) { minute in
+            HStack {
+                Text("\(minute) min")
+                Spacer()
+                Button { remove(minutes: minute) } label: { Image(systemName: "minus.circle") }
                     .buttonStyle(.borderless)
-                }
             }
-            Menu("Add snooze option") {
-                ForEach(addableMinutes, id: \.self) { minute in
-                    Button("\(minute) min") { add(minutes: minute) }
-                }
+        }
+        Menu("Add snooze option") {
+            ForEach(addableMinutes, id: \.self) { minute in
+                Button("\(minute) min") { add(minutes: minute) }
             }
-            .frame(maxWidth: 180)
         }
     }
 
@@ -155,7 +109,6 @@ struct SettingsView: View {
     }
 
     private func remove(minutes: Int) {
-        let seconds = TimeInterval(minutes * 60)
-        store.snoozeIntervals.removeAll { $0 == seconds }
+        store.snoozeIntervals.removeAll { $0 == TimeInterval(minutes * 60) }
     }
 }

@@ -65,6 +65,9 @@ struct MenuContentView: View {
                 .buttonStyle(.plain)
             Spacer()
             Button { coordinator.nextDay() } label: { Image(systemName: "chevron.right") }
+            Button { Task { await coordinator.refresh() } } label: {
+                Image(systemName: "arrow.clockwise")
+            }
             calendarFilter
         }
         .buttonStyle(.borderless)

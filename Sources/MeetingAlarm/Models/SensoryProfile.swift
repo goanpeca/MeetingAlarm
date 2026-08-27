@@ -106,11 +106,6 @@ struct SensoryProfile: Codable, Sendable, Equatable {
     /// Whether to render a live countdown to the meeting start.
     var showCountdown: Bool
 
-    /// Whether the alarm sound should repeat until dismissed (for the intense effects).
-    var soundRepeats: Bool {
-        effect == .flash || effect == .solid
-    }
-
     /// High-intensity, can't-miss interrupt fired AT meeting time.
     static let blast = SensoryProfile(
         name: "Blast",

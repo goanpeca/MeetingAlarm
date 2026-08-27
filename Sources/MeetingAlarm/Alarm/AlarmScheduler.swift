@@ -9,6 +9,9 @@ final class AlarmScheduler {
     var snoozeIntervals: [TimeInterval] = [60, 300, 600]
     /// Optional puzzle gating the Dismiss button.
     var dismissChallenge: DismissChallenge = .none
+    /// Whether the alarm sound repeats until dismissed, and the gap between repeats.
+    var soundRepeat = true
+    var soundGap: TimeInterval = 2
     /// Resolve a preset name to a profile.
     var resolveProfile: (String) -> SensoryProfile = { _ in .blast }
     /// Called when the user snoozes a fired alarm.
@@ -59,7 +62,9 @@ final class AlarmScheduler {
 
     private func fire(id: String, config: ArmedConfig, profile: SensoryProfile) {
         log.info("firing alarm for \(id, privacy: .public)")
-        sound.play(profile.sound, volume: profile.volume, repeats: profile.soundRepeats)
+        sound.play(
+            profile.sound, volume: profile.volume, repeatForever: soundRepeat, gap: soundGap
+        )
         overlay.present(
             profile: profile,
             meeting: config.meeting,

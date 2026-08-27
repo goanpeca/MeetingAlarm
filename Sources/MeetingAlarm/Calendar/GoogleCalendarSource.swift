@@ -23,6 +23,8 @@ final class GoogleCalendarSource: CalendarSource {
         }
     }
 
+    func refresh() async {} // the Google source always fetches live
+
     func availableCalendars() async -> [CalendarInfo] {
         accounts.accounts.map {
             CalendarInfo(id: $0.id, title: $0.email, sourceTitle: "Google")

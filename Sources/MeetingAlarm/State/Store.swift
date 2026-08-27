@@ -11,7 +11,7 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
-    @Published var defaultPresetName: String = "Blast" {
+    @Published var defaultPresetName: String = "Gentle Ramp" {
         didSet { save() }
     }
 
@@ -31,6 +31,14 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    @Published var soundRepeat: Bool = true {
+        didSet { save() }
+    }
+
+    @Published var soundGapSeconds: Double = 2 {
+        didSet { save() }
+    }
+
     @Published var alarmColor: RGBAColor = .red {
         didSet { save() }
     }
@@ -43,7 +51,7 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
-    @Published var dismissChallenge: DismissChallenge = .none {
+    @Published var dismissChallenge: DismissChallenge = .math {
         didSet { save() }
     }
 
@@ -66,6 +74,8 @@ final class Store: ObservableObject {
         // Optional so state saved before these settings existed still decodes.
         var soundEnabled: Bool?
         var alarmSound: SoundChoice?
+        var soundRepeat: Bool?
+        var soundGapSeconds: Double?
         var alarmColor: RGBAColor?
         var alarmEffect: Effect?
         var leadTimeMinutes: Int?
@@ -116,10 +126,12 @@ final class Store: ObservableObject {
         snoozeIntervals = snap.snoozeIntervals
         soundEnabled = snap.soundEnabled ?? true
         alarmSound = snap.alarmSound ?? .jewelDrop
+        soundRepeat = snap.soundRepeat ?? true
+        soundGapSeconds = snap.soundGapSeconds ?? 2
         alarmColor = snap.alarmColor ?? .red
         alarmEffect = snap.alarmEffect ?? .solid
         leadTimeMinutes = snap.leadTimeMinutes ?? 5
-        dismissChallenge = snap.dismissChallenge ?? .none
+        dismissChallenge = snap.dismissChallenge ?? .math
         hiddenCalendarIds = Set(snap.hiddenCalendarIds ?? [])
         loading = false
     }
@@ -135,6 +147,8 @@ final class Store: ObservableObject {
             snoozeIntervals: snoozeIntervals,
             soundEnabled: soundEnabled,
             alarmSound: alarmSound,
+            soundRepeat: soundRepeat,
+            soundGapSeconds: soundGapSeconds,
             alarmColor: alarmColor,
             alarmEffect: alarmEffect,
             leadTimeMinutes: leadTimeMinutes,

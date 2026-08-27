@@ -11,6 +11,9 @@ struct OverlayView: View {
     let onSnooze: (TimeInterval) -> Void
     let onDismiss: () -> Void
 
+    /// Action queued behind the puzzle gate (Join or Dismiss); non-nil shows the gate.
+    @State private var pending: (() -> Void)?
+
     private var color: Color {
         Color(
             .sRGB,
@@ -64,32 +67,77 @@ struct OverlayView: View {
             if let label = meeting.accountLabel {
                 Text(label).font(.title3).opacity(0.85)
             }
-            VStack(spacing: 14) {
-                if !meeting.joinURLs.isEmpty {
-                    HStack(spacing: 14) {
-                        ForEach(meeting.joinURLs, id: \.self) { url in
-                            Button(providerLabel(url)) { join(url) }
-                                .tint(brandColor(url))
-                        }
-                    }
+            if let notes = meeting.notes, !notes.isEmpty {
+                ScrollView {
+                    NotesView(html: notes)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 720)
                 }
-                let snoozes = availableSnoozes(now: now)
-                if !snoozes.isEmpty {
-                    HStack(spacing: 14) {
-                        ForEach(snoozes, id: \.self) { interval in
-                            Button("Snooze \(Int(interval / 60))m") { onSnooze(interval) }
-                                .tint(.gray)
-                        }
-                    }
-                }
-                DismissChallengeView(challenge: challenge, onSolved: onDismiss)
-                    .tint(.red)
+                .frame(maxHeight: 150)
+                .opacity(0.9)
             }
-            .font(.title3)
-            .buttonStyle(.borderedProminent)
+            if !meeting.attendees.isEmpty {
+                Label(attendeeSummary, systemImage: "person.2.fill")
+                    .font(.title3)
+                    .opacity(0.9)
+            }
+            if pending != nil {
+                ChallengeGateView(
+                    challenge: challenge,
+                    onSolved: {
+                        let action = pending
+                        pending = nil
+                        action?()
+                    },
+                    onCancel: { pending = nil }
+                )
+            } else {
+                actionRows(now: now)
+            }
         }
         .foregroundStyle(.white)
         .padding(40)
+    }
+
+    private func actionRows(now: Date) -> some View {
+        VStack(spacing: 14) {
+            if !meeting.joinURLs.isEmpty {
+                HStack(spacing: 14) {
+                    ForEach(meeting.joinURLs, id: \.self) { url in
+                        Button(MeetingProvider.label(for: url)) { request { join(url) } }
+                            .tint(MeetingProvider.color(for: url))
+                    }
+                }
+            }
+            let snoozes = availableSnoozes(now: now)
+            if !snoozes.isEmpty {
+                HStack(spacing: 14) {
+                    ForEach(snoozes, id: \.self) { interval in
+                        Button("Snooze \(Int(interval / 60))m") { onSnooze(interval) }
+                            .tint(.gray)
+                    }
+                }
+            }
+            Button("Dismiss", role: .cancel) { request(onDismiss) }
+                .tint(.red)
+        }
+        .font(.title3)
+        .buttonStyle(.borderedProminent)
+    }
+
+    /// Run `action` now if there's no puzzle, else queue it behind the gate.
+    private func request(_ action: @escaping () -> Void) {
+        if challenge == .none {
+            action()
+        } else {
+            pending = action
+        }
+    }
+
+    private var attendeeSummary: String {
+        let names = meeting.attendees
+        guard names.count > 4 else { return names.joined(separator: ", ") }
+        return names.prefix(3).joined(separator: ", ") + " +\(names.count - 3)"
     }
 
     /// Joining = the alarm did its job. Tear down the modal overlay first (which restores
@@ -103,55 +151,6 @@ struct OverlayView: View {
     /// Only snooze options whose target still lands before the meeting starts.
     private func availableSnoozes(now: Date) -> [TimeInterval] {
         snoozeIntervals.filter { now.addingTimeInterval($0) < meeting.start }
-    }
-
-    private func providerLabel(_ url: URL) -> String {
-        let host = url.host?.lowercased() ?? ""
-        if host.contains("zoom") {
-            return "Join Zoom"
-        }
-        if host.contains("meet.google") {
-            return "Join Meet"
-        }
-        if host.contains("teams") {
-            return "Join Teams"
-        }
-        if host.contains("webex") {
-            return "Join Webex"
-        }
-        if host.contains("whereby") {
-            return "Join Whereby"
-        }
-        return "Join meeting"
-    }
-
-    /// Brand accent for each provider's Join button.
-    private func brandColor(_ url: URL) -> Color {
-        let host = url.host?.lowercased() ?? ""
-        if host.contains("zoom") {
-            return Color(red: 0.18, green: 0.55, blue: 1.0)
-        } // Zoom blue
-        if host.contains("meet.google") {
-            return Color(
-                red: 0.0,
-                green: 0.51,
-                blue: 0.18
-            )
-        } // Meet green
-        if host.contains("teams") {
-            return Color(
-                red: 0.35,
-                green: 0.36,
-                blue: 0.66
-            )
-        } // Teams purple
-        if host.contains("webex") {
-            return Color(red: 0.0, green: 0.44, blue: 0.55)
-        } // Webex teal
-        if host.contains("whereby") {
-            return Color(red: 0.35, green: 0.34, blue: 0.84)
-        }
-        return .accentColor
     }
 
     private func fraction(now: Date) -> Double {

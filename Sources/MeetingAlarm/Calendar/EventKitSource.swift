@@ -40,6 +40,10 @@ final class EventKitSource: CalendarSource {
         }
     }
 
+    func refresh() async {
+        store.refreshSourcesIfNecessary()
+    }
+
     func availableCalendars() async -> [CalendarInfo] {
         store.calendars(for: .event)
             .map {
@@ -72,7 +76,8 @@ final class EventKitSource: CalendarSource {
                 occurrenceStart: event.startDate,
                 url: event.url,
                 notes: event.notes,
-                location: event.location
+                location: event.location,
+                attendees: (event.attendees ?? []).compactMap(\.name)
             ))
         }
         .sorted { $0.start < $1.start }

@@ -11,12 +11,13 @@ struct EventKitMapperTests {
         isAllDay: Bool = false,
         url: URL? = nil,
         notes: String? = nil,
-        location: String? = nil
+        location: String? = nil,
+        attendees: [String] = []
     ) -> EventKitMapper.Fields {
         EventKitMapper.Fields(
             identifier: "E1", title: title, start: start, end: start.addingTimeInterval(900),
             isAllDay: isAllDay, calendarTitle: "Work", occurrenceStart: start,
-            url: url, notes: notes, location: location
+            url: url, notes: notes, location: location, attendees: attendees
         )
     }
 

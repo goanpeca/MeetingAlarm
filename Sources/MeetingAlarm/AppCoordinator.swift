@@ -69,7 +69,10 @@ final class AppCoordinator: ObservableObject {
             self?.handleSnooze(id: id, interval: interval)
         }
         scheduler.onDismiss = { [weak self] id in
+            // Dismiss = this occurrence is handled: clear any snooze and disarm it so
+            // rescheduling can't immediately re-fire an overdue (within-lead-window) alarm.
             self?.store.clearSnooze(id)
+            self?.store.disarm(id)
             self?.reschedule()
         }
         scheduler.onWake = { [weak self] in
@@ -111,6 +114,12 @@ final class AppCoordinator: ObservableObject {
             errorMessage = error.localizedDescription
             log.error("sync failed: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    /// Force the calendar backend to refetch from the server, then re-sync.
+    func refresh() async {
+        await source.refresh()
+        await sync()
     }
 
     // MARK: Day navigation
@@ -190,7 +199,10 @@ final class AppCoordinator: ObservableObject {
             onSnooze: { [weak self] _ in self?.sound.stop() },
             onDismiss: { [weak self] in self?.sound.stop() }
         )
-        sound.play(profile.sound, volume: profile.volume, repeats: profile.soundRepeats)
+        sound.play(
+            profile.sound, volume: profile.volume,
+            repeatForever: store.soundRepeat, gap: store.soundGapSeconds
+        )
     }
 
     /// A preset with the user's global color/effect/sound choices applied.
@@ -205,7 +217,7 @@ final class AppCoordinator: ObservableObject {
 
     /// Play the currently selected sound once, for the Settings preview button.
     func previewSound() {
-        sound.play(store.alarmSound, volume: 0.8, repeats: false)
+        sound.play(store.alarmSound, volume: 0.8, repeatForever: false, gap: 0)
     }
 
     // MARK: Snooze
@@ -223,6 +235,8 @@ final class AppCoordinator: ObservableObject {
     private func reschedule() {
         scheduler.snoozeIntervals = store.snoozeIntervals
         scheduler.dismissChallenge = store.dismissChallenge
+        scheduler.soundRepeat = store.soundRepeat
+        scheduler.soundGap = store.soundGapSeconds
         scheduler.reschedule(armed: store.armed, snoozes: store.snoozes, now: Date())
     }
 }

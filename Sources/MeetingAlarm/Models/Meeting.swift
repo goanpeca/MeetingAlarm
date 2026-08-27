@@ -21,6 +21,10 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
     /// Video/join links found for the meeting — one Join button each (e.g. Meet AND Zoom
     /// if both were pasted on the event by mistake, so you can pick the right one).
     let joinURLs: [URL]
+    /// The event's notes/description, shown on the alarm splash.
+    let notes: String?
+    /// Invited people's display names, shown on the alarm splash.
+    let attendees: [String]
 
     init(
         id: String,
@@ -29,7 +33,9 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         end: Date,
         sourceKind: SourceKind,
         accountLabel: String?,
-        joinURLs: [URL] = []
+        joinURLs: [URL] = [],
+        notes: String? = nil,
+        attendees: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -38,5 +44,7 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
         self.sourceKind = sourceKind
         self.accountLabel = accountLabel
         self.joinURLs = joinURLs
+        self.notes = notes
+        self.attendees = attendees
     }
 }
