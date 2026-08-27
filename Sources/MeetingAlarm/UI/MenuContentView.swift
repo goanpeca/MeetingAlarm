@@ -9,6 +9,12 @@ struct MenuContentView: View {
     /// Scales the list's viewport with the user's Dynamic Type size so rows aren't clipped.
     @ScaledMetric private var rowHeight: CGFloat = 46
 
+    /// Show account labels only when the day spans more than one account; with a single
+    /// account the label is the same on every row and adds nothing.
+    private var showsAccountLabels: Bool {
+        Set(coordinator.meetings.compactMap(\.accountLabel)).count > 1
+    }
+
     private var dayLabel: String {
         if Calendar.current.isDateInToday(coordinator.selectedDay) {
             return "Today"
@@ -39,7 +45,12 @@ struct MenuContentView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(coordinator.meetings) { meeting in
-                            MeetingRow(coordinator: coordinator, store: store, meeting: meeting)
+                            MeetingRow(
+                                coordinator: coordinator,
+                                store: store,
+                                meeting: meeting,
+                                showAccount: showsAccountLabels
+                            )
                         }
                     }
                 }

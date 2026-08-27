@@ -6,6 +6,9 @@ struct MeetingRow: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
     let meeting: Meeting
+    /// Whether to show the per-row account label. Hidden when the whole day belongs to a
+    /// single account, where repeating the same email on every row is just noise.
+    var showAccount: Bool = true
 
     @State private var isExpanded = false
 
@@ -81,7 +84,7 @@ struct MeetingRow: View {
             if coordinator.isRecurring(meeting) {
                 Text("· Repeats")
             }
-            if let label = meeting.accountLabel {
+            if showAccount, let label = meeting.accountLabel {
                 Text("· \(label)").lineLimit(1)
             }
         }
