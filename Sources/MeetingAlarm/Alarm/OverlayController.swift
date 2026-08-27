@@ -42,14 +42,6 @@ final class OverlayController {
         }
 
         for (index, screen) in NSScreen.screens.enumerated() {
-            let view = OverlayView(
-                profile: profile,
-                meeting: meeting,
-                snoozeIntervals: snoozeIntervals,
-                challenge: challenge,
-                onSnooze: snooze,
-                onDismiss: dismissAll
-            )
             let window = OverlayWindow(
                 contentRect: screen.frame,
                 styleMask: .borderless,
@@ -57,12 +49,20 @@ final class OverlayController {
                 defer: false,
                 screen: screen
             )
-            window.isOpaque = false
-            window.backgroundColor = .clear
-            window.level = .screenSaver
-            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+            let view = OverlayView(
+                profile: profile,
+                meeting: meeting,
+                snoozeIntervals: snoozeIntervals,
+                challenge: challenge,
+                onSnooze: snooze,
+                onDismiss: dismissAll,
+                onFocus: { [weak window] in
+                    NSApp.activate(ignoringOtherApps: true)
+                    window?.makeKeyAndOrderFront(nil)
+                }
+            )
             window.contentView = NSHostingView(rootView: view)
-            window.setFrame(screen.frame, display: true)
+            styleOverlay(window, on: screen)
             if index == 0 {
                 window.makeKeyAndOrderFront(nil)
             } else {
@@ -85,6 +85,14 @@ final class OverlayController {
             }
             return event
         }
+    }
+
+    private func styleOverlay(_ window: NSWindow, on screen: NSScreen) {
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.level = .screenSaver
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        window.setFrame(screen.frame, display: true)
     }
 
     /// Ask VoiceOver to speak the alarm as it appears, so it isn't silent for blind users.

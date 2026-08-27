@@ -10,6 +10,9 @@ struct OverlayView: View {
     let challenge: DismissChallenge
     let onSnooze: (TimeInterval) -> Void
     let onDismiss: () -> Void
+    /// Re-assert app activation + key window when the puzzle gate opens, so its text field
+    /// can take focus without a Cmd-Tab (accessory apps don't reliably become key on a click).
+    let onFocus: () -> Void
 
     /// Action queued behind the puzzle gate (Join or Dismiss); non-nil shows the gate.
     @State private var pending: (() -> Void)?
@@ -137,6 +140,7 @@ struct OverlayView: View {
     /// `OverlayController` — so the user is never trapped.)
     private func request(_ action: @escaping () -> Void) {
         pending = action
+        onFocus()
     }
 
     private var attendeeSummary: String {

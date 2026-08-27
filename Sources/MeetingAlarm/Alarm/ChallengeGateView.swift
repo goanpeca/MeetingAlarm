@@ -30,7 +30,12 @@ struct ChallengeGateView: View {
                         .onSubmit(check)
                     Button("OK") { check() }.buttonStyle(.borderedProminent)
                 }
-                .onAppear { fieldFocused = true }
+                .onAppear {
+                    // Give the (accessory-app) overlay window a beat to become key, then take
+                    // focus and re-assert once, so typing works on the first click — no Cmd-Tab.
+                    fieldFocused = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { fieldFocused = true }
+                }
             }
             Button("Cancel", role: .cancel) { onCancel() }
         }
