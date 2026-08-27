@@ -11,7 +11,7 @@ final class AlarmScheduler {
     var dismissChallenge: DismissChallenge = .none
     /// Whether the alarm sound repeats until dismissed, and the gap between repeats.
     var soundRepeat = true
-    var soundGap: TimeInterval = 2
+    var soundGap: TimeInterval = 1
     /// Resolve a preset name to a profile.
     var resolveProfile: (String) -> SensoryProfile = { _ in .blast }
     /// Called when the user snoozes a fired alarm.

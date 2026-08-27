@@ -35,7 +35,7 @@ enum EventKitMapper {
             sourceKind: .eventKit,
             accountLabel: fields.calendarTitle,
             joinURLs: joinURLs,
-            notes: fields.notes,
+            notes: NotesSanitizer.clean(fields.notes),
             attendees: fields.attendees
         )
     }

@@ -9,6 +9,8 @@ final class AppCoordinator: ObservableObject {
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
     @Published private(set) var needsPermission = false
+    @Published private(set) var isRefreshing = false
+    @Published private(set) var isPreviewingSound = false
 
     let store: Store
     let accounts: GoogleAccountStore
@@ -22,7 +24,7 @@ final class AppCoordinator: ObservableObject {
     var source: CalendarSource
     private var syncTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
-    private let calendar = Calendar.current
+    let calendar = Calendar.current
     private let log = Log.make("coordinator")
 
     init(store: Store = Store(), accounts: GoogleAccountStore = GoogleAccountStore()) {
@@ -69,10 +71,10 @@ final class AppCoordinator: ObservableObject {
             self?.handleSnooze(id: id, interval: interval)
         }
         scheduler.onDismiss = { [weak self] id in
-            // Dismiss = this occurrence is handled: clear any snooze and disarm it so
-            // rescheduling can't immediately re-fire an overdue (within-lead-window) alarm.
+            // Dismiss = handled: clear any snooze and mark it handled so rescheduling can't
+            // re-fire the overdue alarm — while keeping it armed (checked) as history.
             self?.store.clearSnooze(id)
-            self?.store.disarm(id)
+            self?.store.markHandled(id)
             self?.reschedule()
         }
         scheduler.onWake = { [weak self] in
@@ -116,50 +118,14 @@ final class AppCoordinator: ObservableObject {
         }
     }
 
-    /// Force the calendar backend to refetch from the server, then re-sync.
+    /// Force the calendar backend to refetch from the server, then re-sync. Keeps the
+    /// spinner up briefly so the refresh reads as deliberate.
     func refresh() async {
+        isRefreshing = true
         await source.refresh()
         await sync()
-    }
-
-    // MARK: Day navigation
-
-    func today() {
-        setDay(Date())
-    }
-
-    func nextDay() {
-        setDay(DayWindow.shift(selectedDay, byDays: 1, calendar: calendar))
-    }
-
-    func prevDay() {
-        setDay(DayWindow.shift(selectedDay, byDays: -1, calendar: calendar))
-    }
-
-    private func setDay(_ day: Date) {
-        selectedDay = day
-        Task { await sync() }
-    }
-
-    // MARK: Arming
-
-    func isArmed(_ meeting: Meeting) -> Bool {
-        store.armed[meeting.id] != nil
-    }
-
-    func toggleArm(_ meeting: Meeting) {
-        if isArmed(meeting) {
-            store.disarm(meeting.id)
-        } else {
-            store.arm(meeting, preset: store.defaultPresetName)
-        }
-        reschedule()
-    }
-
-    func setPreset(_ meeting: Meeting, preset: String) {
-        guard isArmed(meeting) else { return }
-        store.arm(meeting, preset: preset)
-        reschedule()
+        try? await Task.sleep(for: .milliseconds(400))
+        isRefreshing = false
     }
 
     var hasMultipleAccounts: Bool {
@@ -212,12 +178,24 @@ final class AppCoordinator: ObservableObject {
         profile.effect = store.alarmEffect
         profile.leadTime = TimeInterval(store.leadTimeMinutes * 60)
         profile.sound = store.soundEnabled ? store.alarmSound : nil
+        profile.volume = store.alarmVolume
         return profile
     }
 
     /// Play the currently selected sound once, for the Settings preview button.
-    func previewSound() {
-        sound.play(store.alarmSound, volume: 0.8, repeatForever: false, gap: 0)
+    /// Toggle a preview that mirrors real playback (looping with the configured gap when
+    /// "repeat" is on), so the button flips to Stop while a looping preview plays.
+    func togglePreview() {
+        if isPreviewingSound {
+            sound.stop()
+            isPreviewingSound = false
+            return
+        }
+        sound.play(
+            store.alarmSound, volume: store.alarmVolume,
+            repeatForever: store.soundRepeat, gap: store.soundGapSeconds
+        )
+        isPreviewingSound = store.soundRepeat
     }
 
     // MARK: Snooze
@@ -232,11 +210,12 @@ final class AppCoordinator: ObservableObject {
         reschedule()
     }
 
-    private func reschedule() {
+    func reschedule() {
         scheduler.snoozeIntervals = store.snoozeIntervals
         scheduler.dismissChallenge = store.dismissChallenge
         scheduler.soundRepeat = store.soundRepeat
         scheduler.soundGap = store.soundGapSeconds
-        scheduler.reschedule(armed: store.armed, snoozes: store.snoozes, now: Date())
+        let active = store.armed.filter { !store.handled.contains($0.key) }
+        scheduler.reschedule(armed: active, snoozes: store.snoozes, now: Date())
     }
 }

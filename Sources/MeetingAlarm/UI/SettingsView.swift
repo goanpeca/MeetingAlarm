@@ -33,8 +33,14 @@ struct SettingsView: View {
                     }
                 }
                 .disabled(!store.soundEnabled || !store.soundRepeat)
-                Button("Play sample") { coordinator.previewSound() }
-                    .disabled(!store.soundEnabled)
+                LabeledContent("Volume") {
+                    Slider(value: bind(\.alarmVolume), in: 0 ... 1)
+                }
+                .disabled(!store.soundEnabled)
+                Button(coordinator.isPreviewingSound ? "Stop sound" : "Play sample") {
+                    coordinator.togglePreview()
+                }
+                .disabled(!store.soundEnabled)
             }
 
             Section("Appearance") {

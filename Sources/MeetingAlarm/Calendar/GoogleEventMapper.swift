@@ -59,7 +59,7 @@ enum GoogleEventMapper {
                 sourceKind: .google,
                 accountLabel: accountLabel,
                 joinURLs: joinURLs(for: item),
-                notes: item.description,
+                notes: NotesSanitizer.clean(item.description),
                 attendees: (item.attendees ?? [])
                     .compactMap { $0.displayName ?? $0.email }
             )

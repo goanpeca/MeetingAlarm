@@ -7,6 +7,9 @@ import Foundation
 final class Store: ObservableObject {
     @Published var armed: [String: ArmedConfig] = [:]
     @Published var snoozes: [String: Date] = [:]
+    /// Ids that already fired + were dismissed: kept armed (checked, as history) but not
+    /// re-scheduled, so an overdue alarm can't re-fire.
+    @Published var handled: Set<String> = []
     @Published var activeSource: SourceKind = .eventKit {
         didSet { save() }
     }
@@ -35,7 +38,11 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
-    @Published var soundGapSeconds: Double = 2 {
+    @Published var soundGapSeconds: Double = 1 {
+        didSet { save() }
+    }
+
+    @Published var alarmVolume: Double = 1 {
         didSet { save() }
     }
 
@@ -67,6 +74,7 @@ final class Store: ObservableObject {
     private struct Snapshot: Codable {
         var armed: [String: ArmedConfig]
         var snoozes: [String: Date]
+        var handled: [String]?
         var activeSource: SourceKind
         var defaultPresetName: String
         var syncInterval: TimeInterval
@@ -76,6 +84,7 @@ final class Store: ObservableObject {
         var alarmSound: SoundChoice?
         var soundRepeat: Bool?
         var soundGapSeconds: Double?
+        var alarmVolume: Double?
         var alarmColor: RGBAColor?
         var alarmEffect: Effect?
         var leadTimeMinutes: Int?
@@ -90,11 +99,19 @@ final class Store: ObservableObject {
 
     func arm(_ meeting: Meeting, preset: String) {
         armed[meeting.id] = ArmedConfig(presetName: preset, meeting: meeting)
+        handled.remove(meeting.id)
         save()
     }
 
     func disarm(_ id: String) {
         armed[id] = nil
+        handled.remove(id)
+        save()
+    }
+
+    /// Mark a fired+dismissed occurrence handled (stays armed for history, won't re-fire).
+    func markHandled(_ id: String) {
+        handled.insert(id)
         save()
     }
 
@@ -120,6 +137,7 @@ final class Store: ObservableObject {
         loading = true
         armed = snap.armed
         snoozes = snap.snoozes
+        handled = Set(snap.handled ?? [])
         activeSource = snap.activeSource
         defaultPresetName = snap.defaultPresetName
         syncInterval = snap.syncInterval
@@ -127,7 +145,8 @@ final class Store: ObservableObject {
         soundEnabled = snap.soundEnabled ?? true
         alarmSound = snap.alarmSound ?? .jewelDrop
         soundRepeat = snap.soundRepeat ?? true
-        soundGapSeconds = snap.soundGapSeconds ?? 2
+        soundGapSeconds = snap.soundGapSeconds ?? 1
+        alarmVolume = snap.alarmVolume ?? 1
         alarmColor = snap.alarmColor ?? .red
         alarmEffect = snap.alarmEffect ?? .solid
         leadTimeMinutes = snap.leadTimeMinutes ?? 5
@@ -141,6 +160,7 @@ final class Store: ObservableObject {
         let snap = Snapshot(
             armed: armed,
             snoozes: snoozes,
+            handled: Array(handled),
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
             syncInterval: syncInterval,
@@ -149,6 +169,7 @@ final class Store: ObservableObject {
             alarmSound: alarmSound,
             soundRepeat: soundRepeat,
             soundGapSeconds: soundGapSeconds,
+            alarmVolume: alarmVolume,
             alarmColor: alarmColor,
             alarmEffect: alarmEffect,
             leadTimeMinutes: leadTimeMinutes,
