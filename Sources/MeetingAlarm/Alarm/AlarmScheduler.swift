@@ -7,8 +7,8 @@ import Foundation
 final class AlarmScheduler {
     /// Snooze options offered on the overlay.
     var snoozeIntervals: [TimeInterval] = [60, 300, 600]
-    /// Optional puzzle gating the Dismiss button.
-    var dismissChallenge: DismissChallenge = .none
+    /// The puzzle gating the Dismiss button.
+    var dismissChallenge: DismissChallenge = .math
     /// Whether the alarm sound repeats until dismissed, and the gap between repeats.
     var soundRepeat = true
     var soundGap: TimeInterval = 1

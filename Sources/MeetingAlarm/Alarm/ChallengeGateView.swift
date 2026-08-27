@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The puzzle gate shown before a gated action (Dismiss or Join) completes. Only used for
-/// the non-`.none` challenges: `onSolved` runs the pending action, `onCancel` backs out.
+/// The puzzle gate shown before a gated action (Dismiss or Join) completes:
+/// `onSolved` runs the pending action, `onCancel` backs out.
 struct ChallengeGateView: View {
     let challenge: DismissChallenge
     let onSolved: () -> Void
@@ -15,11 +15,6 @@ struct ChallengeGateView: View {
     var body: some View {
         VStack(spacing: 12) {
             switch challenge {
-            case .hold:
-                Text("Hold the button to confirm").font(.title3)
-                Button("Hold…") {}
-                    .buttonStyle(.borderedProminent)
-                    .onLongPressGesture(minimumDuration: 3, perform: onSolved)
             case .math, .typePhrase:
                 Text(prompt).font(.title2).bold()
                 HStack(spacing: 8) {
@@ -36,8 +31,6 @@ struct ChallengeGateView: View {
                     Button("OK") { check() }.buttonStyle(.borderedProminent)
                 }
                 .onAppear { fieldFocused = true }
-            case .none:
-                EmptyView()
             }
             Button("Cancel", role: .cancel) { onCancel() }
         }
@@ -50,7 +43,6 @@ struct ChallengeGateView: View {
         switch challenge {
         case .math: "\(factorA) × \(factorB) = ?"
         case .typePhrase: "Type \(DismissChallenge.phrase) to confirm"
-        default: ""
         }
     }
 

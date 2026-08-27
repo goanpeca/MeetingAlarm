@@ -76,15 +76,14 @@ final class OverlayController {
         // Kiosk-style: cover everything and block escaping to other apps.
         NSApp.presentationOptions = [.hideDock, .hideMenuBar, .disableProcessSwitching]
 
-        // Esc is a safe exit only when dismissal isn't puzzle-gated.
-        if challenge == .none {
-            keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                if event.keyCode == 53 { // Esc
-                    dismissAll()
-                    return nil
-                }
-                return event
+        // Esc always dismisses — the guaranteed escape hatch, even when the Dismiss button
+        // is puzzle-gated, so the overlay can never trap the user.
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            if event.keyCode == 53 { // Esc
+                dismissAll()
+                return nil
             }
+            return event
         }
     }
 

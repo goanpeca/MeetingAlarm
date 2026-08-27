@@ -133,13 +133,10 @@ struct OverlayView: View {
         .buttonStyle(.borderedProminent)
     }
 
-    /// Run `action` now if there's no puzzle, else queue it behind the gate.
+    /// Queue `action` behind the puzzle gate. (Esc still dismisses immediately — see
+    /// `OverlayController` — so the user is never trapped.)
     private func request(_ action: @escaping () -> Void) {
-        if challenge == .none {
-            action()
-        } else {
-            pending = action
-        }
+        pending = action
     }
 
     private var attendeeSummary: String {
