@@ -96,6 +96,12 @@ struct OverlayView: View {
             }
         }
         .foregroundStyle(.white)
+        .frame(maxWidth: 760)
+        .padding(40)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.black.opacity(0.6))
+        )
         .padding(40)
     }
 
