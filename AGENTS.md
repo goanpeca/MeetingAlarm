@@ -27,6 +27,7 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 - **Known issues:** [`docs/technical-debt/README.md`](docs/technical-debt/README.md)
 - **Plans & progress:** [`docs/execution-plans/`](docs/execution-plans/)
 - **Human setup (Google, permissions):** [`README.md`](README.md)
+- **Contributing (hooks, the loop):** [`CONTRIBUTING.md`](CONTRIBUTING.md) · docs index: [`docs/README.md`](docs/README.md)
 
 ## Layers (imports point up only)
 
