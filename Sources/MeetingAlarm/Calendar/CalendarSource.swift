@@ -18,9 +18,15 @@ protocol CalendarSource {
     /// events), so the owner can re-fetch immediately instead of waiting for the next poll.
     var onChange: (() -> Void)? { get set }
 
+    /// Calendar ids the user has hidden; events from these are excluded from fetches.
+    var hiddenCalendarIds: Set<String> { get set }
+
     /// Request access (EventKit permission, or Google OAuth sign-in). Throws if
     /// access is denied or sign-in fails.
     func authorize() async throws
+
+    /// The calendars this source can show, for the filter UI.
+    func availableCalendars() async -> [CalendarInfo]
 
     /// Fetch timed meetings that overlap `interval`, sorted by start time.
     func fetchUpcoming(within interval: DateInterval) async throws -> [Meeting]

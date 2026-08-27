@@ -60,8 +60,40 @@ struct MenuContentView: View {
                 .buttonStyle(.plain)
             Spacer()
             Button { coordinator.nextDay() } label: { Image(systemName: "chevron.right") }
+            calendarFilter
         }
         .buttonStyle(.borderless)
+    }
+
+    /// A funnel menu to show/hide calendars, grouped by their source so you can see where
+    /// each one (e.g. a subscribed gym schedule) actually comes from.
+    private var calendarFilter: some View {
+        Menu {
+            if coordinator.availableCalendars.isEmpty {
+                Text("No calendars")
+            } else {
+                ForEach(groupedCalendars, id: \.source) { group in
+                    Section(group.source) {
+                        ForEach(group.calendars) { cal in
+                            Toggle(cal.title, isOn: Binding(
+                                get: { coordinator.isCalendarShown(cal.id) },
+                                set: { _ in coordinator.toggleCalendar(cal.id) }
+                            ))
+                        }
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+        .menuIndicator(.hidden)
+        .fixedSize()
+    }
+
+    private var groupedCalendars: [(source: String, calendars: [CalendarInfo])] {
+        Dictionary(grouping: coordinator.availableCalendars, by: \.sourceTitle)
+            .map { (source: $0.key, calendars: $0.value.sorted { $0.title < $1.title }) }
+            .sorted { $0.source < $1.source }
     }
 
     private func row(for meeting: Meeting) -> some View {
@@ -76,7 +108,7 @@ struct MenuContentView: View {
                 Text(meeting.title).font(.body)
                 HStack(spacing: 6) {
                     Text(Self.timeFormatter.string(from: meeting.start))
-                    if coordinator.hasMultipleAccounts, let label = meeting.accountLabel {
+                    if let label = meeting.accountLabel {
                         Text("· \(label)").foregroundStyle(.secondary)
                     }
                 }

@@ -47,6 +47,11 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    /// Calendar ids the user has hidden from the day list. Empty = show all.
+    @Published var hiddenCalendarIds: Set<String> = [] {
+        didSet { save() }
+    }
+
     private let defaults: UserDefaults
     private let key = "state.v1"
     private var loading = false
@@ -65,6 +70,7 @@ final class Store: ObservableObject {
         var alarmEffect: Effect?
         var leadTimeMinutes: Int?
         var dismissChallenge: DismissChallenge?
+        var hiddenCalendarIds: [String]?
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -114,6 +120,7 @@ final class Store: ObservableObject {
         alarmEffect = snap.alarmEffect ?? .solid
         leadTimeMinutes = snap.leadTimeMinutes ?? 5
         dismissChallenge = snap.dismissChallenge ?? .none
+        hiddenCalendarIds = Set(snap.hiddenCalendarIds ?? [])
         loading = false
     }
 
@@ -131,7 +138,8 @@ final class Store: ObservableObject {
             alarmColor: alarmColor,
             alarmEffect: alarmEffect,
             leadTimeMinutes: leadTimeMinutes,
-            dismissChallenge: dismissChallenge
+            dismissChallenge: dismissChallenge,
+            hiddenCalendarIds: Array(hiddenCalendarIds)
         )
         if let data = try? JSONEncoder().encode(snap) {
             defaults.set(data, forKey: key)

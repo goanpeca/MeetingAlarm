@@ -6,6 +6,7 @@ import Foundation
 final class GoogleCalendarSource: CalendarSource {
     let kind: SourceKind = .google
     var onChange: (() -> Void)?
+    var hiddenCalendarIds: Set<String> = []
 
     private let auth: GoogleAuth
     private let accounts: GoogleAccountStore
@@ -22,9 +23,15 @@ final class GoogleCalendarSource: CalendarSource {
         }
     }
 
+    func availableCalendars() async -> [CalendarInfo] {
+        accounts.accounts.map {
+            CalendarInfo(id: $0.id, title: $0.email, sourceTitle: "Google")
+        }
+    }
+
     func fetchUpcoming(within interval: DateInterval) async throws -> [Meeting] {
         var groups: [[Meeting]] = []
-        for account in accounts.accounts {
+        for account in accounts.accounts where !hiddenCalendarIds.contains(account.id) {
             do {
                 let token = try await auth.accessToken(for: account.id)
                 let data = try await fetchEvents(token: token, interval: interval)

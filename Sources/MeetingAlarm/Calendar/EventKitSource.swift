@@ -19,6 +19,7 @@ enum CalendarError: LocalizedError {
 final class EventKitSource: CalendarSource {
     let kind: SourceKind = .eventKit
     var onChange: (() -> Void)?
+    var hiddenCalendarIds: Set<String> = []
 
     private let store = EKEventStore()
 
@@ -39,11 +40,26 @@ final class EventKitSource: CalendarSource {
         }
     }
 
+    func availableCalendars() async -> [CalendarInfo] {
+        store.calendars(for: .event)
+            .map {
+                CalendarInfo(
+                    id: $0.calendarIdentifier,
+                    title: $0.title,
+                    sourceTitle: $0.source.title
+                )
+            }
+            .sorted { ($0.sourceTitle, $0.title) < ($1.sourceTitle, $1.title) }
+    }
+
     func fetchUpcoming(within interval: DateInterval) async throws -> [Meeting] {
+        let calendars = store.calendars(for: .event)
+            .filter { !hiddenCalendarIds.contains($0.calendarIdentifier) }
+        guard !calendars.isEmpty else { return [] }
         let predicate = store.predicateForEvents(
             withStart: interval.start,
             end: interval.end,
-            calendars: nil
+            calendars: calendars
         )
         return store.events(matching: predicate).compactMap { event in
             EventKitMapper.meeting(.init(

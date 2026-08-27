@@ -5,6 +5,7 @@ import Foundation
 @MainActor
 final class AppCoordinator: ObservableObject {
     @Published private(set) var meetings: [Meeting] = []
+    @Published private(set) var availableCalendars: [CalendarInfo] = []
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
     @Published private(set) var needsPermission = false
@@ -18,7 +19,7 @@ final class AppCoordinator: ObservableObject {
     private let overlay = OverlayController()
     private let sound = SoundPlayer()
     private let scheduler: AlarmScheduler
-    private var source: CalendarSource
+    var source: CalendarSource
     private var syncTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
     private let calendar = Calendar.current
@@ -43,6 +44,7 @@ final class AppCoordinator: ObservableObject {
         case .eventKit: source = EventKitSource()
         case .google: source = GoogleCalendarSource(auth: auth, accounts: accounts)
         }
+        source.hiddenCalendarIds = store.hiddenCalendarIds
         source.onChange = { [weak self] in
             Task { await self?.sync() }
         }
@@ -94,6 +96,7 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
+            availableCalendars = await source.availableCalendars()
             errorMessage = nil
             let count = meetings.count
             let kind = source.kind.rawValue
@@ -156,18 +159,6 @@ final class AppCoordinator: ObservableObject {
 
     // MARK: Google accounts
 
-    var googleClientId: String {
-        auth.clientId
-    }
-
-    var isGoogleConfigured: Bool {
-        auth.isConfigured
-    }
-
-    func setGoogleCredentials(clientId: String, clientSecret: String) {
-        auth.setCredentials(clientId: clientId, clientSecret: clientSecret)
-    }
-
     func addGoogleAccount() async {
         do {
             _ = try await auth.addAccount()
@@ -177,11 +168,6 @@ final class AppCoordinator: ObservableObject {
             errorMessage = error.localizedDescription
             log.error("add account failed: \(error.localizedDescription, privacy: .public)")
         }
-    }
-
-    func removeGoogleAccount(id: String) {
-        auth.removeAccount(id: id)
-        Task { await sync() }
     }
 
     // MARK: Test
