@@ -64,6 +64,7 @@ make test          # swift test
 make coverage      # tests + coverage gate (>= 70% on the pure core)
 make check-layers  # architectural import purity
 make check-docs    # module map (docs) stays in sync with Sources/
+make check-workflows # GitHub Actions workflow YAML is valid
 make lint          # swiftlint --strict
 make format        # swiftformat . (format-check = --lint)
 make scan          # all mechanical checks together (fast: no build/test)

@@ -27,6 +27,9 @@ jobs:
       - name: Module-map check (doc drift)
         run: ./scripts/check-docs.sh
 
+      - name: Workflow YAML check
+        run: ./scripts/check-workflows.sh
+
       - name: Install SwiftFormat & SwiftLint
         run: brew install swiftformat swiftlint
 
@@ -35,7 +38,7 @@ jobs:
           swiftformat --lint .
           swiftlint --strict
 
-      - name: File-size drift (golden rule: <= 250 lines)
+      - name: "File-size drift (golden rule: <= 250 lines)"
         run: |
           over=$(find Sources -name '*.swift' -exec awk 'END { if (NR > 250) print FILENAME ": " NR " lines" }' {} \;)
           if [ -n "$over" ]; then
