@@ -22,3 +22,6 @@ coverage.txt
 
 # Distribution
 dist/
+
+# Mutation testing (muter)
+muter_logs/

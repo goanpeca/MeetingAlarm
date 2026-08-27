@@ -1,4 +1,4 @@
-.PHONY: build run app test coverage lint format format-check check-layers check-docs scan ci hooks clean
+.PHONY: build run app test coverage lint format format-check check-layers check-docs scan ci hooks mutation clean
 
 APP = MeetingAlarm.app
 
@@ -60,6 +60,12 @@ ci:
 hooks:
 	git config core.hooksPath .githooks
 	@echo "Installed .githooks — pre-commit runs 'make scan', pre-push runs 'make ci'."
+
+## mutation: mutation-test with muter (slow, on demand — tests the tests, not in CI).
+## Install once: brew install muter-mutation-testing/formulae/muter
+mutation:
+	swift package clean
+	muter run --skip-update-check
 
 ## clean: remove build products
 clean:

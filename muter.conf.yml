@@ -1,0 +1,13 @@
+# Muter mutation-testing config. Run on demand with `make mutation` (slow).
+# `executable: env` sets a clean PATH before `swift test` because Muter strips PATH from
+# the test subprocess — SwiftPM's debug-entitlement step then can't find `codesign` — and
+# this avoids sourcing the user's shell profile. `make mutation` also cleans .build first,
+# since Muter copies the project and a stale module cache bakes in the old path (SwiftShims).
+arguments:
+- PATH=/usr/bin:/bin:/usr/sbin:/sbin
+- swift
+- test
+executable: /usr/bin/env
+exclude:
+- Package.swift
+excludeCalls: []

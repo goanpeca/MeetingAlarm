@@ -17,6 +17,9 @@ make hooks   # installs pre-commit (make scan) + pre-push (make ci)
 - `make ci` — the exact gate GitHub runs: build (`-warnings-as-errors`), tests + coverage,
   all scans. Runs on every **push**.
 - `make run` — build + launch the app.
+- `make mutation` — optional, on demand: [muter](https://github.com/muter-mutation-testing/muter)
+  mutation testing to check the tests actually catch regressions (slow; not in CI).
+  Install once: `brew install muter-mutation-testing/formulae/muter`.
 
 Never push red — the pre-push hook runs `make ci`, so fix it locally first. Bypass a hook
 only in a genuine emergency with `--no-verify`.
