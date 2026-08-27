@@ -63,4 +63,13 @@ struct SensoryProfileTests {
         let mid = profile.overlayOpacity(atFraction: 0.5, reduceMotion: true)
         #expect(abs(mid - profile.peakOpacity * 0.5) < 1e-9)
     }
+
+    @Test("Jewel Drop is bundled and default; system sounds map to names")
+    func soundChoiceMapping() {
+        #expect(SoundChoice.allCases.first == .jewelDrop)
+        #expect(SoundChoice.jewelDrop.resourceName == "jewel-drop")
+        #expect(SoundChoice.jewelDrop.systemSoundName == nil)
+        #expect(SoundChoice.chime.resourceName == nil)
+        #expect(SoundChoice.chime.systemSoundName == "Glass")
+    }
 }

@@ -213,10 +213,13 @@ final class AppCoordinator: ObservableObject {
         profile.color = store.alarmColor
         profile.effect = store.alarmEffect
         profile.leadTime = TimeInterval(store.leadTimeMinutes * 60)
-        if !store.soundEnabled {
-            profile.sound = nil
-        }
+        profile.sound = store.soundEnabled ? store.alarmSound : nil
         return profile
+    }
+
+    /// Play the currently selected sound once, for the Settings preview button.
+    func previewSound() {
+        sound.play(store.alarmSound, volume: 0.8, repeats: false)
     }
 
     // MARK: Snooze

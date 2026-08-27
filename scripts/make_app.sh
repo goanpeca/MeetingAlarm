@@ -18,6 +18,9 @@ rm -rf "${APP}"
 mkdir -p "${APP}/Contents/MacOS" "${APP}/Contents/Resources"
 cp "${BIN}" "${APP}/Contents/MacOS/MeetingAlarm"
 cp Resources/Info.plist "${APP}/Contents/Info.plist"
+if compgen -G "Resources/Sounds/*.m4a" > /dev/null; then
+    cp Resources/Sounds/*.m4a "${APP}/Contents/Resources/"
+fi
 
 IDENTITY="${CODESIGN_IDENTITY:-MeetingAlarm Dev}"
 if security find-identity -p codesigning 2>/dev/null | grep -q "$IDENTITY"; then

@@ -40,11 +40,40 @@ enum Effect: String, Codable, Sendable, CaseIterable {
     }
 }
 
-/// Optional alarm sound. `nil` on a profile means silent.
+/// Selectable alarm sound. `nil` on a profile means silent.
 enum SoundChoice: String, Codable, Sendable, CaseIterable {
+    case jewelDrop
     case chime
     case alarm
     case ping
+
+    var displayName: String {
+        switch self {
+        case .jewelDrop: "Jewel Drop (Mu Online)"
+        case .chime: "Chime"
+        case .alarm: "Alarm"
+        case .ping: "Ping"
+        }
+    }
+
+    /// Bundled audio resource name (without extension), or `nil` for a macOS system sound.
+    var resourceName: String? {
+        switch self {
+        case .jewelDrop: "jewel-drop"
+        default: nil
+        }
+    }
+
+    /// macOS system sound name for the non-bundled choices (kept as a plain string so the
+    /// Models layer stays free of AppKit).
+    var systemSoundName: String? {
+        switch self {
+        case .chime: "Glass"
+        case .alarm: "Sosumi"
+        case .ping: "Ping"
+        case .jewelDrop: nil
+        }
+    }
 }
 
 /// How the user clears the overlay. Note: **Esc always dismisses** regardless of

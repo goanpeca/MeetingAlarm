@@ -27,6 +27,10 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    @Published var alarmSound: SoundChoice = .jewelDrop {
+        didSet { save() }
+    }
+
     @Published var alarmColor: RGBAColor = .red {
         didSet { save() }
     }
@@ -56,6 +60,7 @@ final class Store: ObservableObject {
         var snoozeIntervals: [TimeInterval]
         // Optional so state saved before these settings existed still decodes.
         var soundEnabled: Bool?
+        var alarmSound: SoundChoice?
         var alarmColor: RGBAColor?
         var alarmEffect: Effect?
         var leadTimeMinutes: Int?
@@ -104,6 +109,7 @@ final class Store: ObservableObject {
         syncInterval = snap.syncInterval
         snoozeIntervals = snap.snoozeIntervals
         soundEnabled = snap.soundEnabled ?? true
+        alarmSound = snap.alarmSound ?? .jewelDrop
         alarmColor = snap.alarmColor ?? .red
         alarmEffect = snap.alarmEffect ?? .solid
         leadTimeMinutes = snap.leadTimeMinutes ?? 5
@@ -121,6 +127,7 @@ final class Store: ObservableObject {
             syncInterval: syncInterval,
             snoozeIntervals: snoozeIntervals,
             soundEnabled: soundEnabled,
+            alarmSound: alarmSound,
             alarmColor: alarmColor,
             alarmEffect: alarmEffect,
             leadTimeMinutes: leadTimeMinutes,

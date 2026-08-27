@@ -42,6 +42,19 @@ struct SettingsView: View {
                 set: { store.soundEnabled = $0 }
             ))
 
+            picker("Sound", selection: Binding(
+                get: { store.alarmSound },
+                set: { store.alarmSound = $0 }
+            )) {
+                ForEach(SoundChoice.allCases, id: \.self) { sound in
+                    Text(sound.displayName).tag(sound)
+                }
+            }
+            .disabled(!store.soundEnabled)
+
+            Button("Play sample") { coordinator.previewSound() }
+                .disabled(!store.soundEnabled)
+
             picker("Effect", selection: Binding(
                 get: { store.alarmEffect },
                 set: { store.alarmEffect = $0 }
