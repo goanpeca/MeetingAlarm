@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Fast drift gate before every commit: layers, module map, format, lint (no build/test).
+# Installed by `make hooks`. Bypass once with `git commit --no-verify`.
+exec make scan

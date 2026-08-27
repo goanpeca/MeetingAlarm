@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Full CI-parity gate before pushing: build (warnings-as-errors), tests + coverage, and all
+# mechanical scans — the same steps GitHub runs, so red never reaches CI. Installed by
+# `make hooks`. Bypass once with `git push --no-verify`.
+exec make ci

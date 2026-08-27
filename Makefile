@@ -1,4 +1,4 @@
-.PHONY: build run app test coverage lint format format-check check-layers check-docs scan clean
+.PHONY: build run app test coverage lint format format-check check-layers check-docs scan ci hooks clean
 
 APP = MeetingAlarm.app
 
@@ -45,6 +45,21 @@ check-docs:
 
 ## scan: all mechanical checks (the local "harness" drift scan)
 scan: check-layers check-docs format-check lint
+
+## ci: the exact gate GitHub runs — reproduce it locally before pushing
+ci:
+	swift build -Xswiftc -warnings-as-errors
+	swift test --enable-code-coverage
+	./scripts/coverage-gate.sh
+	./scripts/check-layers.sh
+	./scripts/check-docs.sh
+	swiftformat --lint .
+	swiftlint --strict
+
+## hooks: install git hooks (pre-commit = make scan, pre-push = make ci)
+hooks:
+	git config core.hooksPath .githooks
+	@echo "Installed .githooks — pre-commit runs 'make scan', pre-push runs 'make ci'."
 
 ## clean: remove build products
 clean:

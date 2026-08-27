@@ -65,10 +65,15 @@ make check-layers  # architectural import purity
 make check-docs    # module map (docs) stays in sync with Sources/
 make lint          # swiftlint --strict
 make format        # swiftformat . (format-check = --lint)
-make scan          # all mechanical checks together
+make scan          # all mechanical checks together (fast: no build/test)
+make ci            # the exact gate CI runs — reproduce locally before pushing
+make hooks         # install pre-commit (scan) + pre-push (ci) git hooks
 make app           # assemble + ad-hoc-sign MeetingAlarm.app
 make run           # build app bundle and open it
 ```
+
+Run `make hooks` once after cloning: commits are then gated by `make scan` and pushes by
+`make ci`, so drift and build/test breakage never reach CI.
 
 Tooling: Swift 6.3 / Xcode 26, macOS 14+. Install lint/format once with
 `brew install swiftformat swiftlint`.
