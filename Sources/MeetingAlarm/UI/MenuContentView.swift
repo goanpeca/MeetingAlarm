@@ -43,7 +43,7 @@ struct MenuContentView: View {
                         }
                     }
                 }
-                .frame(maxHeight: 320)
+                .frame(height: min(CGFloat(coordinator.meetings.count) * 46 + 8, 320))
             }
         }
         .padding(12)

@@ -8,7 +8,7 @@ struct SensoryProfileTests {
     func blast() {
         let profile = SensoryProfile.blast
         #expect(profile.leadTime == 0)
-        #expect(profile.escalation == .instant)
+        #expect(profile.effect == .flash)
         #expect(profile.peakOpacity > 0.7)
         #expect(profile.sound == .alarm)
     }
@@ -17,8 +17,7 @@ struct SensoryProfileTests {
     func gentleRamp() {
         let profile = SensoryProfile.gentleRamp
         #expect(profile.leadTime >= 60)
-        #expect(profile.escalation == .easeIn)
-        #expect(profile.pulse == false)
+        #expect(profile.effect == .ramp)
         #expect(profile.peakOpacity < SensoryProfile.blast.peakOpacity)
     }
 

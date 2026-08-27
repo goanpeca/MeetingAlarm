@@ -57,7 +57,7 @@ final class AlarmScheduler {
 
     private func fire(id: String, config: ArmedConfig, profile: SensoryProfile) {
         log.info("firing alarm for \(id, privacy: .public)")
-        sound.play(profile.sound, volume: profile.volume, repeats: profile.escalation == .instant)
+        sound.play(profile.sound, volume: profile.volume, repeats: profile.soundRepeats)
         overlay.present(
             profile: profile,
             meeting: config.meeting,

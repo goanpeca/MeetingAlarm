@@ -18,4 +18,24 @@ struct Meeting: Codable, Sendable, Equatable, Identifiable {
     let sourceKind: SourceKind
     /// Owning account/calendar label (e.g. an email), shown when >1 account is present.
     let accountLabel: String?
+    /// Video/join link for the meeting, if one was found — surfaced as a Join button.
+    let joinURL: URL?
+
+    init(
+        id: String,
+        title: String,
+        start: Date,
+        end: Date,
+        sourceKind: SourceKind,
+        accountLabel: String?,
+        joinURL: URL? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.start = start
+        self.end = end
+        self.sourceKind = sourceKind
+        self.accountLabel = accountLabel
+        self.joinURL = joinURL
+    }
 }

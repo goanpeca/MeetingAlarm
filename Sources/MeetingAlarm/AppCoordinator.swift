@@ -60,8 +60,8 @@ final class AppCoordinator: ObservableObject {
 
     private func configureScheduler() {
         scheduler.snoozeIntervals = store.snoozeIntervals
-        scheduler.resolveProfile = { name in
-            SensoryProfile.presets.first { $0.name == name } ?? .blast
+        scheduler.resolveProfile = { [weak self] name in
+            self?.effectiveProfile(named: name) ?? .blast
         }
         scheduler.onSnooze = { [weak self] id, interval in
             self?.handleSnooze(id: id, interval: interval)
@@ -95,6 +95,12 @@ final class AppCoordinator: ObservableObject {
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
             errorMessage = nil
+            let count = meetings.count
+            let kind = source.kind.rawValue
+            log
+                .notice(
+                    "sync ok: \(count, privacy: .public) events, source=\(kind, privacy: .public)"
+                )
         } catch {
             if case CalendarError.accessDenied = error {
                 needsPermission = true
@@ -185,15 +191,27 @@ final class AppCoordinator: ObservableObject {
             id: "test", title: "Test Alarm",
             start: Date().addingTimeInterval(2),
             end: Date().addingTimeInterval(3600),
-            sourceKind: .eventKit, accountLabel: nil
+            sourceKind: .eventKit, accountLabel: nil,
+            joinURL: URL(string: "https://meet.google.com/lookup/demo")
         )
-        let profile = SensoryProfile.presets.first { $0.name == store.defaultPresetName } ?? .blast
+        let profile = effectiveProfile(named: store.defaultPresetName)
         overlay.present(
             profile: profile, meeting: sample, snoozeIntervals: store.snoozeIntervals,
             onSnooze: { [weak self] _ in self?.sound.stop() },
             onDismiss: { [weak self] in self?.sound.stop() }
         )
-        sound.play(profile.sound, volume: profile.volume, repeats: profile.escalation == .instant)
+        sound.play(profile.sound, volume: profile.volume, repeats: profile.soundRepeats)
+    }
+
+    /// A preset with the user's global color/effect/sound choices applied.
+    private func effectiveProfile(named name: String) -> SensoryProfile {
+        var profile = SensoryProfile.presets.first { $0.name == name } ?? .blast
+        profile.color = store.alarmColor
+        profile.effect = store.alarmEffect
+        if !store.soundEnabled {
+            profile.sound = nil
+        }
+        return profile
     }
 
     // MARK: Snooze

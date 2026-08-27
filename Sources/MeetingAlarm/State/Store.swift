@@ -23,6 +23,18 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    @Published var soundEnabled: Bool = true {
+        didSet { save() }
+    }
+
+    @Published var alarmColor: RGBAColor = .red {
+        didSet { save() }
+    }
+
+    @Published var alarmEffect: Effect = .solid {
+        didSet { save() }
+    }
+
     private let defaults: UserDefaults
     private let key = "state.v1"
     private var loading = false
@@ -34,6 +46,10 @@ final class Store: ObservableObject {
         var defaultPresetName: String
         var syncInterval: TimeInterval
         var snoozeIntervals: [TimeInterval]
+        // Optional so state saved before these settings existed still decodes.
+        var soundEnabled: Bool?
+        var alarmColor: RGBAColor?
+        var alarmEffect: Effect?
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -77,6 +93,9 @@ final class Store: ObservableObject {
         defaultPresetName = snap.defaultPresetName
         syncInterval = snap.syncInterval
         snoozeIntervals = snap.snoozeIntervals
+        soundEnabled = snap.soundEnabled ?? true
+        alarmColor = snap.alarmColor ?? .red
+        alarmEffect = snap.alarmEffect ?? .solid
         loading = false
     }
 
@@ -88,7 +107,10 @@ final class Store: ObservableObject {
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
             syncInterval: syncInterval,
-            snoozeIntervals: snoozeIntervals
+            snoozeIntervals: snoozeIntervals,
+            soundEnabled: soundEnabled,
+            alarmColor: alarmColor,
+            alarmEffect: alarmEffect
         )
         if let data = try? JSONEncoder().encode(snap) {
             defaults.set(data, forKey: key)

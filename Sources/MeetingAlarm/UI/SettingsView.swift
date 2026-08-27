@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Preferences: which calendar source is active, the default preset new arms use, and
@@ -27,6 +28,22 @@ struct SettingsView: View {
                 }
             }
 
+            Toggle("Play sound", isOn: Binding(
+                get: { store.soundEnabled },
+                set: { store.soundEnabled = $0 }
+            ))
+
+            picker("Effect", selection: Binding(
+                get: { store.alarmEffect },
+                set: { store.alarmEffect = $0 }
+            )) {
+                ForEach(Effect.allCases, id: \.self) { effect in
+                    Text(effect.displayName).tag(effect)
+                }
+            }
+
+            ColorPicker("Alarm color", selection: colorBinding, supportsOpacity: false)
+
             VStack(alignment: .leading, spacing: 6) {
                 Text("Snooze options").font(.headline)
                 snoozeChips
@@ -34,6 +51,29 @@ struct SettingsView: View {
         }
         .padding(12)
         .frame(width: 340, alignment: .leading)
+    }
+
+    private var colorBinding: Binding<Color> {
+        Binding(
+            get: {
+                Color(
+                    .sRGB,
+                    red: store.alarmColor.red,
+                    green: store.alarmColor.green,
+                    blue: store.alarmColor.blue,
+                    opacity: 1
+                )
+            },
+            set: { newColor in
+                let converted = NSColor(newColor).usingColorSpace(.sRGB) ?? .red
+                store.alarmColor = RGBAColor(
+                    red: Double(converted.redComponent),
+                    green: Double(converted.greenComponent),
+                    blue: Double(converted.blueComponent),
+                    alpha: 1
+                )
+            }
+        )
     }
 
     private func picker(

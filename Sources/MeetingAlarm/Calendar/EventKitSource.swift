@@ -46,15 +46,18 @@ final class EventKitSource: CalendarSource {
             calendars: nil
         )
         return store.events(matching: predicate).compactMap { event in
-            EventKitMapper.meeting(
+            EventKitMapper.meeting(.init(
                 identifier: event.eventIdentifier ?? UUID().uuidString,
                 title: event.title,
                 start: event.startDate,
                 end: event.endDate,
                 isAllDay: event.isAllDay,
                 calendarTitle: event.calendar.title,
-                occurrenceStart: event.startDate
-            )
+                occurrenceStart: event.startDate,
+                url: event.url,
+                notes: event.notes,
+                location: event.location
+            ))
         }
         .sorted { $0.start < $1.start }
     }

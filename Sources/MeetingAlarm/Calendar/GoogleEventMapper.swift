@@ -10,11 +10,24 @@ enum GoogleEventMapper {
         let summary: String?
         let start: When
         let end: When
+        let hangoutLink: String?
+        let location: String?
+        let description: String?
+        let conferenceData: ConferenceData?
     }
 
     private struct When: Decodable {
         let dateTime: String?
         let date: String?
+    }
+
+    private struct ConferenceData: Decodable {
+        let entryPoints: [EntryPoint]?
+    }
+
+    private struct EntryPoint: Decodable {
+        let uri: String?
+        let entryPointType: String?
     }
 
     static func meetings(
@@ -38,8 +51,17 @@ enum GoogleEventMapper {
                 start: start,
                 end: end,
                 sourceKind: .google,
-                accountLabel: accountLabel
+                accountLabel: accountLabel,
+                joinURL: joinURL(for: item)
             )
         }
+    }
+
+    private static func joinURL(for item: Item) -> URL? {
+        let videoEntry = item.conferenceData?.entryPoints?
+            .first { $0.entryPointType == "video" }?.uri
+        let explicit = item.hangoutLink.flatMap(URL.init(string:))
+            ?? videoEntry.flatMap(URL.init(string:))
+        return MeetingLink.detect(explicit: explicit, texts: [item.location, item.description])
     }
 }
