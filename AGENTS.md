@@ -4,9 +4,9 @@
 > progressive disclosure: it points to the real source of truth in `docs/`. Keep
 > it short (~100 lines). When something here would go stale, link instead of copy.
 >
-> Shared entry point for both agents: **OpenAI Codex** reads this file natively;
-> **Claude Code** reads it via `CLAUDE.md`, which imports it. Edit this file — not
-> `CLAUDE.md` — so guidance never drifts between the two.
+> Canonical guide for every agent: **Codex** reads it natively; **Claude Code**
+> (`CLAUDE.md`) and **Gemini** (`GEMINI.md`) point here. Edit this file, not the stubs,
+> so guidance never drifts.
 
 ## What this is
 
@@ -65,6 +65,7 @@ make coverage      # tests + coverage gate (>= 85% on the pure core)
 make check-layers  # architectural import purity
 make check-docs    # module map (docs) stays in sync with Sources/
 make check-workflows # GitHub Actions workflow YAML is valid
+make check-links   # relative Markdown links resolve
 make lint          # swiftlint --strict
 make format        # swiftformat . (format-check = --lint)
 make scan          # all mechanical checks together (fast: no build/test)
@@ -92,15 +93,9 @@ Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-ver
 - **Every source file is in the [module map](docs/generated/repo-map.md)** — a new file
   needs a one-line row in the same change. (Enforced by `check-docs`.)
 
-## Conventions for changes
+## Conventions
 
-1. Read the design doc section you're touching; if code diverges, update the doc
-   or mark it `stale` in `docs/design-docs/index.md` in the same change.
-2. Add tests for pure logic; keep the coverage gate green.
-3. Run `make scan` before committing.
-4. Commits: **one line only, under 72 chars, Conventional-Commit prefix**
-   (`feat:`/`fix:`/`docs:`/`refactor:`/`test:`/`chore:`…), no body, no bullet list.
-5. **Never add AI attribution of any kind** to a commit or PR — no
-   `Co-Authored-By`, no `Signed-off-by`, no "Generated with Claude / Codex / …",
-   and never name Claude, Codex, Anthropic, OpenAI, or any AI tool anywhere in the
-   message. Check the message before finalizing so a trailer never slips back in.
+Full list: [`docs/design-docs/conventions.md`](docs/design-docs/conventions.md). In short: add
+tests for pure logic; run `make scan` before committing; commits are **one line, < 72 chars,
+Conventional-Commit prefix**, and **never carry AI attribution** of any kind; if code diverges
+from a `current` design doc, update it or mark it `stale` in the index.

@@ -5,7 +5,7 @@ verified**: `scripts/check-docs.sh` (run in `make scan` / `make ci` / CI) fails 
 file is missing here or listed here but deleted — so the map can't silently drift from the
 code. Add a row in the same change that adds a file.
 
-Layers point up only (see [`overview.md`](overview.md)); the folder is the layer.
+Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is the layer.
 
 ## Models — pure value types (no UI/IO)
 

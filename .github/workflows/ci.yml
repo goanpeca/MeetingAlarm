@@ -38,6 +38,9 @@ jobs:
       - name: Workflow YAML check
         run: ./scripts/check-workflows.sh
 
+      - name: Markdown link check
+        run: ./scripts/check-links.sh
+
       - name: Install SwiftFormat & SwiftLint
         run: brew install swiftformat swiftlint
 

@@ -1,4 +1,4 @@
-.PHONY: build run app test coverage lint format format-check check-layers check-docs check-workflows scan ci hooks mutation release clean
+.PHONY: build run app test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
 
 APP = MeetingAlarm.app
 
@@ -47,8 +47,12 @@ check-docs:
 check-workflows:
 	./scripts/check-workflows.sh
 
+## check-links: verify relative Markdown links resolve
+check-links:
+	./scripts/check-links.sh
+
 ## scan: all mechanical checks (the local "harness" drift scan)
-scan: check-layers check-docs check-workflows format-check lint
+scan: check-layers check-docs check-workflows check-links format-check lint
 
 ## ci: the exact gate GitHub runs — reproduce it locally before pushing
 ci:
@@ -58,6 +62,7 @@ ci:
 	./scripts/check-layers.sh
 	./scripts/check-docs.sh
 	./scripts/check-workflows.sh
+	./scripts/check-links.sh
 	swiftformat --lint .
 	swiftlint --strict
 
