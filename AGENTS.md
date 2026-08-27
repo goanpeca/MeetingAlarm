@@ -21,6 +21,7 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 - **Design (system of record):** [`docs/design-docs/2026-08-26-meeting-alarm-design.md`](docs/design-docs/2026-08-26-meeting-alarm-design.md)
   (catalog: [`docs/design-docs/INDEX.md`](docs/design-docs/INDEX.md))
 - **Architecture map & layers:** [`docs/architecture/overview.md`](docs/architecture/overview.md)
+- **Module map (every file, verified):** [`docs/architecture/modules.md`](docs/architecture/modules.md)
 - **Golden principles (mechanical rules):** [`docs/principles/golden-principles.md`](docs/principles/golden-principles.md)
 - **Quality grades & coverage bar:** [`docs/quality/quality.md`](docs/quality/quality.md)
 - **Known issues:** [`docs/technical-debt/README.md`](docs/technical-debt/README.md)
@@ -42,12 +43,16 @@ import UI/EventKit/Network frameworks). Details:
 
 ## Where code lives
 
-- `Sources/MeetingAlarm/Models/` — `Meeting`, `SensoryProfile` (+ presets)
+Every file is catalogued in the **[module map](docs/architecture/modules.md)**, kept in sync
+mechanically (see `check-docs`). By layer:
+
+- `Sources/MeetingAlarm/Models/` — pure value types (`Meeting`, `SensoryProfile`, …)
+- `Sources/MeetingAlarm/State/` — persistence (`Store`, `Keychain`)
 - `Sources/MeetingAlarm/Calendar/` — `CalendarSource` protocol, EventKit + Google impls
-- `Sources/MeetingAlarm/Alarm/` — scheduler, overlay, sound *(added during implementation)*
-- `Sources/MeetingAlarm/State/` — `Store`, `Keychain` *(added during implementation)*
-- `Sources/MeetingAlarm/UI/` — menu & settings *(added during implementation)*
-- `Sources/MeetingAlarm/App.swift` — `@main` menu-bar entry
+- `Sources/MeetingAlarm/Alarm/` — scheduler, overlay, sound
+- `Sources/MeetingAlarm/UI/` — menu popover, settings, summonable quick panel
+- `Sources/MeetingAlarm/App.swift` + `AppCoordinator*` — `@main` entry + coordination
+- `Sources/MeetingAlarm/{GlobalHotKey,LoginItem,Logging}.swift` — cross-cutting runtime
 - `Tests/MeetingAlarmTests/` — Swift Testing unit tests for the pure core
 
 ## Commands
@@ -57,6 +62,7 @@ make build         # swift build
 make test          # swift test
 make coverage      # tests + coverage gate (>= 70% on the pure core)
 make check-layers  # architectural import purity
+make check-docs    # module map (docs) stays in sync with Sources/
 make lint          # swiftlint --strict
 make format        # swiftformat . (format-check = --lint)
 make scan          # all mechanical checks together
@@ -74,6 +80,8 @@ Tooling: Swift 6.3 / Xcode 26, macOS 14+. Install lint/format once with
 - **No `print`** in `Sources/` — use `os.Logger`. (Enforced by SwiftLint.)
 - **Files ≤ ~250 lines**; split when they grow. (Enforced by SwiftLint.)
 - **Pure logic stays pure** so it's testable without a screen/network.
+- **Every source file is in the [module map](docs/architecture/modules.md)** — a new file
+  needs a one-line row in the same change. (Enforced by `check-docs`.)
 
 ## Conventions for changes
 

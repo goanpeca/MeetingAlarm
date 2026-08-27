@@ -26,6 +26,9 @@ jobs:
       - name: Layer check
         run: ./scripts/check-layers.sh
 
+      - name: Module-map check (doc drift)
+        run: ./scripts/check-docs.sh
+
       - name: Install SwiftFormat & SwiftLint
         run: brew install swiftformat swiftlint
 

@@ -2,6 +2,8 @@
 
 A top-level map of the domains and how they layer. The authoritative per-component
 contracts live in the [design doc](../design-docs/2026-08-26-meeting-alarm-design.md) §5.
+For the exhaustive, mechanically-verified list of every file see the
+[module map](modules.md).
 
 ## Domains
 
@@ -11,7 +13,12 @@ contracts live in the [design doc](../design-docs/2026-08-26-meeting-alarm-desig
 | State | Persistence of settings/secrets | `Store` (UserDefaults), `Keychain` |
 | Calendar (Services) | Fetch meetings from a backend | `CalendarSource`, `EventKitSource`, `GoogleCalendarSource`, `GoogleAuth` |
 | Alarm (Services) | Fire alarms, draw overlay, play sound | `AlarmScheduler`, `OverlayController`, `SoundPlayer` |
-| Runtime/UI | App lifecycle + menu/settings | `MeetingAlarmApp`, `MenuContentView`, `SettingsView` |
+| Runtime/UI | App lifecycle + menu/settings | `MeetingAlarmApp`, `AppCoordinator`, `MenuContentView`, `SettingsView`, `QuickPanel` |
+
+Newer subsystems slot into these same layers: **recurring-series arming**
+(`SeriesMaterializer` in Models; materialization in `AppCoordinator+Scheduling`), the
+global-hot-key **quick panel** (`GlobalHotKey`, `QuickPanel`), and **launch-at-login**
+(`LoginItem`) — all Runtime/UI or below, none reaching down into the pure core.
 
 ## Layering (imports point up only)
 

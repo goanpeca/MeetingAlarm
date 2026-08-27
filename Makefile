@@ -1,4 +1,4 @@
-.PHONY: build run app test coverage lint format format-check check-layers scan clean
+.PHONY: build run app test coverage lint format format-check check-layers check-docs scan clean
 
 APP = MeetingAlarm.app
 
@@ -39,8 +39,12 @@ format-check:
 check-layers:
 	./scripts/check-layers.sh
 
+## check-docs: enforce the module map (docs/architecture/modules.md) stays in sync
+check-docs:
+	./scripts/check-docs.sh
+
 ## scan: all mechanical checks (the local "harness" drift scan)
-scan: check-layers format-check lint
+scan: check-layers check-docs format-check lint
 
 ## clean: remove build products
 clean:
