@@ -1,4 +1,4 @@
-.PHONY: build run app test coverage lint format format-check check-layers check-docs check-workflows scan ci hooks mutation clean
+.PHONY: build run app test coverage lint format format-check check-layers check-docs check-workflows scan ci hooks mutation release clean
 
 APP = MeetingAlarm.app
 
@@ -71,6 +71,10 @@ hooks:
 mutation:
 	swift package clean
 	muter run --skip-update-check
+
+## release: prepare a release (gate + roll CHANGELOG + bump version). Usage: make release VERSION=X.Y.Z
+release:
+	./scripts/release.sh $(VERSION)
 
 ## clean: remove build products
 clean:

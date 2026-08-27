@@ -71,6 +71,7 @@ make scan          # all mechanical checks together (fast: no build/test)
 make ci            # the exact gate CI runs — reproduce locally before pushing
 make hooks         # install pre-commit (scan) + pre-push (ci) git hooks
 make mutation      # muter mutation testing (slow, on demand; tests the tests)
+make release VERSION=X.Y.Z  # prepare a release: gate + roll CHANGELOG + bump version
 make app           # assemble + ad-hoc-sign MeetingAlarm.app
 make run           # build app bundle and open it
 ```
