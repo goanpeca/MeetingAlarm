@@ -64,7 +64,9 @@ struct MenuContentView: View {
                 ScopePromptView(coordinator: coordinator, prompt: prompt)
             }
         }
-        .task { await coordinator.sync() }
+        // Snap to today whenever the popover opens (handles the app running across midnight or
+        // a day left selected); today() resets the day and re-syncs.
+        .task { coordinator.today() }
     }
 
     private var navigator: some View {
