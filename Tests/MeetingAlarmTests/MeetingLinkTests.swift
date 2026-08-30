@@ -37,4 +37,20 @@ struct MeetingLinkTests {
     func noLink() {
         #expect(MeetingLink.detectAll(explicit: nil, texts: ["just a note", nil]).isEmpty)
     }
+
+    @Test("A Zoom description with agenda + chat links yields a single join button")
+    func zoomDedupesToJoin() {
+        let notes = """
+        Join Zoom Meeting:
+        https://backblaze.zoom.us/j/95995257951?pwd=abc.1&jst=2
+        Meeting agenda:
+        https://docs.zoom.us/agenda/doc/11b3?from=gsuite
+        Chat with Everyone:
+        https://backblaze.zoom.us/launch/jc/95995257951
+        """
+        let urls = MeetingLink.detectAll(explicit: nil, texts: [notes])
+        #expect(urls.count == 1)
+        #expect(urls.first?.host == "backblaze.zoom.us")
+        #expect(urls.first?.path.hasPrefix("/j/") == true)
+    }
 }
