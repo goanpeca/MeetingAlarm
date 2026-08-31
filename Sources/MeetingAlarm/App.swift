@@ -58,6 +58,8 @@ struct RootView: View {
         .frame(width: 360)
         // Escape cancels an open recurring prompt, otherwise closes the popover.
         .onExitCommand { handleEscape() }
+        // Always open on the Meetings pane, not wherever it was last left.
+        .onAppear { pane = .meetings }
     }
 
     private func handleEscape() {
