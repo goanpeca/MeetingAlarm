@@ -38,6 +38,16 @@ struct MeetingLinkTests {
         #expect(MeetingLink.detectAll(explicit: nil, texts: ["just a note", nil]).isEmpty)
     }
 
+    @Test("Drops a non-http(s) explicit URL from untrusted calendar data")
+    func dropsNonWebExplicit() {
+        #expect(MeetingLink.detectAll(
+            explicit: URL(string: "file:///etc/passwd"), texts: [nil, "no links"]
+        ).isEmpty)
+        #expect(MeetingLink.detectAll(
+            explicit: URL(string: "javascript:alert(1)"), texts: ["just a note"]
+        ).isEmpty)
+    }
+
     @Test("A Zoom description with agenda + chat links yields a single join button")
     func zoomDedupesToJoin() {
         let notes = """

@@ -12,7 +12,9 @@ enum MeetingLink {
     /// (so Meet *and* Zoom both surface), or a single fallback URL if none are preferred.
     static func detectAll(explicit: URL?, texts: [String?]) -> [URL] {
         var candidates: [URL] = []
-        if let explicit {
+        // Calendar data is untrusted: an event's own `url` field could carry a `file:`,
+        // `javascript:`, or arbitrary app-scheme URL. Only surface http(s) as an openable link.
+        if let explicit, isWebURL(explicit) {
             candidates.append(explicit)
         }
         for text in texts.compactMap(\.self) {
@@ -36,7 +38,13 @@ enum MeetingLink {
         let range = NSRange(text.startIndex..., in: text)
         return detector.matches(in: text, range: range)
             .compactMap(\.url)
-            .filter { $0.scheme == "http" || $0.scheme == "https" }
+            .filter(isWebURL)
+    }
+
+    /// Whether a URL is a plain web link safe to open. Guards against non-http(s) schemes
+    /// (`file:`, `javascript:`, custom app schemes) arriving from untrusted calendar data.
+    static func isWebURL(_ url: URL) -> Bool {
+        url.scheme == "http" || url.scheme == "https"
     }
 
     private static func isPreferred(_ url: URL) -> Bool {

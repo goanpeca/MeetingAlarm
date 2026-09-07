@@ -36,7 +36,7 @@ struct MeetingDetailView: View {
         HStack(spacing: 8) {
             ForEach(meeting.joinURLs, id: \.self) { url in
                 Button {
-                    NSWorkspace.shared.open(url)
+                    openLink(url)
                 } label: {
                     Label(MeetingProvider.label(for: url), systemImage: "video.fill")
                         .font(.caption.weight(.semibold))
@@ -48,6 +48,13 @@ struct MeetingDetailView: View {
             }
         }
         .padding(.bottom, 2)
+    }
+
+    /// Open a detected link, re-checking the scheme at the sink — `joinURLs` is already web-only,
+    /// but never hand a non-http(s) URL from calendar data to `NSWorkspace`.
+    private func openLink(_ url: URL) {
+        guard MeetingLink.isWebURL(url) else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private func loadDescription() {

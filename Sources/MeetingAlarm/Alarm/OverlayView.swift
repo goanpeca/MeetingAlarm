@@ -154,6 +154,7 @@ struct OverlayView: View {
     /// front cleanly instead of fighting the kiosk-mode overlay.
     private func join(_ url: URL) {
         onDismiss()
+        guard MeetingLink.isWebURL(url) else { return }
         NSWorkspace.shared.open(url)
     }
 
