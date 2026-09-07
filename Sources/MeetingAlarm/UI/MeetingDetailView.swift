@@ -1,7 +1,8 @@
+import AppKit
 import SwiftUI
 
-/// The expandable detail under a meeting row: who's invited and the full description.
-/// Uses system (secondary) colors so it follows the light/dark theme.
+/// The expandable detail under a meeting row: the join link(s) first, then who's invited and
+/// the full description. Uses system (secondary) colors so it follows the light/dark theme.
 struct MeetingDetailView: View {
     let meeting: Meeting
 
@@ -9,6 +10,9 @@ struct MeetingDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            if !meeting.joinURLs.isEmpty {
+                joinButtons
+            }
             if !meeting.attendees.isEmpty {
                 Label(meeting.attendees.joined(separator: ", "), systemImage: "person.2")
                     .fixedSize(horizontal: false, vertical: true)
@@ -25,6 +29,25 @@ struct MeetingDetailView: View {
         .font(.caption)
         .foregroundStyle(.secondary)
         .task { loadDescription() }
+    }
+
+    /// One brand-tinted button per detected provider that opens the link in the browser/app.
+    private var joinButtons: some View {
+        HStack(spacing: 8) {
+            ForEach(meeting.joinURLs, id: \.self) { url in
+                Button {
+                    NSWorkspace.shared.open(url)
+                } label: {
+                    Label(MeetingProvider.label(for: url), systemImage: "video.fill")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .tint(MeetingProvider.color(for: url))
+                .accessibilityHint("Opens the meeting link")
+            }
+        }
+        .padding(.bottom, 2)
     }
 
     private func loadDescription() {

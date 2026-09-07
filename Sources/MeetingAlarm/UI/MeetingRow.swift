@@ -21,7 +21,7 @@ struct MeetingRow: View {
     }()
 
     private var hasDetail: Bool {
-        !meeting.attendees.isEmpty || !(meeting.notes ?? "").isEmpty
+        !meeting.joinURLs.isEmpty || !meeting.attendees.isEmpty || !(meeting.notes ?? "").isEmpty
     }
 
     var body: some View {
