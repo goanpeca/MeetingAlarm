@@ -48,6 +48,9 @@ struct MeetingRow: View {
                 Text(meeting.title).font(.body)
                 subtitle
             }
+            // Let the whole title/time block expand the row, not just the small chevron.
+            .contentShape(Rectangle())
+            .onTapGesture { toggleExpand() }
             Spacer()
             if coordinator.isArmed(meeting) {
                 HStack(spacing: 6) {
@@ -96,9 +99,7 @@ struct MeetingRow: View {
             .frame(width: 12)
             .padding(.top, 3)
         if hasDetail {
-            Button {
-                withAnimation(.easeInOut(duration: 0.15)) { isExpanded.toggle() }
-            } label: {
+            Button { toggleExpand() } label: {
                 chevron.rotationEffect(.degrees(isExpanded ? 90 : 0))
             }
             .buttonStyle(.plain)
@@ -107,6 +108,12 @@ struct MeetingRow: View {
         } else {
             chevron.opacity(0).accessibilityHidden(true)
         }
+    }
+
+    /// Expand/collapse the row's detail (no-op when there's nothing to show).
+    private func toggleExpand() {
+        guard hasDetail else { return }
+        withAnimation(.easeInOut(duration: 0.15)) { isExpanded.toggle() }
     }
 
     private var subtitle: some View {
