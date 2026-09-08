@@ -26,6 +26,8 @@ section in the same change that alters behavior.
 
 ### Changed
 
+- Alarms are now **on by default** for every future meeting. Unchecking a row saves an
+  opt-out; recurring meetings can be opted out once or for the entire series.
 - Default alarm color follows the OS accent color (System Settings → Appearance → Theme).
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 

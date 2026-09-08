@@ -5,6 +5,9 @@ import Foundation
 @MainActor
 final class AppCoordinator: ObservableObject {
     @Published private(set) var meetings: [Meeting] = []
+    /// A rolling calendar horizon used to schedule the default-on alarms, independent of the
+    /// day currently open in the popover.
+    private var schedulingMeetings: [Meeting] = []
     @Published private(set) var availableCalendars: [CalendarInfo] = []
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
@@ -24,10 +27,9 @@ final class AppCoordinator: ObservableObject {
     let calendar = Calendar.current
     private let log = Log.make("coordinator")
     private var quickPanel: QuickPanelController?
-    /// How far ahead a whole armed series is pre-scheduled, plus a throttle so the extra
-    /// horizon fetch doesn't run on every poll. Internal so `AppCoordinator+Scheduling` uses them.
-    let seriesHorizon: TimeInterval = 60 * 24 * 60 * 60
-    var lastSeriesMaterialize = Date.distantPast
+    /// How far ahead all future meetings are scheduled. This matches the old recurring-series
+    /// horizon while making default-on behavior reliable beyond the day currently displayed.
+    let schedulingHorizon: TimeInterval = 60 * 24 * 60 * 60
 
     init(store: Store = Store()) {
         self.store = store
@@ -99,8 +101,14 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
-            reconcileArmed()
-            await materializeSeries()
+            let horizon = DateInterval(
+                start: calendar.startOfDay(for: Date()),
+                end: Date().addingTimeInterval(schedulingHorizon)
+            )
+            schedulingMeetings = try await source.fetchUpcoming(within: horizon)
+            reconcileArmed(schedulingMeetings)
+            materializeSeries()
+            reschedule()
             availableCalendars = await source.availableCalendars()
             errorMessage = nil
             let count = meetings.count
@@ -215,7 +223,7 @@ final class AppCoordinator: ObservableObject {
         scheduler.dismissChallenge = store.dismissChallenge
         scheduler.soundRepeat = store.soundRepeat
         scheduler.soundGap = store.soundGapSeconds
-        let active = store.armed.filter { !store.handled.contains($0.key) }
+        let active = activeArmedConfigs().filter { !store.handled.contains($0.key) }
         scheduler.reschedule(armed: active, snoozes: store.snoozes, now: Date())
     }
 }

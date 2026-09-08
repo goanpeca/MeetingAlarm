@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// One meeting in the day list: an arm checkbox, the title, time + duration, a `>`
-/// disclosure that reveals attendees + full description, and (when armed) a preset picker.
+/// disclosure that reveals attendees + full description, and per-alarm controls when armed.
 struct MeetingRow: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store

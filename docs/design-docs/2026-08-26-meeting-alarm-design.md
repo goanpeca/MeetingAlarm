@@ -15,7 +15,8 @@
 ## 1. Purpose
 
 A menu-bar macOS app that makes it **impossible to miss a meeting while you're at the
-computer**. It reads your calendar, lets you **arm an extra alarm per meeting**, and at the
+computer**. It reads your calendar, **arms every future meeting by default**, and lets you opt
+out of the few that do not need an alarm. At the
 chosen moment throws a **full-screen colored overlay across every display** with an optional
 sound. The alert is driven by a configurable **sensory profile** with two presets — a
 high-intensity **Blast** and a predictable, sensory-safe **Gentle Ramp**.
@@ -30,9 +31,9 @@ sensitivities / gets stuck in hyperfocus)?" — see §9.
 - Read upcoming meetings from **both** the macOS Calendar (EventKit) **and** Google
   Calendar directly (OAuth), switchable behind one interface.
 - **Day-scoped checklist (MVP core):** see the events for a chosen day — **default
-  today** — with a **‹ prev / Today / next ›** navigator, and **check/uncheck** each event to
-  arm or disarm its reminder. Choosing which meetings get an alarm *is* the primary screen.
-- Per-meeting arming: each checked meeting gets an alarm, with a selectable preset.
+  today** — with a **‹ prev / Today / next ›** navigator. Every future event is checked by
+  default; unchecking it persistently opts it out of its reminder.
+- Per-meeting arming: every checked meeting gets an alarm, with a selectable preset.
 - A full-screen, multi-display overlay that is loud/red when you want it and calm/gradual
   when you want it.
 - Optional sound, fully user-controllable (off / volume / which sound).
@@ -129,15 +130,16 @@ be driven from a Claude Code `/loop` or scheduled agent.)
 
 ## 4. Data flow
 
-1. **App launch** → `Store` loads settings + armed set; `App` selects the active
-   `CalendarSource` (EventKit or Google) from settings.
+1. **App launch** → `Store` loads settings, explicit custom arms, and opt-out exclusions;
+   `App` selects the active `CalendarSource` (EventKit or Google) from settings.
 2. **Sync** → for the **selected day** (default today), the active source
    `fetchUpcoming(within: daysInterval)` returns that day's `[Meeting]`. `MenuContentView`
    lists them with a checkbox each; armed meetings are checked. A repeating sync (default
    every 5 min) refreshes; the day navigator changes the selected day and re-fetches.
-3. **Arming** → checking a meeting writes its key + chosen preset into `Store`; unchecking
-   removes it. Either way `AlarmScheduler` (re)computes. Arming spans days — a meeting armed
-   on a future day still fires even when the list is showing today.
+3. **Arming** → all future meetings are derived as armed unless their occurrence or whole
+   recurring series is in `Store`'s opt-out exclusions. Unchecking writes an exclusion;
+   re-checking removes it. `AlarmScheduler` recomputes over a rolling 60-day horizon, so
+   alarms span days even when the list is showing another date.
 4. **Scheduling** → for each armed meeting, `AlarmScheduler` computes `fireTime`
    (`start − leadTime` for Gentle Ramp, `start` for Blast) and arms a timer. On wake or
    re-sync it recomputes; a fire time already passed (but meeting not yet ended) fires

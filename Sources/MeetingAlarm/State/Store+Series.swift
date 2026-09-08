@@ -7,15 +7,26 @@ extension Store {
     func armSeries(_ seriesId: String, preset: String) {
         armedSeries[seriesId] = preset
         seriesExceptions[seriesId] = nil
+        excludedSeriesIds.remove(seriesId)
         save()
     }
 
-    /// Disarm a whole series and drop its materialized occurrences, skips, and overrides.
+    /// Opt out of a whole series and drop its materialized/explicit occurrences, skips, and
+    /// overrides.
     func disarmSeries(_ seriesId: String) {
+        excludedSeriesIds.insert(seriesId)
         armedSeries[seriesId] = nil
         seriesExceptions[seriesId] = nil
         seriesOverrides[seriesId] = nil
-        armed = armed.filter { !($0.value.fromSeries && $0.value.meeting.seriesId == seriesId) }
+        let occurrenceIds = armed.compactMap { id, config in
+            config.meeting.seriesId == seriesId ? id : nil
+        }
+        armed = armed.filter { $0.value.meeting.seriesId != seriesId }
+        for id in occurrenceIds {
+            snoozes[id] = nil
+            armOverrides[id] = nil
+            handled.remove(id)
+        }
         save()
     }
 
@@ -25,11 +36,11 @@ extension Store {
         save()
     }
 
-    /// Skip a single occurrence of an armed series ("this event only").
+    /// Skip a single occurrence of an armed series ("this event only"). This also serves
+    /// default-on arming, where no explicit series rule exists.
     func addSeriesException(seriesId: String, occurrenceId: String) {
         seriesExceptions[seriesId, default: []].insert(occurrenceId)
-        armed[occurrenceId] = nil
-        save()
+        exclude(occurrenceId)
     }
 
     /// Replace all series-materialized entries with a freshly computed set, leaving

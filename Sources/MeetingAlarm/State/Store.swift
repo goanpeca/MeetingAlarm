@@ -15,6 +15,12 @@ final class Store: ObservableObject {
     @Published var armedSeries: [String: String] = [:]
     /// Per-series occurrence ids the user chose to skip ("this event only").
     @Published var seriesExceptions: [String: Set<String>] = [:]
+    /// Future occurrences the user explicitly opted out of. Every other meeting is armed
+    /// automatically, so this is deliberately an exclusion list rather than an armed list.
+    @Published var excludedMeetingIds: Set<String> = []
+    /// Recurring series the user opted out of wholesale. A later explicit arm of one
+    /// occurrence still takes precedence, letting it be re-enabled on its own.
+    @Published var excludedSeriesIds: Set<String> = []
     /// Per-meeting alarm overrides (color/sound), keyed by occurrence id.
     @Published var armOverrides: [String: AlarmOverrides] = [:]
     /// Per-series alarm overrides (color/sound), keyed by series id. An occurrence's own
@@ -88,6 +94,8 @@ final class Store: ObservableObject {
         var handled: [String]?
         var armedSeries: [String: String]?
         var seriesExceptions: [String: [String]]?
+        var excludedMeetingIds: [String]?
+        var excludedSeriesIds: [String]?
         var armOverrides: [String: AlarmOverrides]?
         var seriesOverrides: [String: AlarmOverrides]?
         var activeSource: SourceKind
@@ -124,6 +132,26 @@ final class Store: ObservableObject {
         armed[id] = nil
         handled.remove(id)
         armOverrides[id] = nil
+        save()
+    }
+
+    /// Opt out of one occurrence. This is persisted so the next calendar refresh does not
+    /// silently re-arm an event the user deliberately unchecked.
+    func exclude(_ id: String) {
+        excludedMeetingIds.insert(id)
+        armed[id] = nil
+        handled.remove(id)
+        snoozes[id] = nil
+        armOverrides[id] = nil
+        save()
+    }
+
+    /// Re-enable one occurrence. Keeping an explicit snapshot lets it override a series-wide
+    /// exclusion while also preserving the chosen preset across a relaunch.
+    func include(_ meeting: Meeting, preset: String) {
+        excludedMeetingIds.remove(meeting.id)
+        armed[meeting.id] = ArmedConfig(presetName: preset, meeting: meeting)
+        handled.remove(meeting.id)
         save()
     }
 
@@ -173,6 +201,8 @@ final class Store: ObservableObject {
         handled = Set(snap.handled ?? [])
         armedSeries = snap.armedSeries ?? [:]
         seriesExceptions = (snap.seriesExceptions ?? [:]).mapValues(Set.init)
+        excludedMeetingIds = Set(snap.excludedMeetingIds ?? [])
+        excludedSeriesIds = Set(snap.excludedSeriesIds ?? [])
         armOverrides = snap.armOverrides ?? [:]
         seriesOverrides = snap.seriesOverrides ?? [:]
         activeSource = snap.activeSource
@@ -200,6 +230,8 @@ final class Store: ObservableObject {
             handled: Array(handled),
             armedSeries: armedSeries,
             seriesExceptions: seriesExceptions.mapValues(Array.init),
+            excludedMeetingIds: Array(excludedMeetingIds),
+            excludedSeriesIds: Array(excludedSeriesIds),
             armOverrides: armOverrides,
             seriesOverrides: seriesOverrides,
             activeSource: activeSource,

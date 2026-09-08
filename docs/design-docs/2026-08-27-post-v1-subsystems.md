@@ -5,18 +5,19 @@ Contracts and rationale; the exhaustive file list is the [module map](../generat
 
 ## 1. Recurring-series arming
 
-**Goal.** Arm a whole repeating meeting, not just one day, with a per-action "this event vs. the
-whole series" choice (mirroring macOS Calendar).
+**Goal.** Opt a whole repeating meeting out (or back in), not just one day, with a per-action
+"this event vs. the whole series" choice (mirroring macOS Calendar).
 
 **Design.**
 - `Meeting.seriesId` identifies a series across occurrences — EventKit: the shared event
   identifier (`hasRecurrenceRules`). `nil` = one-off.
-- Arming a series stores a rule (`Store.armedSeries: seriesId → preset`) plus per-occurrence
-  skips (`seriesExceptions`). We do **not** enumerate future occurrences (unbounded).
-- `SeriesMaterializer` (pure, tested) decides which occurrences to schedule; `AppCoordinator+`
-  `Scheduling.materializeSeries` fetches a **rolling 60-day horizon** each sync (throttled ≥120s)
-  and writes them into `Store.armed` with `fromSeries = true`, so the existing snapshot-based
-  scheduler fires them unchanged. See TD-7.
+- Meetings are armed by default. `Store.excludedSeriesIds` records whole-series opt-outs and
+  `excludedMeetingIds` records one-off opt-outs; an explicit arm can re-enable a single
+  occurrence in an otherwise excluded series. Legacy explicit series rules retain their
+  per-occurrence skips (`seriesExceptions`).
+- `SeriesMaterializer` (pure, tested) decides which legacy explicit-series occurrences to
+  schedule. The coordinator fetches a rolling **60-day horizon** on every sync, derives the
+  default-on alarms without persisting them, and retains only the user's explicit choices.
 - **Scope prompt is an in-popover overlay** (`ScopePromptView`), not a system
   `confirmationDialog` — the latter's buttons are unclickable inside a `MenuBarExtra(.window)`.
 

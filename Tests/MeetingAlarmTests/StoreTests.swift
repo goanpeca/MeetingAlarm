@@ -77,6 +77,8 @@ struct StoreTests {
         #expect(store.alarmSound == .jewelDrop)
         #expect(store.armedSeries.isEmpty)
         #expect(store.handled.isEmpty)
+        #expect(store.excludedMeetingIds.isEmpty)
+        #expect(store.excludedSeriesIds.isEmpty)
     }
 
     private func meeting(_ id: String, seriesId: String? = nil) -> Meeting {
@@ -97,6 +99,18 @@ struct StoreTests {
         let reloaded = Store(defaults: defaults)
         #expect(reloaded.armedSeries["S1"] == "Blast")
         #expect(reloaded.seriesExceptions["S1"]?.contains("occ-2") == true)
+    }
+
+    @Test("Excluded meetings and series persist so default alarms stay opted out")
+    func exclusionsPersist() {
+        let defaults = makeDefaults()
+        let store = Store(defaults: defaults)
+        store.exclude("one-off")
+        store.disarmSeries("S1")
+
+        let reloaded = Store(defaults: defaults)
+        #expect(reloaded.excludedMeetingIds.contains("one-off"))
+        #expect(reloaded.excludedSeriesIds.contains("S1"))
     }
 
     @Test("disarmSeries clears the rule, skips, overrides, and materialized occurrences")
