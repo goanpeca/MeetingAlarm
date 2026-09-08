@@ -7,7 +7,7 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var meetings: [Meeting] = []
     /// A rolling calendar horizon used to schedule the default-on alarms, independent of the
     /// day currently open in the popover.
-    private var schedulingMeetings: [Meeting] = []
+    var schedulingMeetings: [Meeting] = []
     @Published private(set) var availableCalendars: [CalendarInfo] = []
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
