@@ -13,6 +13,22 @@ struct RGBAColor: Codable, Sendable, Equatable {
     static let red = RGBAColor(red: 0.86, green: 0.15, blue: 0.15, alpha: 1)
     /// A calm teal for the sensory-safe `Gentle Ramp` preset.
     static let calmTeal = RGBAColor(red: 0.11, green: 0.44, blue: 0.52, alpha: 1)
+
+    /// A fixed spread of alarm-appropriate hues offered as tappable swatches when customizing
+    /// a meeting's color — an inline alternative to the system color panel, which steals focus
+    /// from the menu-bar window and can't be used from inside the popover.
+    static let palette: [RGBAColor] = [
+        red,
+        RGBAColor(red: 0.95, green: 0.45, blue: 0.10, alpha: 1), // orange
+        RGBAColor(red: 0.95, green: 0.77, blue: 0.06, alpha: 1), // amber
+        RGBAColor(red: 0.30, green: 0.69, blue: 0.31, alpha: 1), // green
+        calmTeal,
+        RGBAColor(red: 0.13, green: 0.51, blue: 0.96, alpha: 1), // blue
+        RGBAColor(red: 0.36, green: 0.34, blue: 0.83, alpha: 1), // indigo
+        RGBAColor(red: 0.61, green: 0.35, blue: 0.71, alpha: 1), // purple
+        RGBAColor(red: 0.91, green: 0.12, blue: 0.39, alpha: 1), // pink
+        RGBAColor(red: 0.47, green: 0.33, blue: 0.28, alpha: 1) // brown
+    ]
 }
 
 /// The visual effect the overlay uses. Animated effects (`pulse`, `flash`) fall back to

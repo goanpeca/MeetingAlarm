@@ -17,4 +17,12 @@ struct ModelsCodableTests {
         #expect(try JSONDecoder().decode(ArmedConfig.self, from: data) == config)
         #expect(config.meeting.id == "m1")
     }
+
+    @Test("The alarm color palette is non-empty and has no duplicate swatches")
+    func colorPalette() {
+        #expect(!RGBAColor.palette.isEmpty)
+        for color in RGBAColor.palette {
+            #expect(RGBAColor.palette.filter { $0 == color }.count == 1)
+        }
+    }
 }

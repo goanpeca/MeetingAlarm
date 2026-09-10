@@ -1,18 +1,20 @@
-import AppKit
 import SwiftUI
 
 /// Per-meeting alarm customization, shown in a popover from the row's gear button. Each
 /// control overrides a global setting; turning it off inherits the global value again. For a
 /// recurring event a scope picker asks whether the change applies to this event or the whole
-/// series (like macOS Calendar). For now only color and sound are overridable.
+/// series (like macOS Calendar). Color is chosen from an inline palette rather than the system
+/// color panel, which would steal focus and dismiss this menu-bar popover.
 struct MeetingOverridesView: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
     let meeting: Meeting
 
-    @State private var colorPanel = ColorPanelController()
     /// Which scope edits are written to. Only meaningful (and shown) for recurring events.
     @State private var scope: AppCoordinator.OverrideScope = .occurrence
+
+    /// The OS accent (so a meeting can match the system) followed by the fixed palette.
+    private let swatches: [RGBAColor] = [SystemAccent.rgba()] + RGBAColor.palette
 
     private var overrides: AlarmOverrides {
         coordinator.overrides(for: meeting, scope: scope)
@@ -38,12 +40,8 @@ struct MeetingOverridesView: View {
             }
 
             Toggle("Override color", isOn: colorEnabled)
-            if let color = overrides.color {
-                LabeledContent("Color") {
-                    Button { openColorPanel(current: color) } label: { swatch(color) }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Pick alarm color")
-                }
+            if overrides.color != nil {
+                palette
             }
 
             Toggle("Override sound", isOn: soundEnabled)
@@ -66,6 +64,39 @@ struct MeetingOverridesView: View {
         .frame(width: 300)
         // Default to editing the series when it already carries an override.
         .onAppear { scope = coordinator.hasSeriesOverride(meeting) ? .series : .occurrence }
+    }
+
+    // MARK: Color palette
+
+    /// Tappable swatches. Choosing one applies immediately at the selected scope — no system
+    /// color panel, so the popover (and its scope choice) stays put.
+    private var palette: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 30), spacing: 8)],
+            alignment: .leading, spacing: 8
+        ) {
+            ForEach(swatches.indices, id: \.self) { index in
+                swatchButton(swatches[index])
+            }
+        }
+    }
+
+    private func swatchButton(_ rgb: RGBAColor) -> some View {
+        let selected = overrides.color == rgb
+        return Button {
+            coordinator.setColorOverride(meeting, color: rgb, scope: scope)
+        } label: {
+            Circle()
+                .fill(color(rgb))
+                .frame(width: 26, height: 26)
+                .overlay(Circle().strokeBorder(
+                    selected ? Color.primary : Color.secondary.opacity(0.35),
+                    lineWidth: selected ? 3 : 1
+                ))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Alarm color")
+        .accessibilityAddTraits(selected ? [.isSelected] : [])
     }
 
     // MARK: Bindings
@@ -98,31 +129,7 @@ struct MeetingOverridesView: View {
         )
     }
 
-    // MARK: Helpers
-
-    private func swatch(_ color: RGBAColor) -> some View {
-        RoundedRectangle(cornerRadius: 5)
-            .fill(Color(.sRGB, red: color.red, green: color.green, blue: color.blue, opacity: 1))
-            .frame(width: 46, height: 22)
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.secondary.opacity(0.4)))
-    }
-
-    private func openColorPanel(current: RGBAColor) {
-        let ns = NSColor(
-            srgbRed: current.red, green: current.green, blue: current.blue, alpha: 1
-        )
-        colorPanel.show(current: ns) { newColor in
-            let converted = newColor.usingColorSpace(.sRGB) ?? newColor
-            coordinator.setColorOverride(
-                meeting,
-                color: RGBAColor(
-                    red: Double(converted.redComponent),
-                    green: Double(converted.greenComponent),
-                    blue: Double(converted.blueComponent),
-                    alpha: 1
-                ),
-                scope: scope
-            )
-        }
+    private func color(_ rgb: RGBAColor) -> Color {
+        Color(.sRGB, red: rgb.red, green: rgb.green, blue: rgb.blue, opacity: 1)
     }
 }
