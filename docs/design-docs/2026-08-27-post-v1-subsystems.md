@@ -16,15 +16,16 @@ Contracts and rationale; the exhaustive file list is the [module map](../generat
   picks the default for the rest — opt-in when off, opt-out when on. `Store.armedSeries`
   records whole-series arms; `excludedSeriesIds`/`excludedMeetingIds` record opt-outs;
   `seriesExceptions` records per-occurrence skips.
-- `SeriesMaterializer` (pure, tested) schedules explicit-series occurrences into `Store.armed`.
-  The coordinator fetches a rolling **60-day horizon** each sync; when auto-arm is on it also
-  derives the opt-out alarms without persisting them (only meetings not yet started), so saved
-  state keeps only the user's explicit choices.
+- No occurrences are enumerated or persisted. Each sync fetches a small **rolling 2-day
+  window** (`AppCoordinator.upcomingMeetings`); `activeArmedConfigs` schedules every meeting in
+  it that `DefaultArming` reports armed — including armed-series occurrences. As time advances,
+  new meetings roll into the window and arm automatically, so a series fires day-to-day without
+  any pre-scheduling or materialization.
 - **Scope prompt is an in-popover overlay** (`ScopePromptView`), not a system
   `confirmationDialog` — the latter's buttons are unclickable inside a `MenuBarExtra(.window)`.
 
-**Invariant.** `ArmedConfig` decodes snapshots written before `fromSeries` existed (custom
-`init(from:)`); a non-optional default would otherwise drop all saved state on upgrade.
+**Invariant.** Persisted state records only explicit choices (arms + opt-outs); `ArmedConfig`
+decodes older snapshots that still carry a `fromSeries` key by ignoring it.
 
 ## 2. Staying reachable — global hot key + quick panel
 

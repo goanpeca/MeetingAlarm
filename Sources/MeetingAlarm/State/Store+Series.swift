@@ -1,7 +1,7 @@
 import Foundation
 
-/// Recurring-series arming, split from `Store` to keep each file under the size limit.
-/// Individual occurrences are materialized from these rules by `AppCoordinator`.
+/// Recurring-series arming, split from `Store` to keep each file under the size limit. A series
+/// rule marks every occurrence armed; the scheduler applies it as meetings roll into its window.
 extension Store {
     /// Arm a whole recurring series with `preset`. Clears any prior per-occurrence skips.
     func armSeries(_ seriesId: String, preset: String) {
@@ -11,8 +11,7 @@ extension Store {
         save()
     }
 
-    /// Opt out of a whole series and drop its materialized/explicit occurrences, skips, and
-    /// overrides.
+    /// Opt out of a whole series and drop its explicit occurrence arms, skips, and overrides.
     func disarmSeries(_ seriesId: String) {
         excludedSeriesIds.insert(seriesId)
         armedSeries[seriesId] = nil
@@ -41,21 +40,5 @@ extension Store {
     func addSeriesException(seriesId: String, occurrenceId: String) {
         seriesExceptions[seriesId, default: []].insert(occurrenceId)
         exclude(occurrenceId)
-    }
-
-    /// Replace all series-materialized entries with a freshly computed set, leaving
-    /// explicitly-armed occurrences untouched. Returns true only when something changed
-    /// (so callers can skip a needless reschedule).
-    func setMaterializedSeries(_ entries: [SeriesMaterializer.Entry]) -> Bool {
-        var next = armed.filter { !$0.value.fromSeries }
-        for entry in entries {
-            next[entry.meeting.id] = ArmedConfig(
-                presetName: entry.preset, meeting: entry.meeting, fromSeries: true
-            )
-        }
-        guard next != armed else { return false }
-        armed = next
-        save()
-        return true
     }
 }

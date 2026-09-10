@@ -15,10 +15,10 @@ For the exhaustive, mechanically-verified list of every file see the
 | Alarm (Services) | Fire alarms, draw overlay, play sound | `AlarmScheduler`, `OverlayController`, `SoundPlayer` |
 | Runtime/UI | App lifecycle + menu/settings | `MeetingAlarmApp`, `AppCoordinator`, `MenuContentView`, `SettingsView`, `QuickPanel` |
 
-Newer subsystems slot into these same layers: **recurring-series arming**
-(`SeriesMaterializer` in Models; materialization in `AppCoordinator+Scheduling`), the
-global-hot-key **quick panel** (`GlobalHotKey`, `QuickPanel`), and **launch-at-login**
-(`LoginItem`) — all Runtime/UI or below, none reaching down into the pure core.
+Newer subsystems slot into these same layers: **arming policy** (`DefaultArming` in Models;
+scheduling in `AppCoordinator+Scheduling`), the global-hot-key **quick panel** (`GlobalHotKey`,
+`QuickPanel`), and **launch-at-login** (`LoginItem`) — all Runtime/UI or below, none reaching
+down into the pure core.
 
 ## Layering (imports point up only)
 

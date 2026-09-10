@@ -30,6 +30,9 @@ section in the same change that alters behavior.
 
 ### Changed
 
+- Scheduling now reads a small **rolling 2-day window** refetched each sync instead of
+  pre-arming a 60-day horizon, so meetings arm as they roll in — removing the series
+  materialization subsystem (`SeriesMaterializer`, `materializeSeries`, `fromSeries`).
 - Default alarm color follows the OS accent color (System Settings → Appearance → Theme).
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 

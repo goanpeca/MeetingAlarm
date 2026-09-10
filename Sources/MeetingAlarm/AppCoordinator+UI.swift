@@ -28,9 +28,7 @@ extension AppCoordinator {
         DefaultArming.isArmed(
             meeting: meeting,
             autoArm: store.autoArm,
-            // Only user-chosen occurrence arms count as explicit overrides — series-materialized
-            // entries (fromSeries) are derived and must not override a series opt-out.
-            explicitlyArmedIds: Set(store.armed.filter { !$0.value.fromSeries }.keys),
+            explicitlyArmedIds: Set(store.armed.keys),
             armedSeriesIds: Set(store.armedSeries.keys),
             excludedMeetingIds: store.excludedMeetingIds,
             excludedSeriesIds: store.excludedSeriesIds,
@@ -98,15 +96,14 @@ extension AppCoordinator {
         guard let seriesId = meeting.seriesId else { return }
         store.include(meeting, preset: store.defaultPresetName)
         store.armSeries(seriesId, preset: store.defaultPresetName)
-        Task { await refreshHorizon(force: true); materializeSeries(); reschedule() }
+        reschedule()
     }
 
-    /// Flip auto-arm and reflect it in the schedule immediately: enabling fetches the horizon
-    /// and arms the new derived alarms; disabling drops them so a timer can't fire after the
-    /// user turned the feature off. Without this, the change would wait for the next poll.
+    /// Flip auto-arm and reflect it in the schedule immediately (rather than waiting for the
+    /// next poll): reschedule now arms every in-window default-on meeting, or drops them.
     func setAutoArm(_ enabled: Bool) {
         store.autoArm = enabled
-        Task { await refreshHorizon(force: true); reschedule() }
+        reschedule()
     }
 
     /// "Skip just this one" occurrence of an armed series.
@@ -199,7 +196,7 @@ extension AppCoordinator {
     func setPreset(_ meeting: Meeting, preset: String) {
         if isArmedViaSeries(meeting), let seriesId = meeting.seriesId {
             store.armSeries(seriesId, preset: preset)
-            Task { await refreshHorizon(force: true); materializeSeries(); reschedule() }
+            reschedule()
         } else if store.armed[meeting.id] != nil {
             store.arm(meeting, preset: preset)
             reschedule()

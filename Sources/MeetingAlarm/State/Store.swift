@@ -10,8 +10,8 @@ final class Store: ObservableObject {
     /// Ids that already fired + were dismissed: kept armed (checked, as history) but not
     /// re-scheduled, so an overdue alarm can't re-fire.
     @Published var handled: Set<String> = []
-    /// Series ids the user armed wholesale → preset name. Individual occurrences are
-    /// materialized from these each sync (see `AppCoordinator.materializeSeries`).
+    /// Series ids the user armed wholesale → preset name. The scheduler treats every occurrence
+    /// of these series as armed as they roll into its window.
     @Published var armedSeries: [String: String] = [:]
     /// Per-series occurrence ids the user chose to skip ("this event only").
     @Published var seriesExceptions: [String: Set<String>] = [:]

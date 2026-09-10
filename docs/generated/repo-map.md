@@ -11,7 +11,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
-| `Sources/MeetingAlarm/Models/ArmedConfig.swift` | Per-meeting arming choice: preset + meeting snapshot, with a `fromSeries` flag for series-materialized entries. |
+| `Sources/MeetingAlarm/Models/ArmedConfig.swift` | An explicit per-meeting arm choice: preset + meeting snapshot. |
 | `Sources/MeetingAlarm/Models/CalendarInfo.swift` | A calendar's identity/title for the show/hide filter UI. |
 | `Sources/MeetingAlarm/Models/DayWindow.swift` | Day → `DateInterval` window and day shifting, timezone-correct. |
 | `Sources/MeetingAlarm/Models/DefaultArming.swift` | Pure arming policy for both modes: explicit arms/opt-outs win; `autoArm` sets the default (opt-in/opt-out). |
@@ -22,7 +22,6 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/Models/OccurrenceKey.swift` | Stable per-day key so armed state survives same-day time edits. |
 | `Sources/MeetingAlarm/Models/ScopePrompt.swift` | Pending "this event / whole series" question for a recurring action. |
 | `Sources/MeetingAlarm/Models/SensoryProfile.swift` | Alarm visual/sound profile + presets; `RGBAColor`, `Effect`. |
-| `Sources/MeetingAlarm/Models/SeriesMaterializer.swift` | Pure rule for which series occurrences to schedule. |
 
 ## State — persistence (imports Models only)
 

@@ -5,9 +5,10 @@ import Foundation
 @MainActor
 final class AppCoordinator: ObservableObject {
     @Published private(set) var meetings: [Meeting] = []
-    /// A rolling calendar horizon used to schedule the default-on alarms, independent of the
-    /// day currently open in the popover.
-    var schedulingMeetings: [Meeting] = []
+    /// A small rolling window of upcoming meetings used only to arm timers, independent of the
+    /// day shown in the popover. Refetched every sync, so as time advances new meetings roll in
+    /// and arm automatically — no need to pre-schedule weeks ahead.
+    var upcomingMeetings: [Meeting] = []
     @Published private(set) var availableCalendars: [CalendarInfo] = []
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
@@ -27,13 +28,10 @@ final class AppCoordinator: ObservableObject {
     let calendar = Calendar.current
     private let log = Log.make("coordinator")
     private var quickPanel: QuickPanelController?
-    /// How far ahead all future meetings are scheduled. This matches the old recurring-series
-    /// horizon while making default-on behavior reliable beyond the day currently displayed.
-    let schedulingHorizon: TimeInterval = 60 * 24 * 60 * 60
-    /// Throttle for the horizon fetch so the frequent day-list poll doesn't run a full 60-day
-    /// EventKit query (which blocks the main actor) every time. Internal so `+Scheduling` uses it.
-    let horizonThrottle: TimeInterval = 120
-    var lastHorizonFetch = Date.distantPast
+    /// How far ahead the scheduler looks. Only needs to exceed the poll interval + the longest
+    /// lead time so a meeting is armed before it fires; a rolling refetch keeps it current. Kept
+    /// small (2 days) so it stays cheap and never pre-arms weeks of timers.
+    let schedulingWindow: TimeInterval = 2 * 24 * 60 * 60
 
     init(store: Store = Store()) {
         self.store = store
@@ -105,9 +103,8 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
-            await refreshHorizon(force: false)
-            reconcileArmed(schedulingMeetings)
-            materializeSeries()
+            let window = DateInterval(start: Date(), duration: schedulingWindow)
+            upcomingMeetings = try await source.fetchUpcoming(within: window)
             reschedule()
             availableCalendars = await source.availableCalendars()
             errorMessage = nil

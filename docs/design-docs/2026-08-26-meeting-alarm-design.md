@@ -140,9 +140,9 @@ be driven from a Claude Code `/loop` or scheduled agent.)
    every 5 min) refreshes; the day navigator changes the selected day and re-fetches.
 3. **Arming** → `DefaultArming` (pure) resolves each meeting: explicit arms/opt-outs always
    win; the `autoArm` setting decides the default for the rest (opt-in when off, opt-out when
-   on). Checking/unchecking writes an explicit arm or exclusion. `AlarmScheduler` recomputes
-   over a rolling 60-day horizon, so alarms span days even when the list shows another date;
-   auto-armed (derived) meetings only schedule if they haven't started yet.
+   on). Checking/unchecking writes an explicit arm or exclusion. Scheduling reads a small
+   rolling 2-day window refetched each sync, so alarms span days as meetings roll in — no
+   pre-scheduling weeks ahead; auto-armed (derived) meetings only schedule if not yet started.
 4. **Scheduling** → for each armed meeting, `AlarmScheduler` computes `fireTime`
    (`start − leadTime` for Gentle Ramp, `start` for Blast) and arms a timer. On wake or
    re-sync it recomputes; a fire time already passed (but meeting not yet ended) fires

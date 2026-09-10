@@ -72,7 +72,6 @@ struct StoreTests {
         let entry = store.armed["eventkit:E1:2026-08-26"]
         #expect(entry?.presetName == "Blast")
         #expect(entry?.meeting.title == "Standup")
-        #expect(entry?.fromSeries == false)
         #expect(entry?.meeting.seriesId == nil)
         #expect(store.defaultPresetName == "Gentle Ramp")
         #expect(store.soundEnabled == true)
@@ -116,16 +115,14 @@ struct StoreTests {
         #expect(reloaded.excludedSeriesIds.contains("S1"))
     }
 
-    @Test("disarmSeries clears the rule, skips, overrides, and materialized occurrences")
+    @Test("disarmSeries clears the rule, skips, overrides, and explicit occurrence arms")
     func disarmSeriesClears() {
         let store = Store(defaults: makeDefaults())
         store.armSeries("S1", preset: "Blast")
-        _ = store.setMaterializedSeries([
-            .init(meeting: meeting("occ-1", seriesId: "S1"), preset: "Blast")
-        ])
+        store.arm(meeting("occ-1", seriesId: "S1"), preset: "Blast")
         store.addSeriesException(seriesId: "S1", occurrenceId: "occ-9")
         store.setSeriesOverrides("S1", AlarmOverrides(color: .red))
-        #expect(store.armed["occ-1"]?.fromSeries == true)
+        #expect(store.armed["occ-1"] != nil)
         store.disarmSeries("S1")
         #expect(store.armedSeries["S1"] == nil)
         #expect(store.seriesExceptions["S1"] == nil)
@@ -143,21 +140,5 @@ struct StoreTests {
         store.setSeriesOverrides("S1", AlarmOverrides())
         #expect(store.seriesOverrides["S1"] == nil)
         #expect(Store(defaults: defaults).seriesOverrides["S1"] == nil)
-    }
-
-    @Test("setMaterializedSeries is idempotent and preserves explicit arms")
-    func materializeKeepsExplicit() {
-        let store = Store(defaults: makeDefaults())
-        store.arm(meeting("explicit"), preset: "Gentle Ramp")
-        let entries: [SeriesMaterializer.Entry] = [
-            .init(meeting: meeting("occ-1", seriesId: "S1"), preset: "Blast")
-        ]
-        #expect(store.setMaterializedSeries(entries) == true)
-        #expect(store.setMaterializedSeries(entries) == false)
-        #expect(store.armed["explicit"]?.presetName == "Gentle Ramp")
-        #expect(store.armed["occ-1"]?.fromSeries == true)
-        #expect(store.setMaterializedSeries([]) == true)
-        #expect(store.armed["occ-1"] == nil)
-        #expect(store.armed["explicit"] != nil)
     }
 }
