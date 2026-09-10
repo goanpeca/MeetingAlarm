@@ -209,7 +209,9 @@ final class AppCoordinator: ObservableObject {
     // MARK: Snooze
 
     private func handleSnooze(id: String, interval: TimeInterval) {
-        if let config = store.armed[id],
+        // Resolve from the active set (not just store.armed) so a snoozed auto-armed/derived
+        // meeting is found — otherwise its snooze wouldn't persist and it would re-fire at once.
+        if let config = activeArmedConfigs()[id],
            let target = AlarmMath.snoozeFireTime(
                from: Date(), interval: interval, meetingStart: config.meeting.start
            ) {

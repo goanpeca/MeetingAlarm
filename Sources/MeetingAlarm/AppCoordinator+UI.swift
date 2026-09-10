@@ -28,7 +28,9 @@ extension AppCoordinator {
         DefaultArming.isArmed(
             meeting: meeting,
             autoArm: store.autoArm,
-            explicitlyArmedIds: Set(store.armed.keys),
+            // Only user-chosen occurrence arms count as explicit overrides — series-materialized
+            // entries (fromSeries) are derived and must not override a series opt-out.
+            explicitlyArmedIds: Set(store.armed.filter { !$0.value.fromSeries }.keys),
             armedSeriesIds: Set(store.armedSeries.keys),
             excludedMeetingIds: store.excludedMeetingIds,
             excludedSeriesIds: store.excludedSeriesIds,
