@@ -28,6 +28,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
+| `Sources/MeetingAlarm/State/Store+Arming.swift` | Per-occurrence arm/disarm, opt-out/opt-in, and overrides mutators (split from `Store`). |
 | `Sources/MeetingAlarm/State/Store+Series.swift` | Recurring-series arming (split from `Store`). |
 | `Sources/MeetingAlarm/State/Store.swift` | Persists armed meetings, series rules/skips, snoozes, and all settings (UserDefaults JSON). |
 

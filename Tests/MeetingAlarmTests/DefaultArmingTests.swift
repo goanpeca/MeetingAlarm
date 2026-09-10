@@ -7,8 +7,8 @@ struct DefaultArmingTests {
     private func meeting(_ id: String, seriesId: String? = nil) -> Meeting {
         Meeting(
             id: id, title: "Event",
-            start: Date(timeIntervalSince1970: 4_000),
-            end: Date(timeIntervalSince1970: 6_000),
+            start: Date(timeIntervalSince1970: 4000),
+            end: Date(timeIntervalSince1970: 6000),
             sourceKind: .eventKit, accountLabel: nil, seriesId: seriesId
         )
     }

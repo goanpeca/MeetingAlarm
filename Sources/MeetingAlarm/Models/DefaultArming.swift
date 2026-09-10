@@ -11,7 +11,9 @@ enum DefaultArming {
         seriesExceptions: [String: Set<String>]
     ) -> Bool {
         guard !excludedMeetingIds.contains(meeting.id) else { return false }
-        if explicitlyArmedIds.contains(meeting.id) { return true }
+        if explicitlyArmedIds.contains(meeting.id) {
+            return true
+        }
         guard let seriesId = meeting.seriesId else { return true }
         return !excludedSeriesIds.contains(seriesId)
             && !(seriesExceptions[seriesId]?.contains(meeting.id) ?? false)
