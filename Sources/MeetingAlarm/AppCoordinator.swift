@@ -169,7 +169,8 @@ final class AppCoordinator: ObservableObject {
     /// applied on top.
     private func effectiveProfile(for config: ArmedConfig) -> SensoryProfile {
         var profile = effectiveProfile(named: config.presetName)
-        guard let overrides = store.armOverrides[config.meeting.id] else { return profile }
+        // Occurrence override wins, then the series override, then the global profile above.
+        let overrides = overrides(for: config.meeting)
         if let color = overrides.color {
             profile.color = color
         }

@@ -105,9 +105,37 @@ extension AppCoordinator {
 
     // MARK: Per-meeting overrides
 
-    /// This meeting's color/sound overrides (empty = fully inherits the global settings).
+    /// Whether an override applies to just this occurrence or the whole recurring series —
+    /// the "this event / all in the series" choice, mirroring arm/disarm.
+    enum OverrideScope: Equatable { case occurrence, series }
+
+    /// The overrides that actually fire for this meeting: its own occurrence override layered
+    /// over its series override, falling through to the global settings. Also drives the row
+    /// swatch and the gear's filled state.
     func overrides(for meeting: Meeting) -> AlarmOverrides {
-        store.armOverrides[meeting.id] ?? AlarmOverrides()
+        let occurrence = store.armOverrides[meeting.id] ?? AlarmOverrides()
+        guard let seriesId = meeting.seriesId,
+              let series = store.seriesOverrides[seriesId] else { return occurrence }
+        return occurrence.layered(over: series)
+    }
+
+    /// The raw override stored at one scope (not merged) — what the editor shows and edits so
+    /// each toggle reflects exactly that scope's stored value.
+    func overrides(for meeting: Meeting, scope: OverrideScope) -> AlarmOverrides {
+        switch scope {
+        case .occurrence:
+            return store.armOverrides[meeting.id] ?? AlarmOverrides()
+        case .series:
+            guard let seriesId = meeting.seriesId else { return AlarmOverrides() }
+            return store.seriesOverrides[seriesId] ?? AlarmOverrides()
+        }
+    }
+
+    /// Whether this meeting's series already has an override (so the editor can default the
+    /// scope to "all in the series").
+    func hasSeriesOverride(_ meeting: Meeting) -> Bool {
+        guard let seriesId = meeting.seriesId else { return false }
+        return store.seriesOverrides[seriesId] != nil
     }
 
     /// The alarm color this meeting will actually fire with (its override, else the global).
@@ -115,19 +143,37 @@ extension AppCoordinator {
         overrides(for: meeting).color ?? store.alarmColor
     }
 
-    /// Override (or clear, when `color` is nil) the alarm color for this meeting only.
-    func setColorOverride(_ meeting: Meeting, color: RGBAColor?) {
-        var current = overrides(for: meeting)
+    /// Override (or clear, when `color` is nil) the alarm color at the chosen scope.
+    func setColorOverride(_ meeting: Meeting, color: RGBAColor?, scope: OverrideScope) {
+        var current = overrides(for: meeting, scope: scope)
         current.color = color
-        store.setOverrides(meeting.id, current)
-        reschedule()
+        writeOverrides(meeting, current, scope: scope)
     }
 
-    /// Override (or clear, when `sound` is nil) the alarm sound for this meeting only.
-    func setSoundOverride(_ meeting: Meeting, sound: SoundOverride?) {
-        var current = overrides(for: meeting)
+    /// Override (or clear, when `sound` is nil) the alarm sound at the chosen scope.
+    func setSoundOverride(_ meeting: Meeting, sound: SoundOverride?, scope: OverrideScope) {
+        var current = overrides(for: meeting, scope: scope)
         current.sound = sound
-        store.setOverrides(meeting.id, current)
+        writeOverrides(meeting, current, scope: scope)
+    }
+
+    /// Clear both overrides at the chosen scope ("reset to global").
+    func clearOverrides(_ meeting: Meeting, scope: OverrideScope) {
+        writeOverrides(meeting, AlarmOverrides(), scope: scope)
+    }
+
+    private func writeOverrides(
+        _ meeting: Meeting,
+        _ overrides: AlarmOverrides,
+        scope: OverrideScope
+    ) {
+        switch scope {
+        case .occurrence:
+            store.setOverrides(meeting.id, overrides)
+        case .series:
+            guard let seriesId = meeting.seriesId else { return }
+            store.setSeriesOverrides(seriesId, overrides)
+        }
         reschedule()
     }
 

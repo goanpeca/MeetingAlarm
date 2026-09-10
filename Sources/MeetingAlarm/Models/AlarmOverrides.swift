@@ -13,6 +13,13 @@ struct AlarmOverrides: Codable, Sendable, Equatable {
     var isEmpty: Bool {
         color == nil && sound == nil
     }
+
+    /// This override layered on top of `base`: each field set here wins, and any field left
+    /// unset falls through to `base`. Used to resolve an occurrence's override over its
+    /// series' override (which in turn falls through to the global settings).
+    func layered(over base: AlarmOverrides) -> AlarmOverrides {
+        AlarmOverrides(color: color ?? base.color, sound: sound ?? base.sound)
+    }
 }
 
 /// A per-meeting sound choice: force a specific sound, or force silence. Distinct from

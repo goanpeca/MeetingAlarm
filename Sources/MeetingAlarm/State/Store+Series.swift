@@ -10,11 +10,18 @@ extension Store {
         save()
     }
 
-    /// Disarm a whole series and drop its materialized occurrences and skips.
+    /// Disarm a whole series and drop its materialized occurrences, skips, and overrides.
     func disarmSeries(_ seriesId: String) {
         armedSeries[seriesId] = nil
         seriesExceptions[seriesId] = nil
+        seriesOverrides[seriesId] = nil
         armed = armed.filter { !($0.value.fromSeries && $0.value.meeting.seriesId == seriesId) }
+        save()
+    }
+
+    /// Set (or clear, when `isEmpty`) the color/sound override applied to a whole series.
+    func setSeriesOverrides(_ seriesId: String, _ overrides: AlarmOverrides) {
+        seriesOverrides[seriesId] = overrides.isEmpty ? nil : overrides
         save()
     }
 

@@ -17,6 +17,9 @@ final class Store: ObservableObject {
     @Published var seriesExceptions: [String: Set<String>] = [:]
     /// Per-meeting alarm overrides (color/sound), keyed by occurrence id.
     @Published var armOverrides: [String: AlarmOverrides] = [:]
+    /// Per-series alarm overrides (color/sound), keyed by series id. An occurrence's own
+    /// override wins; otherwise it inherits its series' override, then the global settings.
+    @Published var seriesOverrides: [String: AlarmOverrides] = [:]
     @Published var activeSource: SourceKind = .eventKit {
         didSet { save() }
     }
@@ -86,6 +89,7 @@ final class Store: ObservableObject {
         var armedSeries: [String: String]?
         var seriesExceptions: [String: [String]]?
         var armOverrides: [String: AlarmOverrides]?
+        var seriesOverrides: [String: AlarmOverrides]?
         var activeSource: SourceKind
         var defaultPresetName: String
         var syncInterval: TimeInterval
@@ -170,6 +174,7 @@ final class Store: ObservableObject {
         armedSeries = snap.armedSeries ?? [:]
         seriesExceptions = (snap.seriesExceptions ?? [:]).mapValues(Set.init)
         armOverrides = snap.armOverrides ?? [:]
+        seriesOverrides = snap.seriesOverrides ?? [:]
         activeSource = snap.activeSource
         defaultPresetName = snap.defaultPresetName
         syncInterval = snap.syncInterval
@@ -196,6 +201,7 @@ final class Store: ObservableObject {
             armedSeries: armedSeries,
             seriesExceptions: seriesExceptions.mapValues(Array.init),
             armOverrides: armOverrides,
+            seriesOverrides: seriesOverrides,
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
             syncInterval: syncInterval,

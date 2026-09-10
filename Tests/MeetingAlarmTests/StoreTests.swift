@@ -99,7 +99,7 @@ struct StoreTests {
         #expect(reloaded.seriesExceptions["S1"]?.contains("occ-2") == true)
     }
 
-    @Test("disarmSeries clears the rule, skips, and materialized occurrences")
+    @Test("disarmSeries clears the rule, skips, overrides, and materialized occurrences")
     func disarmSeriesClears() {
         let store = Store(defaults: makeDefaults())
         store.armSeries("S1", preset: "Blast")
@@ -107,11 +107,25 @@ struct StoreTests {
             .init(meeting: meeting("occ-1", seriesId: "S1"), preset: "Blast")
         ])
         store.addSeriesException(seriesId: "S1", occurrenceId: "occ-9")
+        store.setSeriesOverrides("S1", AlarmOverrides(color: .red))
         #expect(store.armed["occ-1"]?.fromSeries == true)
         store.disarmSeries("S1")
         #expect(store.armedSeries["S1"] == nil)
         #expect(store.seriesExceptions["S1"] == nil)
+        #expect(store.seriesOverrides["S1"] == nil)
         #expect(store.armed["occ-1"] == nil)
+    }
+
+    @Test("Series overrides persist, reload, and clear when emptied")
+    func seriesOverridesPersist() {
+        let defaults = makeDefaults()
+        let store = Store(defaults: defaults)
+        store.setSeriesOverrides("S1", AlarmOverrides(color: .red, sound: .silent))
+        #expect(Store(defaults: defaults).seriesOverrides["S1"]
+            == AlarmOverrides(color: .red, sound: .silent))
+        store.setSeriesOverrides("S1", AlarmOverrides())
+        #expect(store.seriesOverrides["S1"] == nil)
+        #expect(Store(defaults: defaults).seriesOverrides["S1"] == nil)
     }
 
     @Test("setMaterializedSeries is idempotent and preserves explicit arms")

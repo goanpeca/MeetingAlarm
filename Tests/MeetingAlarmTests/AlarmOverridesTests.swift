@@ -19,6 +19,19 @@ struct AlarmOverridesTests {
         #expect(try JSONDecoder().decode(AlarmOverrides.self, from: data) == overrides)
     }
 
+    @Test("layered: each set field wins, unset fields fall through to the base")
+    func layered() {
+        let series = AlarmOverrides(color: .red, sound: .sound(.chime))
+        // An occurrence that only overrides the sound keeps the series color.
+        let occurrence = AlarmOverrides(sound: .silent)
+        #expect(occurrence.layered(over: series) == AlarmOverrides(color: .red, sound: .silent))
+        // An empty occurrence inherits the whole series override.
+        #expect(AlarmOverrides().layered(over: series) == series)
+        // A fully-set occurrence ignores the base entirely.
+        let full = AlarmOverrides(color: .calmTeal, sound: .sound(.ping))
+        #expect(full.layered(over: series) == full)
+    }
+
     @Test("Silent and specific-sound overrides are distinct values")
     func soundOverrideCases() throws {
         #expect(SoundOverride.silent != SoundOverride.sound(.alarm))
