@@ -9,7 +9,7 @@ jobs:
   build-test:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Pin the toolchain so a green build is reproducible (macos-latest's Xcode drifts).
       - name: Select Xcode
