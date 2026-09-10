@@ -30,6 +30,10 @@ final class AppCoordinator: ObservableObject {
     /// How far ahead all future meetings are scheduled. This matches the old recurring-series
     /// horizon while making default-on behavior reliable beyond the day currently displayed.
     let schedulingHorizon: TimeInterval = 60 * 24 * 60 * 60
+    /// Throttle for the horizon fetch so the frequent day-list poll doesn't run a full 60-day
+    /// EventKit query (which blocks the main actor) every time. Internal so `+Scheduling` uses it.
+    let horizonThrottle: TimeInterval = 120
+    var lastHorizonFetch = Date.distantPast
 
     init(store: Store = Store()) {
         self.store = store
@@ -101,11 +105,7 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
-            let horizon = DateInterval(
-                start: calendar.startOfDay(for: Date()),
-                end: Date().addingTimeInterval(schedulingHorizon)
-            )
-            schedulingMeetings = try await source.fetchUpcoming(within: horizon)
+            await refreshHorizon(force: false)
             reconcileArmed(schedulingMeetings)
             materializeSeries()
             reschedule()

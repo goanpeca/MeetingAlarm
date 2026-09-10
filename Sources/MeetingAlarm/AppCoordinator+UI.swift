@@ -98,8 +98,15 @@ extension AppCoordinator {
         guard let seriesId = meeting.seriesId else { return }
         store.include(meeting, preset: store.defaultPresetName)
         store.armSeries(seriesId, preset: store.defaultPresetName)
-        materializeSeries()
-        reschedule()
+        Task { await refreshHorizon(force: true); materializeSeries(); reschedule() }
+    }
+
+    /// Flip auto-arm and reflect it in the schedule immediately: enabling fetches the horizon
+    /// and arms the new derived alarms; disabling drops them so a timer can't fire after the
+    /// user turned the feature off. Without this, the change would wait for the next poll.
+    func setAutoArm(_ enabled: Bool) {
+        store.autoArm = enabled
+        Task { await refreshHorizon(force: true); reschedule() }
     }
 
     /// "Skip just this one" occurrence of an armed series.
@@ -192,8 +199,7 @@ extension AppCoordinator {
     func setPreset(_ meeting: Meeting, preset: String) {
         if isArmedViaSeries(meeting), let seriesId = meeting.seriesId {
             store.armSeries(seriesId, preset: preset)
-            materializeSeries()
-            reschedule()
+            Task { await refreshHorizon(force: true); materializeSeries(); reschedule() }
         } else if store.armed[meeting.id] != nil {
             store.arm(meeting, preset: preset)
             reschedule()

@@ -1,8 +1,8 @@
 import Foundation
 
 /// Per-occurrence arming mutations, split from `Store` to keep each file under the size limit.
-/// Alarms are on by default; stored state records only the user's explicit choices — custom
-/// arms and opt-out exclusions.
+/// Stored state records only the user's explicit choices — custom arms and opt-out exclusions;
+/// the default for untouched meetings is decided by the `autoArm` setting (opt-in when off).
 extension Store {
     func arm(_ meeting: Meeting, preset: String) {
         armed[meeting.id] = ArmedConfig(presetName: preset, meeting: meeting)

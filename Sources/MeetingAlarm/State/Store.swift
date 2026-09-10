@@ -15,8 +15,9 @@ final class Store: ObservableObject {
     @Published var armedSeries: [String: String] = [:]
     /// Per-series occurrence ids the user chose to skip ("this event only").
     @Published var seriesExceptions: [String: Set<String>] = [:]
-    /// Future occurrences the user explicitly opted out of. Every other meeting is armed
-    /// automatically, so this is deliberately an exclusion list rather than an armed list.
+    /// Future occurrences the user explicitly opted out of. In auto-arm (opt-out) mode every
+    /// other meeting is armed automatically, so this is an exclusion list rather than an armed
+    /// list; with auto-arm off it simply suppresses the derived default for those occurrences.
     @Published var excludedMeetingIds: Set<String> = []
     /// Recurring series the user opted out of wholesale. A later explicit arm of one
     /// occurrence still takes precedence, letting it be re-enabled on its own.

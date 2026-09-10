@@ -23,6 +23,7 @@ struct StoreTests {
         store.setSnooze("m1", at: Date(timeIntervalSince1970: 5000))
         store.syncInterval = 120
         store.snoozeIntervals = [60, 300]
+        store.autoArm = true
 
         let reloaded = Store(defaults: defaults)
         #expect(reloaded.armed["m1"]?.presetName == "Gentle Ramp")
@@ -30,6 +31,7 @@ struct StoreTests {
         #expect(reloaded.snoozes["m1"] == Date(timeIntervalSince1970: 5000))
         #expect(reloaded.syncInterval == 120)
         #expect(reloaded.snoozeIntervals == [60, 300])
+        #expect(reloaded.autoArm == true)
     }
 
     @Test("prunePastSnoozes drops targets at or before now")

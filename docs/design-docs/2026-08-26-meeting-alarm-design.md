@@ -17,9 +17,8 @@
 A menu-bar macOS app that makes it **impossible to miss a meeting while you're at the
 computer**. It reads your calendar and lets you **arm an extra alarm per meeting** — or flip
 on an optional **auto-arm** setting to arm every future meeting and opt out the few you don't
-want. At the
-chosen moment throws a **full-screen colored overlay across every display** with an optional
-sound. The alert is driven by a configurable **sensory profile** with two presets — a
+want. At the chosen moment it throws a **full-screen colored overlay across every display**
+with an optional sound. The alert is driven by a configurable **sensory profile** with two presets — a
 high-intensity **Blast** and a predictable, sensory-safe **Gentle Ramp**.
 
 The Gentle Ramp preset is a first-class design goal, not an afterthought: it answers the

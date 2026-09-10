@@ -35,21 +35,61 @@ extension AppCoordinator {
         _ = store.setMaterializedSeries(entries)
     }
 
+    /// Whether the rolling horizon is needed at all: only auto-arm or an explicitly-armed
+    /// series schedules meetings beyond the day currently on screen.
+    var needsHorizon: Bool {
+        store.autoArm || !store.armedSeries.isEmpty
+    }
+
+    /// Refresh the 60-day scheduling horizon — but only when it's actually needed, and (unless
+    /// `force`d) at most every `horizonThrottle` seconds, so the frequent day-list poll doesn't
+    /// run a full main-actor EventKit query every time. When it isn't needed, the horizon is
+    /// dropped so stale derived arms can't linger.
+    func refreshHorizon(force: Bool) async {
+        guard needsHorizon else {
+            schedulingMeetings = []
+            return
+        }
+        if !force, Date().timeIntervalSince(lastHorizonFetch) < horizonThrottle {
+            return
+        }
+        lastHorizonFetch = Date()
+        let horizon = DateInterval(
+            start: calendar.startOfDay(for: Date()),
+            end: Date().addingTimeInterval(schedulingHorizon)
+        )
+        if let upcoming = try? await source.fetchUpcoming(within: horizon) {
+            schedulingMeetings = upcoming
+        }
+    }
+
     /// Combines stored custom arms with every fetched, non-excluded future meeting (when
     /// auto-arm is on). Derived arms remain unpersisted, so saved state records only intentional
     /// choices — and they only cover meetings that haven't started, so enabling auto-arm or
     /// waking mid-day never full-screens you for a meeting you're already in. Explicit arms keep
-    /// their overdue-fire safety net.
+    /// their overdue-fire safety net. The arming sets are built once per pass, not per meeting,
+    /// so scheduling stays linear in the horizon size.
     func activeArmedConfigs() -> [String: ArmedConfig] {
-        var configs = store.armed
+        let explicitIds = Set(store.armed.filter { !$0.value.fromSeries }.keys)
+        let armedSeriesIds = Set(store.armedSeries.keys)
         let now = Date()
-        for meeting in schedulingMeetings where isArmed(meeting) {
+        func armed(_ meeting: Meeting) -> Bool {
+            DefaultArming.isArmed(
+                meeting: meeting, autoArm: store.autoArm,
+                explicitlyArmedIds: explicitIds, armedSeriesIds: armedSeriesIds,
+                excludedMeetingIds: store.excludedMeetingIds,
+                excludedSeriesIds: store.excludedSeriesIds,
+                seriesExceptions: store.seriesExceptions
+            )
+        }
+        var configs = store.armed
+        for meeting in schedulingMeetings where armed(meeting) {
             if configs[meeting.id] == nil, meeting.start > now {
                 configs[meeting.id] = ArmedConfig(
                     presetName: presetName(for: meeting), meeting: meeting
                 )
             }
         }
-        return configs.filter { isArmed($0.value.meeting) }
+        return configs.filter { armed($0.value.meeting) }
     }
 }
