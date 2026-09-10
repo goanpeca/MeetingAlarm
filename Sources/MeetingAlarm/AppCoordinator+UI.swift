@@ -63,7 +63,8 @@ extension AppCoordinator {
     }
 
     /// Checkbox entry point: recurring events always offer "this event / all in series";
-    /// one-offs toggle directly. Meetings are otherwise armed by default.
+    /// one-offs toggle directly. The default arm state for untouched meetings follows the
+    /// auto-arm setting (opt-in when off, opt-out when on).
     func requestArmToggle(_ meeting: Meeting) {
         guard !isPast(meeting) else { return }
         let armed = isArmed(meeting)
