@@ -14,7 +14,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/Models/ArmedConfig.swift` | Per-meeting arming choice: preset + meeting snapshot, with a `fromSeries` flag for series-materialized entries. |
 | `Sources/MeetingAlarm/Models/CalendarInfo.swift` | A calendar's identity/title for the show/hide filter UI. |
 | `Sources/MeetingAlarm/Models/DayWindow.swift` | Day → `DateInterval` window and day shifting, timezone-correct. |
-| `Sources/MeetingAlarm/Models/DefaultArming.swift` | Pure default-on policy: applies occurrence/series exclusions and explicit re-enables. |
+| `Sources/MeetingAlarm/Models/DefaultArming.swift` | Pure arming policy for both modes: explicit arms/opt-outs win; `autoArm` sets the default (opt-in/opt-out). |
 | `Sources/MeetingAlarm/Models/DismissChallenge.swift` | Dismiss-gate options (none / hold / math / type-phrase). |
 | `Sources/MeetingAlarm/Models/DurationText.swift` | Formats a meeting length as "30 min" / "1 hr 30 min". |
 | `Sources/MeetingAlarm/Models/AlarmOverrides.swift` | Per-meeting color/sound overrides of the global alarm settings (pure). |

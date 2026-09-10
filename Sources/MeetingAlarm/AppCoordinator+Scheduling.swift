@@ -35,12 +35,16 @@ extension AppCoordinator {
         _ = store.setMaterializedSeries(entries)
     }
 
-    /// Combines stored custom arms with every fetched, non-excluded future meeting. The latter
-    /// remain derived rather than persisted, so the saved state records only intentional choices.
+    /// Combines stored custom arms with every fetched, non-excluded future meeting (when
+    /// auto-arm is on). Derived arms remain unpersisted, so saved state records only intentional
+    /// choices — and they only cover meetings that haven't started, so enabling auto-arm or
+    /// waking mid-day never full-screens you for a meeting you're already in. Explicit arms keep
+    /// their overdue-fire safety net.
     func activeArmedConfigs() -> [String: ArmedConfig] {
         var configs = store.armed
+        let now = Date()
         for meeting in schedulingMeetings where isArmed(meeting) {
-            if configs[meeting.id] == nil {
+            if configs[meeting.id] == nil, meeting.start > now {
                 configs[meeting.id] = ArmedConfig(
                     presetName: presetName(for: meeting), meeting: meeting
                 )

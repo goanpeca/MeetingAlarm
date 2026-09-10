@@ -27,7 +27,9 @@ extension AppCoordinator {
     func isArmed(_ meeting: Meeting) -> Bool {
         DefaultArming.isArmed(
             meeting: meeting,
+            autoArm: store.autoArm,
             explicitlyArmedIds: Set(store.armed.keys),
+            armedSeriesIds: Set(store.armedSeries.keys),
             excludedMeetingIds: store.excludedMeetingIds,
             excludedSeriesIds: store.excludedSeriesIds,
             seriesExceptions: store.seriesExceptions

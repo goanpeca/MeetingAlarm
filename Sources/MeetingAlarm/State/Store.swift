@@ -34,6 +34,13 @@ final class Store: ObservableObject {
         didSet { save() }
     }
 
+    /// Arm every future meeting automatically (opt-out), rather than only the ones the user
+    /// checks (opt-in). Off by default — the app stays a deliberate per-meeting choice unless
+    /// the user turns this on in Settings.
+    @Published var autoArm: Bool = false {
+        didSet { save() }
+    }
+
     @Published var syncInterval: TimeInterval = 300 {
         didSet { save() }
     }
@@ -100,6 +107,7 @@ final class Store: ObservableObject {
         var seriesOverrides: [String: AlarmOverrides]?
         var activeSource: SourceKind
         var defaultPresetName: String
+        var autoArm: Bool?
         var syncInterval: TimeInterval
         var snoozeIntervals: [TimeInterval]
         // Optional so state saved before these settings existed still decodes.
@@ -153,6 +161,7 @@ final class Store: ObservableObject {
         seriesOverrides = snap.seriesOverrides ?? [:]
         activeSource = snap.activeSource
         defaultPresetName = snap.defaultPresetName
+        autoArm = snap.autoArm ?? false
         syncInterval = snap.syncInterval
         snoozeIntervals = snap.snoozeIntervals
         soundEnabled = snap.soundEnabled ?? true
@@ -182,6 +191,7 @@ final class Store: ObservableObject {
             seriesOverrides: seriesOverrides,
             activeSource: activeSource,
             defaultPresetName: defaultPresetName,
+            autoArm: autoArm,
             syncInterval: syncInterval,
             snoozeIntervals: snoozeIntervals,
             soundEnabled: soundEnabled,

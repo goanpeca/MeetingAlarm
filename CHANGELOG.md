@@ -9,6 +9,10 @@ section in the same change that alters behavior.
 
 ### Added
 
+- **Auto-arm** setting (Settings → Arming, **off by default**): when on, every future meeting
+  is armed unless you uncheck it (opt-out), with per-occurrence or whole-series opt-outs;
+  derived arms cover only meetings that haven't started, so it never alarms a meeting you're
+  already in. Off, the app stays opt-in — only the meetings you check are armed.
 - Recurring-event support: a "Repeats" tag on recurring rows, and an in-popover prompt to arm
   **this event only** or the **whole series**; series occurrences are materialized over a
   rolling 60-day horizon so they fire day-to-day. Unarming asks skip-one vs. whole-series.
@@ -26,8 +30,6 @@ section in the same change that alters behavior.
 
 ### Changed
 
-- Alarms are now **on by default** for every future meeting. Unchecking a row saves an
-  opt-out; recurring meetings can be opted out once or for the entire series.
 - Default alarm color follows the OS accent color (System Settings → Appearance → Theme).
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 

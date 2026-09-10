@@ -79,6 +79,7 @@ struct StoreTests {
         #expect(store.handled.isEmpty)
         #expect(store.excludedMeetingIds.isEmpty)
         #expect(store.excludedSeriesIds.isEmpty)
+        #expect(store.autoArm == false)
     }
 
     private func meeting(_ id: String, seriesId: String? = nil) -> Meeting {

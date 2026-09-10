@@ -5,19 +5,21 @@ Contracts and rationale; the exhaustive file list is the [module map](../generat
 
 ## 1. Recurring-series arming
 
-**Goal.** Opt a whole repeating meeting out (or back in), not just one day, with a per-action
+**Goal.** Arm (or opt out) a whole repeating meeting, not just one day, with a per-action
 "this event vs. the whole series" choice (mirroring macOS Calendar).
 
 **Design.**
 - `Meeting.seriesId` identifies a series across occurrences — EventKit: the shared event
   identifier (`hasRecurrenceRules`). `nil` = one-off.
-- Meetings are armed by default. `Store.excludedSeriesIds` records whole-series opt-outs and
-  `excludedMeetingIds` records one-off opt-outs; an explicit arm can re-enable a single
-  occurrence in an otherwise excluded series. Legacy explicit series rules retain their
-  per-occurrence skips (`seriesExceptions`).
-- `SeriesMaterializer` (pure, tested) decides which legacy explicit-series occurrences to
-  schedule. The coordinator fetches a rolling **60-day horizon** on every sync, derives the
-  default-on alarms without persisting them, and retains only the user's explicit choices.
+- `DefaultArming` (pure, tested) is the single source of truth: explicit occurrence
+  arms/opt-outs and whole-series arms always win; the `autoArm` setting (off by default)
+  picks the default for the rest — opt-in when off, opt-out when on. `Store.armedSeries`
+  records whole-series arms; `excludedSeriesIds`/`excludedMeetingIds` record opt-outs;
+  `seriesExceptions` records per-occurrence skips.
+- `SeriesMaterializer` (pure, tested) schedules explicit-series occurrences into `Store.armed`.
+  The coordinator fetches a rolling **60-day horizon** each sync; when auto-arm is on it also
+  derives the opt-out alarms without persisting them (only meetings not yet started), so saved
+  state keeps only the user's explicit choices.
 - **Scope prompt is an in-popover overlay** (`ScopePromptView`), not a system
   `confirmationDialog` — the latter's buttons are unclickable inside a `MenuBarExtra(.window)`.
 

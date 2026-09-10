@@ -6,8 +6,9 @@
 ![Swift](https://img.shields.io/badge/Swift-6.3-orange)
 
 A macOS **menu-bar app** that makes meetings impossible to miss while you're at the
-computer. It automatically arms every upcoming meeting unless you opt it out and, at the moment,
-it throws a **full-screen overlay across every display** with an optional sound.
+computer. Arm an extra alarm on any upcoming meeting (or flip on **auto-arm** to arm them
+all) and, at the moment you choose, it throws a **full-screen overlay across every display**
+with an optional sound.
 
 Two built-in alert styles (both fully adjustable):
 
@@ -28,8 +29,9 @@ Two built-in alert styles (both fully adjustable):
 Click the menu-bar bell to open the popover:
 
 - **Meetings** — a checklist of the selected day's events (default **Today**), with a
-  **‹ prev · Today · next ›** navigator. Every future row starts **checked**; uncheck the
-  meetings you do not want alarms for. Those exclusions persist across days and relaunches.
+  **‹ prev · Today · next ›** navigator. **Check** a row to arm a reminder; customize its
+  color/sound from the row. With **auto-arm** on (Settings → Arming), every row starts
+  checked and you uncheck instead. Either way the choice persists across days and relaunches.
 - **Test Alarm** (footer) fires the overlay immediately so you can see/hear it.
 - When an alarm fires: the overlay covers every display with a live countdown, **Snooze**
   buttons, and **Dismiss**. **Esc always dismisses** — you can never get trapped.

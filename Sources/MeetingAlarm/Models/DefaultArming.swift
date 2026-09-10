@@ -1,11 +1,15 @@
 import Foundation
 
-/// Pure default-on alarm policy. Stored state records only explicit choices: exclusions win,
-/// an explicit occurrence arm can override a series exclusion, and everything else is armed.
+/// Pure alarm-arming policy for both modes. Explicit user choices always win — a per-occurrence
+/// opt-out, an explicit occurrence arm, or a whole-series arm. `autoArm` only decides the
+/// default for meetings the user hasn't touched: on = opt-out (everything armed unless
+/// excluded), off = opt-in (nothing armed unless explicitly chosen).
 enum DefaultArming {
     static func isArmed(
         meeting: Meeting,
+        autoArm: Bool,
         explicitlyArmedIds: Set<String>,
+        armedSeriesIds: Set<String>,
         excludedMeetingIds: Set<String>,
         excludedSeriesIds: Set<String>,
         seriesExceptions: [String: Set<String>]
@@ -14,8 +18,12 @@ enum DefaultArming {
         if explicitlyArmedIds.contains(meeting.id) {
             return true
         }
-        guard let seriesId = meeting.seriesId else { return true }
-        return !excludedSeriesIds.contains(seriesId)
-            && !(seriesExceptions[seriesId]?.contains(meeting.id) ?? false)
+        guard let seriesId = meeting.seriesId else { return autoArm }
+        let skipped = seriesExceptions[seriesId]?.contains(meeting.id) ?? false
+        if armedSeriesIds.contains(seriesId) {
+            return !skipped
+        }
+        guard autoArm else { return false }
+        return !excludedSeriesIds.contains(seriesId) && !skipped
     }
 }

@@ -18,6 +18,14 @@ struct SettingsView: View {
                     set: { launchAtLogin = LoginItem.setEnabled($0) ? $0 : LoginItem.isEnabled }
                 ))
             }
+            Section("Arming") {
+                Toggle("Auto-arm every meeting", isOn: bind(\.autoArm))
+                Text(store.autoArm
+                    ? "Every future meeting is armed unless you uncheck it."
+                    : "Only the meetings you check are armed.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Picker("Default alarm", selection: bind(\.defaultPresetName)) {
                 ForEach(SensoryProfile.presets, id: \.name) { Text($0.name).tag($0.name) }
             }
