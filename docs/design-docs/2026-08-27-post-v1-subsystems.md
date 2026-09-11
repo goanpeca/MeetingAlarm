@@ -5,23 +5,27 @@ Contracts and rationale; the exhaustive file list is the [module map](../generat
 
 ## 1. Recurring-series arming
 
-**Goal.** Arm a whole repeating meeting, not just one day, with a per-action "this event vs. the
-whole series" choice (mirroring macOS Calendar).
+**Goal.** Arm (or opt out) a whole repeating meeting, not just one day, with a per-action
+"this event vs. the whole series" choice (mirroring macOS Calendar).
 
 **Design.**
 - `Meeting.seriesId` identifies a series across occurrences — EventKit: the shared event
   identifier (`hasRecurrenceRules`). `nil` = one-off.
-- Arming a series stores a rule (`Store.armedSeries: seriesId → preset`) plus per-occurrence
-  skips (`seriesExceptions`). We do **not** enumerate future occurrences (unbounded).
-- `SeriesMaterializer` (pure, tested) decides which occurrences to schedule; `AppCoordinator+`
-  `Scheduling.materializeSeries` fetches a **rolling 60-day horizon** each sync (throttled ≥120s)
-  and writes them into `Store.armed` with `fromSeries = true`, so the existing snapshot-based
-  scheduler fires them unchanged. See TD-7.
+- `DefaultArming` (pure, tested) is the single source of truth: explicit occurrence
+  arms/opt-outs and whole-series arms always win; the `autoArm` setting (off by default)
+  picks the default for the rest — opt-in when off, opt-out when on. `Store.armedSeries`
+  records whole-series arms; `excludedSeriesIds`/`excludedMeetingIds` record opt-outs;
+  `seriesExceptions` records per-occurrence skips.
+- No occurrences are enumerated or persisted. Each sync fetches a small **rolling 2-day
+  window** (`AppCoordinator.upcomingMeetings`); `activeArmedConfigs` schedules every meeting in
+  it that `DefaultArming` reports armed — including armed-series occurrences. As time advances,
+  new meetings roll into the window and arm automatically, so a series fires day-to-day without
+  any pre-scheduling or materialization.
 - **Scope prompt is an in-popover overlay** (`ScopePromptView`), not a system
   `confirmationDialog` — the latter's buttons are unclickable inside a `MenuBarExtra(.window)`.
 
-**Invariant.** `ArmedConfig` decodes snapshots written before `fromSeries` existed (custom
-`init(from:)`); a non-optional default would otherwise drop all saved state on upgrade.
+**Invariant.** Persisted state records only explicit choices (arms + opt-outs); `ArmedConfig`
+decodes older snapshots that still carry a `fromSeries` key by ignoring it.
 
 ## 2. Staying reachable — global hot key + quick panel
 

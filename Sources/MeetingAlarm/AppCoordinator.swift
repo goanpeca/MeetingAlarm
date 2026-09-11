@@ -5,6 +5,10 @@ import Foundation
 @MainActor
 final class AppCoordinator: ObservableObject {
     @Published private(set) var meetings: [Meeting] = []
+    /// A small rolling window of upcoming meetings used only to arm timers, independent of the
+    /// day shown in the popover. Refetched every sync, so as time advances new meetings roll in
+    /// and arm automatically — no need to pre-schedule weeks ahead.
+    var upcomingMeetings: [Meeting] = []
     @Published private(set) var availableCalendars: [CalendarInfo] = []
     @Published var selectedDay: Date = .init()
     @Published private(set) var errorMessage: String?
@@ -13,6 +17,9 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var isPreviewingSound = false
     /// A pending recurring-scope question, shown as an in-popover overlay.
     @Published var scopePrompt: ScopePrompt?
+    /// When true, a prompt asks whether flipping auto-arm should also reset every per-meeting
+    /// choice so all future meetings follow the new setting.
+    @Published var showAutoArmPrompt = false
 
     let store: Store
     private let overlay = OverlayController()
@@ -24,10 +31,10 @@ final class AppCoordinator: ObservableObject {
     let calendar = Calendar.current
     private let log = Log.make("coordinator")
     private var quickPanel: QuickPanelController?
-    /// How far ahead a whole armed series is pre-scheduled, plus a throttle so the extra
-    /// horizon fetch doesn't run on every poll. Internal so `AppCoordinator+Scheduling` uses them.
-    let seriesHorizon: TimeInterval = 60 * 24 * 60 * 60
-    var lastSeriesMaterialize = Date.distantPast
+    /// How far ahead the scheduler looks. Only needs to exceed the poll interval + the longest
+    /// lead time so a meeting is armed before it fires; a rolling refetch keeps it current. Kept
+    /// small (2 days) so it stays cheap and never pre-arms weeks of timers.
+    let schedulingWindow: TimeInterval = 2 * 24 * 60 * 60
 
     init(store: Store = Store()) {
         self.store = store
@@ -99,8 +106,9 @@ final class AppCoordinator: ObservableObject {
             needsPermission = false
             let interval = DayWindow.interval(for: selectedDay, calendar: calendar)
             meetings = try await source.fetchUpcoming(within: interval)
-            reconcileArmed()
-            await materializeSeries()
+            let window = DateInterval(start: Date(), duration: schedulingWindow)
+            upcomingMeetings = try await source.fetchUpcoming(within: window)
+            reschedule()
             availableCalendars = await source.availableCalendars()
             errorMessage = nil
             let count = meetings.count
@@ -201,7 +209,9 @@ final class AppCoordinator: ObservableObject {
     // MARK: Snooze
 
     private func handleSnooze(id: String, interval: TimeInterval) {
-        if let config = store.armed[id],
+        // Resolve from the active set (not just store.armed) so a snoozed auto-armed/derived
+        // meeting is found — otherwise its snooze wouldn't persist and it would re-fire at once.
+        if let config = activeArmedConfigs()[id],
            let target = AlarmMath.snoozeFireTime(
                from: Date(), interval: interval, meetingStart: config.meeting.start
            ) {
@@ -215,7 +225,7 @@ final class AppCoordinator: ObservableObject {
         scheduler.dismissChallenge = store.dismissChallenge
         scheduler.soundRepeat = store.soundRepeat
         scheduler.soundGap = store.soundGapSeconds
-        let active = store.armed.filter { !store.handled.contains($0.key) }
+        let active = activeArmedConfigs().filter { !store.handled.contains($0.key) }
         scheduler.reschedule(armed: active, snoozes: store.snoozes, now: Date())
     }
 }

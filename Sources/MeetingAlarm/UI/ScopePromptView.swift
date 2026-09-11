@@ -35,10 +35,10 @@ struct ScopePromptView: View {
     private var choices: some View {
         switch prompt.kind {
         case .arm:
-            action("Arm this event only", prominent: true) {
+            action("Turn on this event only", prominent: true) {
                 coordinator.armOccurrence(prompt.meeting)
             }
-            action("Arm all events in the series") { coordinator.armSeries(prompt.meeting) }
+            action("Turn on the whole series") { coordinator.armSeries(prompt.meeting) }
         case .disarm:
             action("Skip just this one", prominent: true) {
                 coordinator.skipOccurrence(prompt.meeting)

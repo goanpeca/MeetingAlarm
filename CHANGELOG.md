@@ -9,9 +9,13 @@ section in the same change that alters behavior.
 
 ### Added
 
+- **Auto-arm** setting (Settings → Arming, **off by default**): when on, every future meeting
+  is armed unless you uncheck it (opt-out), with per-occurrence or whole-series opt-outs;
+  derived arms cover only meetings that haven't started, so it never alarms a meeting you're
+  already in. Off, the app stays opt-in — only the meetings you check are armed.
 - Recurring-event support: a "Repeats" tag on recurring rows, and an in-popover prompt to arm
-  **this event only** or the **whole series**; series occurrences are materialized over a
-  rolling 60-day horizon so they fire day-to-day. Unarming asks skip-one vs. whole-series.
+  **this event only** or the **whole series**; series occurrences fire day-to-day as they roll
+  into the rolling scheduling window. Unarming asks skip-one vs. whole-series.
 - Global hot key **⌃⌥⌘M** summons a floating quick panel mirroring the menu-bar popover, so
   the app stays reachable when its menu-bar icon is hidden (e.g. behind the notch).
 - **Launch at login** toggle (Settings → Startup) via `SMAppService`.
@@ -26,6 +30,11 @@ section in the same change that alters behavior.
 
 ### Changed
 
+- Toggling **auto-arm** now asks whether to apply the new setting to every future meeting —
+  resetting your individual checked/unchecked choices — or keep those choices as-is.
+- Scheduling now reads a small **rolling 2-day window** refetched each sync instead of
+  pre-arming a 60-day horizon, so meetings arm as they roll in — removing the series
+  materialization subsystem (`SeriesMaterializer`, `materializeSeries`, `fromSeries`).
 - Default alarm color follows the OS accent color (System Settings → Appearance → Theme).
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 

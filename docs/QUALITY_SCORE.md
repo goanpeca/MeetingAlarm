@@ -17,7 +17,7 @@ coverage. Update this in the same change that moves a grade. Grades: **A** solid
 
 | Domain | Grade | Notes / gaps |
 |--------|:-----:|--------------|
-| Models | A | `Meeting`, `SensoryProfile` (+ `overlayOpacity`), `DayWindow`, `DurationText`, `ArmedConfig`, `AlarmOverrides`, `SeriesMaterializer` — presets, Codable, ramp, duration, and series math unit-tested. |
+| Models | A | `Meeting`, `SensoryProfile` (+ `overlayOpacity`), `DayWindow`, `DurationText`, `ArmedConfig`, `AlarmOverrides`, `DefaultArming` — presets, Codable, ramp, duration, and arming policy unit-tested. |
 | State | A | `Store` (armed/snooze/series/overrides/settings) round-trips tested, including a legacy-snapshot decode. |
 | Calendar (Services) | B | Pure `EventKitMapper`, `MeetingMerge`, `MeetingLink`, `NotesSanitizer` unit-tested; the EventKit query (`EventKitSource`) is a shell verified manually. |
 | Alarm (Services) | B | `AlarmMath` (fire/snooze) unit-tested; `AlarmScheduler` timers, `OverlayController` (multi-display, Esc), `SoundPlayer` are shells verified via **Test Alarm**. |

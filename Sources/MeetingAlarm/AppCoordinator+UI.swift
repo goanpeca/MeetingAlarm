@@ -25,7 +25,15 @@ extension AppCoordinator {
     // MARK: Arming
 
     func isArmed(_ meeting: Meeting) -> Bool {
-        store.armed[meeting.id] != nil || isArmedViaSeries(meeting)
+        DefaultArming.isArmed(
+            meeting: meeting,
+            autoArm: store.autoArm,
+            explicitlyArmedIds: Set(store.armed.keys),
+            armedSeriesIds: Set(store.armedSeries.keys),
+            excludedMeetingIds: store.excludedMeetingIds,
+            excludedSeriesIds: store.excludedSeriesIds,
+            seriesExceptions: store.seriesExceptions
+        )
     }
 
     /// Armed because its whole series is armed (and this occurrence isn't a skipped one).
@@ -54,40 +62,59 @@ extension AppCoordinator {
         return store.armed[meeting.id]?.presetName ?? store.defaultPresetName
     }
 
-    /// Checkbox entry point: a recurring event opens the "this event / all in series" prompt;
-    /// a one-off (or a recurring event armed on its own) toggles directly.
+    /// Checkbox entry point: recurring events always offer "this event / all in series";
+    /// one-offs toggle directly. The default arm state for untouched meetings follows the
+    /// auto-arm setting (opt-in when off, opt-out when on).
     func requestArmToggle(_ meeting: Meeting) {
         guard !isPast(meeting) else { return }
         let armed = isArmed(meeting)
-        if isRecurring(meeting), !armed || isArmedViaSeries(meeting) {
+        if isRecurring(meeting) {
             scopePrompt = ScopePrompt(meeting: meeting, kind: armed ? .disarm : .arm)
         } else {
             toggleArm(meeting)
         }
     }
 
-    /// Plain (non-prompting) arm/disarm of a single occurrence. Recurring events route
+    /// Plain (non-prompting) opt-in/opt-out of a single occurrence. Recurring events route
     /// through the scoped methods below via the row's "This event / All in series" prompt.
     func toggleArm(_ meeting: Meeting) {
         guard !isPast(meeting) else { return }
-        if store.armed[meeting.id] != nil {
-            store.disarm(meeting.id)
+        if isArmed(meeting) {
+            store.exclude(meeting.id)
         } else {
-            store.arm(meeting, preset: store.defaultPresetName)
+            store.include(meeting, preset: store.defaultPresetName)
         }
         reschedule()
     }
 
     func armOccurrence(_ meeting: Meeting) {
         guard !isPast(meeting) else { return }
-        store.arm(meeting, preset: store.defaultPresetName)
+        store.include(meeting, preset: store.defaultPresetName)
         reschedule()
     }
 
     func armSeries(_ meeting: Meeting) {
         guard let seriesId = meeting.seriesId else { return }
+        store.include(meeting, preset: store.defaultPresetName)
         store.armSeries(seriesId, preset: store.defaultPresetName)
-        Task { await materializeSeries(force: true) }
+        reschedule()
+    }
+
+    /// Flip auto-arm and reflect it in the schedule immediately (rather than waiting for the
+    /// next poll): reschedule now arms every in-window default-on meeting, or drops them. Always
+    /// ask whether to also apply the new setting to every future meeting — the prompt is shown
+    /// on every toggle so arming and unarming behave the same way.
+    func setAutoArm(_ enabled: Bool) {
+        store.autoArm = enabled
+        reschedule()
+        showAutoArmPrompt = true
+    }
+
+    /// Clear every per-meeting arm/opt-out/skip so all meetings follow the auto-arm default.
+    func applyAutoArmToAll() {
+        store.clearArmChoices()
+        showAutoArmPrompt = false
+        reschedule()
     }
 
     /// "Skip just this one" occurrence of an armed series.
@@ -180,7 +207,7 @@ extension AppCoordinator {
     func setPreset(_ meeting: Meeting, preset: String) {
         if isArmedViaSeries(meeting), let seriesId = meeting.seriesId {
             store.armSeries(seriesId, preset: preset)
-            Task { await materializeSeries(force: true) }
+            reschedule()
         } else if store.armed[meeting.id] != nil {
             store.arm(meeting, preset: preset)
             reschedule()

@@ -56,14 +56,21 @@ struct RootView: View {
             .padding([.bottom, .horizontal], 12)
         }
         .frame(width: 360)
-        // Escape cancels an open recurring prompt, otherwise closes the popover.
+        .overlay {
+            if coordinator.showAutoArmPrompt {
+                AutoArmPromptView(coordinator: coordinator, store: coordinator.store)
+            }
+        }
+        // Escape cancels an open prompt, otherwise closes the popover.
         .onExitCommand { handleEscape() }
         // Always open on the Meetings pane, not wherever it was last left.
         .onAppear { pane = .meetings }
     }
 
     private func handleEscape() {
-        if coordinator.scopePrompt != nil {
+        if coordinator.showAutoArmPrompt {
+            coordinator.showAutoArmPrompt = false
+        } else if coordinator.scopePrompt != nil {
             coordinator.scopePrompt = nil
         } else {
             NSApp.keyWindow?.close()

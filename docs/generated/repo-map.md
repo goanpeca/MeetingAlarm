@@ -11,9 +11,10 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
-| `Sources/MeetingAlarm/Models/ArmedConfig.swift` | Per-meeting arming choice: preset + meeting snapshot, with a `fromSeries` flag for series-materialized entries. |
+| `Sources/MeetingAlarm/Models/ArmedConfig.swift` | An explicit per-meeting arm choice: preset + meeting snapshot. |
 | `Sources/MeetingAlarm/Models/CalendarInfo.swift` | A calendar's identity/title for the show/hide filter UI. |
 | `Sources/MeetingAlarm/Models/DayWindow.swift` | Day → `DateInterval` window and day shifting, timezone-correct. |
+| `Sources/MeetingAlarm/Models/DefaultArming.swift` | Pure arming policy for both modes: explicit arms/opt-outs win; `autoArm` sets the default (opt-in/opt-out). |
 | `Sources/MeetingAlarm/Models/DismissChallenge.swift` | Dismiss-gate options (none / hold / math / type-phrase). |
 | `Sources/MeetingAlarm/Models/DurationText.swift` | Formats a meeting length as "30 min" / "1 hr 30 min". |
 | `Sources/MeetingAlarm/Models/AlarmOverrides.swift` | Per-meeting color/sound overrides of the global alarm settings (pure). |
@@ -21,12 +22,12 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/Models/OccurrenceKey.swift` | Stable per-day key so armed state survives same-day time edits. |
 | `Sources/MeetingAlarm/Models/ScopePrompt.swift` | Pending "this event / whole series" question for a recurring action. |
 | `Sources/MeetingAlarm/Models/SensoryProfile.swift` | Alarm visual/sound profile + presets; `RGBAColor`, `Effect`. |
-| `Sources/MeetingAlarm/Models/SeriesMaterializer.swift` | Pure rule for which series occurrences to schedule. |
 
 ## State — persistence (imports Models only)
 
 | File | Purpose |
 |------|---------|
+| `Sources/MeetingAlarm/State/Store+Arming.swift` | Per-occurrence arm/disarm, opt-out/opt-in, and overrides mutators (split from `Store`). |
 | `Sources/MeetingAlarm/State/Store+Series.swift` | Recurring-series arming (split from `Store`). |
 | `Sources/MeetingAlarm/State/Store.swift` | Persists armed meetings, series rules/skips, snoozes, and all settings (UserDefaults JSON). |
 
@@ -58,6 +59,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
+| `Sources/MeetingAlarm/UI/AutoArmPromptView.swift` | In-popover prompt to reset every per-meeting choice when auto-arm is toggled. |
 | `Sources/MeetingAlarm/UI/ColorPanelController.swift` | Presents `NSColorPanel` in front for the accessory app. |
 | `Sources/MeetingAlarm/UI/HTMLText.swift` | HTML notes → plain, theme-aware text for the day list. |
 | `Sources/MeetingAlarm/UI/MeetingDetailView.swift` | Expanded row detail: attendees + full description. |

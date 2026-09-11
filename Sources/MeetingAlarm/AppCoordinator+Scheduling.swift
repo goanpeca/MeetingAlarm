@@ -1,47 +1,36 @@
 import Foundation
 
-/// Keeping armed occurrences in sync with the calendar: refreshing edited events and
-/// materializing whole-series arms into schedulable occurrences. Split from the main
-/// coordinator to stay under the file/type-size limits.
+/// Builds the set of alarms to arm right now from the rolling upcoming-meetings window, applying
+/// the arming policy. Split from the main coordinator to stay under the file/type-size limits.
 extension AppCoordinator {
-    /// Update explicitly-armed occurrences whose underlying event changed (e.g. its time was
-    /// edited), so the checked row shows the new time and the alarm re-times. Series-derived
-    /// entries are left to `materializeSeries`, which rebuilds them from a fresh fetch.
-    func reconcileArmed() {
-        var changed = false
-        for meeting in meetings {
-            if let config = store.armed[meeting.id], !config.fromSeries, config.meeting != meeting {
-                store.updateArmed(meeting)
-                changed = true
+    /// Every meeting in the current window that should fire, as `id -> config`. The arming sets
+    /// are built once (not per meeting), so this stays linear in the window size. Derived
+    /// (auto-arm default) alarms skip meetings already in progress — waking mid-day never
+    /// full-screens you for a meeting you're already in — while explicit arms and armed series
+    /// keep their overdue-fire safety net.
+    func activeArmedConfigs() -> [String: ArmedConfig] {
+        let explicitIds = Set(store.armed.keys)
+        let armedSeriesIds = Set(store.armedSeries.keys)
+        let now = Date()
+        var configs: [String: ArmedConfig] = [:]
+        for meeting in upcomingMeetings {
+            let armed = DefaultArming.isArmed(
+                meeting: meeting, autoArm: store.autoArm,
+                explicitlyArmedIds: explicitIds, armedSeriesIds: armedSeriesIds,
+                excludedMeetingIds: store.excludedMeetingIds,
+                excludedSeriesIds: store.excludedSeriesIds,
+                seriesExceptions: store.seriesExceptions
+            )
+            guard armed else { continue }
+            let isExplicit = explicitIds.contains(meeting.id)
+                || (meeting.seriesId.map(armedSeriesIds.contains) ?? false)
+            if !isExplicit, meeting.start <= now {
+                continue
             }
-        }
-        if changed {
-            reschedule()
-        }
-    }
-
-    /// Rebuild the series-armed occurrences within the scheduling horizon so a whole armed
-    /// series fires day-to-day. Throttled: the extra horizon fetch runs at most every 2
-    /// minutes on the poll, but an arm/disarm action passes `force` to run it now.
-    func materializeSeries(force: Bool = false) async {
-        var entries: [SeriesMaterializer.Entry] = []
-        if !store.armedSeries.isEmpty {
-            if !force, Date().timeIntervalSince(lastSeriesMaterialize) < 120 {
-                return
-            }
-            lastSeriesMaterialize = Date()
-            let horizon = DateInterval(start: Date(), duration: seriesHorizon)
-            let upcoming = await (try? source.fetchUpcoming(within: horizon)) ?? []
-            entries = SeriesMaterializer.occurrencesToArm(
-                upcoming: upcoming,
-                armedSeries: store.armedSeries,
-                exceptions: store.seriesExceptions,
-                explicitlyArmed: Set(store.armed.filter { !$0.value.fromSeries }.keys),
-                handled: store.handled
+            configs[meeting.id] = ArmedConfig(
+                presetName: presetName(for: meeting), meeting: meeting
             )
         }
-        if store.setMaterializedSeries(entries) {
-            reschedule()
-        }
+        return configs
     }
 }
