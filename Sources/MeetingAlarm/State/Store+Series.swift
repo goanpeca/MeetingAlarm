@@ -3,9 +3,14 @@ import Foundation
 /// Recurring-series arming, split from `Store` to keep each file under the size limit. A series
 /// rule marks every occurrence armed; the scheduler applies it as meetings roll into its window.
 extension Store {
-    /// Arm a whole recurring series with `preset`. Clears any prior per-occurrence skips.
+    /// Arm a whole recurring series with `preset`. Clears any prior per-occurrence skips — both
+    /// the exception set and the `excludedMeetingIds` entries those skips wrote (via `exclude`) —
+    /// so arming the series again really does re-arm every occurrence.
     func armSeries(_ seriesId: String, preset: String) {
         armedSeries[seriesId] = preset
+        for id in seriesExceptions[seriesId] ?? [] {
+            excludedMeetingIds.remove(id)
+        }
         seriesExceptions[seriesId] = nil
         excludedSeriesIds.remove(seriesId)
         save()

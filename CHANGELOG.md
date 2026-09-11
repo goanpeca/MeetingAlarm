@@ -14,8 +14,8 @@ section in the same change that alters behavior.
   derived arms cover only meetings that haven't started, so it never alarms a meeting you're
   already in. Off, the app stays opt-in — only the meetings you check are armed.
 - Recurring-event support: a "Repeats" tag on recurring rows, and an in-popover prompt to arm
-  **this event only** or the **whole series**; series occurrences are materialized over a
-  rolling 60-day horizon so they fire day-to-day. Unarming asks skip-one vs. whole-series.
+  **this event only** or the **whole series**; series occurrences fire day-to-day as they roll
+  into the rolling scheduling window. Unarming asks skip-one vs. whole-series.
 - Global hot key **⌃⌥⌘M** summons a floating quick panel mirroring the menu-bar popover, so
   the app stays reachable when its menu-bar icon is hidden (e.g. behind the notch).
 - **Launch at login** toggle (Settings → Startup) via `SMAppService`.

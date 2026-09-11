@@ -103,6 +103,17 @@ struct StoreTests {
         #expect(reloaded.seriesExceptions["S1"]?.contains("occ-2") == true)
     }
 
+    @Test("Re-arming a series clears prior per-occurrence skips and their exclusions")
+    func rearmSeriesClearsSkips() {
+        let store = Store(defaults: makeDefaults())
+        store.armSeries("S1", preset: "Blast")
+        store.addSeriesException(seriesId: "S1", occurrenceId: "occ-2")
+        #expect(store.excludedMeetingIds.contains("occ-2"))
+        store.armSeries("S1", preset: "Blast")
+        #expect(store.seriesExceptions["S1"] == nil)
+        #expect(!store.excludedMeetingIds.contains("occ-2"))
+    }
+
     @Test("Excluded meetings and series persist so default alarms stay opted out")
     func exclusionsPersist() {
         let defaults = makeDefaults()
