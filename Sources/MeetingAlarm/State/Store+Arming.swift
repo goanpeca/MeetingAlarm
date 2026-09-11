@@ -37,6 +37,17 @@ extension Store {
         save()
     }
 
+    /// Drop every explicit arm, opt-out, and skip so meetings follow the auto-arm default.
+    /// Color/sound overrides, snoozes, and fired-history are left intact.
+    func clearArmChoices() {
+        armed = [:]
+        armedSeries = [:]
+        excludedMeetingIds = []
+        excludedSeriesIds = []
+        seriesExceptions = [:]
+        save()
+    }
+
     /// Set (or clear, when `isEmpty`) the per-meeting color/sound override for an occurrence.
     func setOverrides(_ id: String, _ overrides: AlarmOverrides) {
         armOverrides[id] = overrides.isEmpty ? nil : overrides

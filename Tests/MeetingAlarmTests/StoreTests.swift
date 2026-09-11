@@ -114,6 +114,23 @@ struct StoreTests {
         #expect(!store.excludedMeetingIds.contains("occ-2"))
     }
 
+    @Test("clearArmChoices drops arms, series, and exclusions but keeps overrides")
+    func clearArmChoicesResets() {
+        let store = Store(defaults: makeDefaults())
+        store.arm(meeting("m1"), preset: "Blast")
+        store.armSeries("S1", preset: "Blast")
+        store.exclude("m2")
+        store.disarmSeries("S2")
+        store.setOverrides("m1", AlarmOverrides(color: .red))
+        store.clearArmChoices()
+        #expect(store.armed.isEmpty)
+        #expect(store.armedSeries.isEmpty)
+        #expect(store.excludedMeetingIds.isEmpty)
+        #expect(store.excludedSeriesIds.isEmpty)
+        #expect(store.seriesExceptions.isEmpty)
+        #expect(store.armOverrides["m1"]?.color == .red)
+    }
+
     @Test("Excluded meetings and series persist so default alarms stay opted out")
     func exclusionsPersist() {
         let defaults = makeDefaults()

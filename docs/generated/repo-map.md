@@ -59,6 +59,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 
 | File | Purpose |
 |------|---------|
+| `Sources/MeetingAlarm/UI/AutoArmPromptView.swift` | In-popover prompt to reset every per-meeting choice when auto-arm is toggled. |
 | `Sources/MeetingAlarm/UI/ColorPanelController.swift` | Presents `NSColorPanel` in front for the accessory app. |
 | `Sources/MeetingAlarm/UI/HTMLText.swift` | HTML notes → plain, theme-aware text for the day list. |
 | `Sources/MeetingAlarm/UI/MeetingDetailView.swift` | Expanded row detail: attendees + full description. |

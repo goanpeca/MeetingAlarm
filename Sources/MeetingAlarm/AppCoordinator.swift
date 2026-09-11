@@ -17,6 +17,9 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var isPreviewingSound = false
     /// A pending recurring-scope question, shown as an in-popover overlay.
     @Published var scopePrompt: ScopePrompt?
+    /// When true, a prompt asks whether flipping auto-arm should also reset every per-meeting
+    /// choice so all future meetings follow the new setting.
+    @Published var showAutoArmPrompt = false
 
     let store: Store
     private let overlay = OverlayController()
