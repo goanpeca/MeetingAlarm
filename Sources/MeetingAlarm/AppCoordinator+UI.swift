@@ -101,20 +101,13 @@ extension AppCoordinator {
     }
 
     /// Flip auto-arm and reflect it in the schedule immediately (rather than waiting for the
-    /// next poll): reschedule now arms every in-window default-on meeting, or drops them. If the
-    /// user has individually checked/unchecked meetings, offer to reset those to the new setting.
+    /// next poll): reschedule now arms every in-window default-on meeting, or drops them. Always
+    /// ask whether to also apply the new setting to every future meeting — the prompt is shown
+    /// on every toggle so arming and unarming behave the same way.
     func setAutoArm(_ enabled: Bool) {
         store.autoArm = enabled
         reschedule()
-        showAutoArmPrompt = hasExplicitArmChoices
-    }
-
-    /// Whether any per-meeting arm/opt-out/skip choice is on record (so switching the default
-    /// leaves some future meetings not matching it).
-    var hasExplicitArmChoices: Bool {
-        !store.armed.isEmpty || !store.armedSeries.isEmpty
-            || !store.excludedMeetingIds.isEmpty || !store.excludedSeriesIds.isEmpty
-            || !store.seriesExceptions.isEmpty
+        showAutoArmPrompt = true
     }
 
     /// Clear every per-meeting arm/opt-out/skip so all meetings follow the auto-arm default.

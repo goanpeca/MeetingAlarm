@@ -30,8 +30,8 @@ section in the same change that alters behavior.
 
 ### Changed
 
-- Toggling **auto-arm** while you have individually checked/unchecked meetings now offers to
-  reset those choices so every future meeting follows the new setting (or keep them as-is).
+- Toggling **auto-arm** now asks whether to apply the new setting to every future meeting —
+  resetting your individual checked/unchecked choices — or keep those choices as-is.
 - Scheduling now reads a small **rolling 2-day window** refetched each sync instead of
   pre-arming a 60-day horizon, so meetings arm as they roll in — removing the series
   materialization subsystem (`SeriesMaterializer`, `materializeSeries`, `fromSeries`).
