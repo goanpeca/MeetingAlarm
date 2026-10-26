@@ -18,6 +18,12 @@ strays() {
 }
 
 total=$(jq '.checks | length' "$eval_file")
+# An eval with no checks can never certify anything — fail rather than vacuously pass
+# (otherwise total==passed==0 would report PASS even after an error or a stray-file change).
+if [ "$total" -eq 0 ]; then
+  echo "FAIL $name (no checks defined)"
+  exit 1
+fi
 passed=0
 report=""
 

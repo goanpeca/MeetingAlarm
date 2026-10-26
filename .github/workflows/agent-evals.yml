@@ -45,6 +45,7 @@ jobs:
           fi
           git config --global user.name evals && git config --global user.email evals@example.com
           cp -r evals /tmp/evals # grade from a copy made before any run
+          chmod -R a-w /tmp/evals # read-only so the run (Edit tool) can't rewrite its own grader
           failed=0
           for eval in /tmp/evals/*.json; do
             git worktree add -q --detach /tmp/run "$(jq -r '.from' "$eval")"

@@ -29,3 +29,13 @@ One `evals/<name>.json` per case (schema in the `sdlc-evals` skill):
 
 Grade one locally before trusting CI: it must PASS against the known-good change and FAIL
 against a deliberately bad one. The grader is [`check.sh`](check.sh).
+
+## Grader integrity
+
+The workflow copies the grader and eval definitions to `/tmp/evals` before any run and makes
+them read-only, and the agent under test is restricted to `Read, Edit, Bash(make test)` — so it
+cannot rewrite its own grader. This does **not** fully contain a malicious test the agent
+*writes*: `make test` runs as the same user and could tamper with files outside the checkout.
+For untrusted changes, run each eval in an ephemeral, sandboxed runner (fresh container/VM,
+no write access to the grader) — that enforced isolation, not the directory split alone, is the
+real guarantee.
