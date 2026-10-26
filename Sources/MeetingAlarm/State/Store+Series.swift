@@ -22,11 +22,9 @@ extension Store {
         armedSeries[seriesId] = nil
         seriesExceptions[seriesId] = nil
         seriesOverrides[seriesId] = nil
-        let occurrenceIds = armed.compactMap { id, config in
-            config.meeting.seriesId == seriesId ? id : nil
-        }
-        armed = armed.filter { $0.value.meeting.seriesId != seriesId }
+        let occurrenceIds = armed.filter { $0.value.meeting.seriesId == seriesId }.keys
         for id in occurrenceIds {
+            armed[id] = nil
             snoozes[id] = nil
             armOverrides[id] = nil
             handled.remove(id)

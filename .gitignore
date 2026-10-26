@@ -25,3 +25,6 @@ dist/
 
 # Mutation testing (muter)
 muter_logs/
+
+# Pinned lint/format binaries (make tools)
+.tools/

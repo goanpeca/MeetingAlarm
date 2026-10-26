@@ -16,7 +16,7 @@ private final class OverlayWindow: NSWindow {
 /// Presents the alarm overlay on every screen as a modal, can't-escape surface: it covers
 /// all displays, hides the Dock/menu bar, and disables app switching — the only ways out
 /// are Snooze, a Join link, or Dismiss (which may require solving the configured puzzle).
-/// Esc dismisses only when no dismiss challenge is set.
+/// Esc always dismisses, regardless of the puzzle (see `OverlayKey`).
 @MainActor
 final class OverlayController {
     private var windows: [NSWindow] = []
@@ -79,7 +79,7 @@ final class OverlayController {
         // Esc always dismisses — the guaranteed escape hatch, even when the Dismiss button
         // is puzzle-gated, so the overlay can never trap the user.
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.keyCode == 53 { // Esc
+            if OverlayKey.dismisses(keyCode: event.keyCode, challenge: challenge) {
                 dismissAll()
                 return nil
             }

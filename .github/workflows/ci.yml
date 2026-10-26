@@ -46,8 +46,8 @@ jobs:
       - name: Markdown link check
         run: ./scripts/check-links.sh
 
-      - name: Install SwiftFormat & SwiftLint
-        run: brew install swiftformat swiftlint
+      - name: Install pinned SwiftFormat & SwiftLint
+        run: ./scripts/install-tools.sh
 
       - name: Format check
         run: swiftformat --lint .

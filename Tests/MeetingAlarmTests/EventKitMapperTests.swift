@@ -43,6 +43,14 @@ struct EventKitMapperTests {
         #expect(meeting.title == "(No title)")
     }
 
+    @Test("A missing (nil) title falls back to the placeholder; a real title is kept")
+    func nilTitle() throws {
+        let missing = try #require(EventKitMapper.meeting(fields(title: nil)))
+        #expect(missing.title == "(No title)")
+        let named = try #require(EventKitMapper.meeting(fields(title: "Planning")))
+        #expect(named.title == "Planning")
+    }
+
     @Test("A video link in the notes becomes a join URL")
     func extractsJoinURL() throws {
         let meeting = try #require(EventKitMapper.meeting(

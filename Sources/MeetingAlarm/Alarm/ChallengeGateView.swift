@@ -52,13 +52,9 @@ struct ChallengeGateView: View {
     }
 
     private func check() {
-        let trimmed = input.trimmingCharacters(in: .whitespaces)
-        switch challenge {
-        case .math where Int(trimmed) == factorA * factorB:
+        if challenge.isSolved(input: input, factorA: factorA, factorB: factorB) {
             onSolved()
-        case .typePhrase where trimmed.uppercased() == DismissChallenge.phrase:
-            onSolved()
-        default:
+        } else {
             input = ""
         }
     }

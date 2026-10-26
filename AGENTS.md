@@ -61,7 +61,7 @@ mechanically (see `check-docs`). By layer:
 ```bash
 make build         # swift build
 make test          # swift test
-make coverage      # tests + coverage gate (>= 85% on the pure core)
+make coverage      # tests + coverage gate (>= 90% on the pure core)
 make check-layers  # architectural import purity
 make check-docs    # module map (docs) stays in sync with Sources/
 make check-workflows # GitHub Actions workflow YAML is valid
@@ -70,6 +70,7 @@ make lint          # swiftlint --strict
 make format        # swiftformat . (format-check = --lint)
 make scan          # all mechanical checks together (fast: no build/test)
 make ci            # the exact gate CI runs — reproduce locally before pushing
+make tools         # install the pinned swiftformat/swiftlint into .tools/bin (auto-run by scan/ci)
 make hooks         # install pre-commit (scan) + pre-push (ci) git hooks
 make mutation      # muter mutation testing (slow, on demand; tests the tests)
 make release VERSION=X.Y.Z  # prepare a release: gate + roll CHANGELOG + bump version
@@ -81,7 +82,8 @@ Run `make hooks` once after cloning: commits are then gated by `make scan` and p
 `make ci`, so drift and build/test breakage never reach CI.
 
 Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-version` and via
-`setup-xcode` in CI), macOS 14+. Install lint/format once with `brew install swiftformat swiftlint`.
+`setup-xcode` in CI), macOS 14+. Lint/format tools are pinned in `scripts/tool-versions.env` and installed
+by `make tools` (run automatically by `make scan` / `make ci`), so local == CI.
 
 ## Non-negotiable invariants
 
