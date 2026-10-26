@@ -1,0 +1,32 @@
+# Non-core source files: thin AppKit / SwiftUI / IO shells that are verified manually,
+# not unit-tested. Single source of truth, read by BOTH the coverage gate
+# (scripts/coverage-gate.sh) and mutation testing (scripts/mutation-core-files.sh), so the
+# "what counts as the testable core" list can never drift between them.
+# One basename per line; blank lines and #-comments are ignored.
+App.swift
+Logging.swift
+LoginItem.swift
+GlobalHotKey.swift
+SoundPlayer.swift
+OverlayController.swift
+OverlayView.swift
+ChallengeGateView.swift
+NotesView.swift
+MeetingProvider.swift
+EventKitSource.swift
+AlarmScheduler.swift
+AppCoordinator.swift
+AppCoordinator+Sources.swift
+AppCoordinator+UI.swift
+AppCoordinator+Scheduling.swift
+MenuContentView.swift
+MeetingRow.swift
+MeetingDetailView.swift
+MeetingOverridesView.swift
+ScopePromptView.swift
+AutoArmPromptView.swift
+HTMLText.swift
+SystemAccent.swift
+ColorPanelController.swift
+QuickPanel.swift
+SettingsView.swift

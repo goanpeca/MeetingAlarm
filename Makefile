@@ -75,7 +75,7 @@ hooks:
 ## Install once: brew install muter-mutation-testing/formulae/muter
 mutation:
 	swift package clean
-	muter run --skip-update-check
+	muter run --skip-update-check --files-to-mutate $(shell ./scripts/mutation-core-files.sh | paste -sd, -)
 
 ## release: prepare a release (gate + roll CHANGELOG + bump version). Usage: make release VERSION=X.Y.Z
 release:

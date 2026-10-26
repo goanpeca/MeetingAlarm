@@ -10,9 +10,11 @@ cd "$(dirname "$0")/.."
 
 THRESHOLD="${COVERAGE_THRESHOLD:-85}"
 CORE_GLOB="${CORE_GLOB:-/Sources/MeetingAlarm/}"
-# Thin AppKit/EventKit/URLSession/SwiftUI shells are verified manually (design §13),
-# so they are excluded from the measured pure-logic denominator.
-EXCLUDE="${EXCLUDE:-App.swift Logging.swift Keychain.swift LoginItem.swift SoundPlayer.swift OverlayController.swift OverlayView.swift ChallengeGateView.swift NotesView.swift MeetingProvider.swift EventKitSource.swift GoogleCalendarSource.swift GoogleAuth.swift LoopbackServer.swift AlarmScheduler.swift AppCoordinator.swift AppCoordinator+Sources.swift AppCoordinator+UI.swift AppCoordinator+Scheduling.swift MenuContentView.swift MeetingRow.swift MeetingDetailView.swift MeetingOverridesView.swift ScopePromptView.swift AutoArmPromptView.swift HTMLText.swift SystemAccent.swift ColorPanelController.swift GlobalHotKey.swift QuickPanel.swift SettingsView.swift}"
+# Thin AppKit/EventKit/URLSession/SwiftUI shells are verified manually (design §13), so they
+# are excluded from the measured pure-logic denominator. The list lives in one shared file
+# (scripts/non-core-files.txt) so the coverage gate and mutation testing can't disagree on
+# what the testable core is.
+EXCLUDE="${EXCLUDE:-$(grep -vE '^[[:space:]]*(#|$)' "$(dirname "$0")/non-core-files.txt" | tr '\n' ' ')}"
 
 BIN="$(swift build --show-bin-path)"
 PROFDATA="$BIN/codecov/default.profdata"

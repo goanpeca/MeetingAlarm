@@ -8,6 +8,10 @@ arguments:
 - swift
 - test
 executable: /usr/bin/env
+# Which files get mutated is controlled by `make mutation` via `muter run --files-to-mutate`
+# (see scripts/mutation-core-files.sh): only the pure, tested core, never the SwiftUI/AppKit
+# shells. (Mutating a SwiftUI `@ViewBuilder` body is impossible — Muter's injected `return`
+# branches are illegal there — and mutating untested shells is pointless.)
 exclude:
 - Package.swift
 excludeCalls: []
