@@ -13,7 +13,11 @@ struct StorePersistenceTests {
         UserDefaults(suiteName: "test.\(UUID().uuidString)") ?? .standard
     }
 
-    private func meeting(_ id: String, seriesId: String? = nil, start: TimeInterval = 4000) -> Meeting {
+    private func meeting(
+        _ id: String,
+        seriesId: String? = nil,
+        start: TimeInterval = 4000
+    ) -> Meeting {
         Meeting(
             id: id, title: "Event",
             start: Date(timeIntervalSince1970: start),

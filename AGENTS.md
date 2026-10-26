@@ -107,11 +107,15 @@ docs we already keep — no separate `intent/` tree:
 | `spec.md` | `docs/design-docs/<slug>.md` (+ index row, verification status) |
 | `plan.md` | `docs/exec-plans/active/<slug>.md` → `completed/` at merge |
 | policy skill / build hook | a rule in `docs/` + a lint wired into `make ci` |
+| review passes | [`REVIEW.md`](REVIEW.md) (bugs / security / compliance), run via `sdlc-pr-review` |
+| config evals | [`evals/`](evals/) + `.github/workflows/agent-evals.yml` (starter — see `evals/README.md`) |
 | required check | the full gate `make ci`, mirrored in CI |
 
-**Gate posture** (playbook §4 dial): minimal blocking gates — `make ci` green before push,
-human review optional. Moving toward the playbook's code-owner-approval end is a
-change-management decision; record it here if it changes.
+**Gate posture** (playbook §4 dial): **single-maintainer, minimal gates.** The author is the
+sole owner and approver: self-merge once `make ci` is green and the [`REVIEW.md`](REVIEW.md)
+passes are clean; human review optional. No code-owner-approval requirement, approval hooks, or
+managed settings/sandbox (N/A for a solo project). Revisit and record here if the project gains
+other maintainers.
 
 ## Conventions
 

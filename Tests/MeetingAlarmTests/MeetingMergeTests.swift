@@ -20,4 +20,15 @@ struct MeetingMergeTests {
         let result = MeetingMerge.merged([first, second])
         #expect(result.map(\.id) == ["a1", "b0", "b1", "a2"])
     }
+
+    @Test("Equal-start meetings break the tie by id, independent of account order")
+    func tieBreaksById() {
+        // Both start at the same instant but arrive out of id order (and reversed between
+        // accounts). Only a (start, id) sort yields id order both ways — a start-only sort
+        // leaves them in fetch order, so this fails a sort that ignores the id tie-breaker.
+        let first = [meeting("z", 100)]
+        let second = [meeting("a", 100)]
+        #expect(MeetingMerge.merged([first, second]).map(\.id) == ["a", "z"])
+        #expect(MeetingMerge.merged([second, first]).map(\.id) == ["a", "z"])
+    }
 }

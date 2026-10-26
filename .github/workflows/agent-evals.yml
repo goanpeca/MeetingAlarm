@@ -1,0 +1,63 @@
+name: Agent evals
+
+# Regression-tests the agent's configuration (AGENTS.md/CLAUDE.md, .claude/**, evals/**) — the
+# sdlc-evals play. STARTER: manual-only for now so it never blocks a PR before it can work.
+# To enable as a gate (see evals/README.md): add the ANTHROPIC_API_KEY repo secret, write real
+# cases, then uncomment the pull_request + schedule triggers below and add the Dependabot guard
+# to the job (per the repo CLAUDE.md), and make it a required check.
+on:
+  workflow_dispatch:
+  # pull_request:
+  #   paths: ['AGENTS.md', 'CLAUDE.md', '.claude/**', 'evals/**']
+  # schedule:
+  #   - cron: '0 2 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # each eval starts from an older commit
+          persist-credentials: false
+
+      # Pin the toolchain so `make test` (swift-testing) resolves, same as ci.yml.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Install Claude Code
+        # The eval runner needs the Claude Code CLI globally; there is no project lockfile for it.
+        run: npm install -g @anthropic-ai/claude-code # zizmor: ignore[adhoc-packages]
+
+      - name: Run eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY is not set — add it as a repo secret to run evals."
+            exit 1
+          fi
+          git config --global user.name evals && git config --global user.email evals@example.com
+          cp -r evals /tmp/evals # grade from a copy made before any run
+          chmod -R a-w /tmp/evals # read-only so the run (Edit tool) can't rewrite its own grader
+          failed=0
+          for eval in /tmp/evals/*.json; do
+            git worktree add -q --detach /tmp/run "$(jq -r '.from' "$eval")"
+            rm -rf /tmp/run/evals /tmp/run/.claude # keep the checks out of the run's checkout
+            cp -r AGENTS.md CLAUDE.md .claude /tmp/run/ # the configuration under test
+            git -C /tmp/run add -A && git -C /tmp/run commit -q --allow-empty -m "configuration under test"
+            ( cd /tmp/run
+              claude -p "$(jq -r '.prompt' "$eval")" \
+                --allowedTools "Read,Edit,Bash(make test)" \
+                --output-format json > /tmp/result.json
+              /tmp/evals/check.sh "$eval" /tmp/result.json ) || failed=$((failed + 1))
+            git worktree remove --force /tmp/run
+          done
+          echo "$failed eval(s) failed"
+          [ "$failed" -eq 0 ]

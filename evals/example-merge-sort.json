@@ -1,0 +1,11 @@
+{
+  "name": "merge-sort-stable",
+  "source": "Commit ed7a172 — tuple-compare merge sort",
+  "from": "413f996",
+  "prompt": "In MeetingMerge.merged, make the sort order meetings by start time, then by id for ties, so the result is stable regardless of account fetch order. Run `make test` before you finish.",
+  "may_change": ["Sources/MeetingAlarm/Calendar/MeetingMerge.swift", "Tests"],
+  "checks": [
+    { "name": "tests pass", "run": "make test" },
+    { "name": "no line removed from existing tests", "run": "! git diff HEAD -- Tests | grep '^-[^-]'" }
+  ]
+}

@@ -1,0 +1,10 @@
+# zizmor configuration — GitHub Actions security audit.
+# This repo pins actions by major tag (actions/checkout@v7, …) and lets Dependabot bump them,
+# rather than by commit SHA. Relax the unpinned-uses blanket "hash-pin" policy to "ref-pin"
+# (a tag or branch is required, a bare/floating ref is not) so that convention passes while
+# still catching genuinely unpinned uses.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "*": ref-pin
