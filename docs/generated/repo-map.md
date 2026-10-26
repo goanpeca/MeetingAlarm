@@ -20,6 +20,7 @@ Layers point up only (see [`overview.md`](../../ARCHITECTURE.md)); the folder is
 | `Sources/MeetingAlarm/Models/AlarmOverrides.swift` | Per-meeting color/sound overrides of the global alarm settings (pure). |
 | `Sources/MeetingAlarm/Models/Meeting.swift` | Normalized meeting occurrence: stable id, join URLs, notes, attendees, `seriesId`. |
 | `Sources/MeetingAlarm/Models/OccurrenceKey.swift` | Stable per-day key so armed state survives same-day time edits. |
+| `Sources/MeetingAlarm/Models/OverlayKey.swift` | Pure overlay keyboard policy: Esc always dismisses, whatever the dismiss challenge. |
 | `Sources/MeetingAlarm/Models/ScopePrompt.swift` | Pending "this event / whole series" question for a recurring action. |
 | `Sources/MeetingAlarm/Models/SensoryProfile.swift` | Alarm visual/sound profile + presets; `RGBAColor`, `Effect`. |
 
