@@ -5,8 +5,6 @@ import Foundation
 /// list is stable regardless of account fetch order.
 enum MeetingMerge {
     static func merged(_ groups: [[Meeting]]) -> [Meeting] {
-        groups.flatMap(\.self).sorted {
-            $0.start == $1.start ? $0.id < $1.id : $0.start < $1.start
-        }
+        groups.flatMap(\.self).sorted { ($0.start, $0.id) < ($1.start, $1.id) }
     }
 }
