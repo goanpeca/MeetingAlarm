@@ -9,12 +9,17 @@ on:
     - cron: "0 6 * * 0" # Sundays 06:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   mutation:
     runs-on: macos-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       # Pin the toolchain so results are reproducible (macos-latest's Xcode drifts).
       - name: Select Xcode

@@ -1,0 +1,27 @@
+name: Zizmor
+
+# Static security audit of the GitHub Actions workflows themselves (https://zizmor.sh):
+# catches template injection, credential persistence, over-broad permissions, and unpinned
+# or confusable action refs. Policy is tuned in .github/zizmor.yml. Fails the build on findings.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    if: ${{ github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install zizmor
+        run: pipx install zizmor
+
+      - name: Audit workflows
+        run: zizmor --offline .
