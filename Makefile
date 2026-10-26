@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := build
 .PHONY: tools build run app test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
 
 APP = MeetingAlarm.app
