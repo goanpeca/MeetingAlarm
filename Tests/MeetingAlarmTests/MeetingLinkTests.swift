@@ -63,4 +63,32 @@ struct MeetingLinkTests {
         #expect(urls.first?.host == "backblaze.zoom.us")
         #expect(urls.first?.path.hasPrefix("/j/") == true)
     }
+
+    @Test("Zoom links on different hosts/subdomains collapse to one provider button")
+    func zoomSubdomainsShareOneProvider() {
+        let urls = MeetingLink.detectAll(
+            explicit: nil,
+            texts: ["https://zoom.us/j/111 or https://us02web.zoom.us/j/222"]
+        )
+        #expect(urls.count == 1)
+    }
+
+    @Test("Meet and Zoom stay separate providers even when each appears on a subdomain")
+    func distinctProvidersStaySeparate() {
+        let urls = MeetingLink.detectAll(
+            explicit: nil,
+            texts: ["https://us02web.zoom.us/j/222 and https://meet.google.com/abc-defg-hij"]
+        )
+        #expect(urls.count == 2)
+    }
+
+    @Test("A non-join Zoom docs link alone is not treated as a join link")
+    func zoomDocsIsNotAJoin() {
+        let urls = MeetingLink.detectAll(
+            explicit: nil, texts: ["https://docs.zoom.us/agenda/doc/11b3"]
+        )
+        // No join link exists, so detection falls back to the single first URL.
+        #expect(urls.count == 1)
+        #expect(urls.first?.host == "docs.zoom.us")
+    }
 }

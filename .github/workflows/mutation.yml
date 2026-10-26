@@ -33,7 +33,7 @@ jobs:
       - name: Run mutation testing (fail below the floor)
         run: make mutation
         env:
-          MUTATION_MIN: "45"
+          MUTATION_MIN: "85"
 
       - name: Upload Muter report
         if: always()

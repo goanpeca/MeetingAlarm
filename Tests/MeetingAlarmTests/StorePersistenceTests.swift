@@ -56,6 +56,19 @@ struct StorePersistenceTests {
         #expect(reloaded.snoozes["future"] != nil)
     }
 
+    @Test("prunePastSnoozes drops a snooze due exactly now (boundary is exclusive)")
+    func pruneBoundary() {
+        let defaults = makeDefaults()
+        let store = Store(defaults: defaults)
+        let now = Date(timeIntervalSince1970: 5000)
+        store.setSnooze("exactly-now", at: now)
+        store.setSnooze("just-after", at: now.addingTimeInterval(1))
+        store.prunePastSnoozes(now: now)
+        #expect(store.snoozes["exactly-now"] == nil)
+        #expect(store.snoozes["just-after"] != nil)
+        #expect(Store(defaults: defaults).snoozes["exactly-now"] == nil)
+    }
+
     // MARK: Per-occurrence arming
 
     @Test("arm persists and un-handles the occurrence")
