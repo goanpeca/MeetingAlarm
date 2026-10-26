@@ -1,6 +1,14 @@
-.PHONY: build run app test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
+.PHONY: tools build run app test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
 
 APP = MeetingAlarm.app
+
+# Pinned swiftformat/swiftlint (scripts/tool-versions.env) live in .tools/bin and win on PATH,
+# so local and CI run the exact same binaries.
+export PATH := $(CURDIR)/.tools/bin:$(PATH)
+
+## tools: install the pinned swiftformat + swiftlint into .tools/bin (checksum-verified)
+tools:
+	./scripts/install-tools.sh
 
 ## build: compile the package
 build:
@@ -24,15 +32,15 @@ coverage:
 	./scripts/coverage-gate.sh
 
 ## lint: SwiftLint (strict)
-lint:
+lint: tools
 	swiftlint --strict
 
 ## format: apply SwiftFormat in place
-format:
+format: tools
 	swiftformat .
 
 ## format-check: verify formatting without changing files
-format-check:
+format-check: tools
 	swiftformat --lint .
 
 ## check-layers: enforce architectural import purity
@@ -55,7 +63,7 @@ check-links:
 scan: check-layers check-docs check-workflows check-links format-check lint
 
 ## ci: the exact gate GitHub runs — reproduce it locally before pushing
-ci:
+ci: tools
 	swift build -Xswiftc -warnings-as-errors
 	swift test --enable-code-coverage
 	./scripts/coverage-gate.sh
