@@ -92,6 +92,27 @@ Tooling: Swift 6.3 / **Xcode 26** (pinned for reproducible builds in `.xcode-ver
 - **Every source file is in the [module map](docs/generated/repo-map.md)** — a new file
   needs a one-line row in the same change. (Enforced by `check-docs`.)
 
+## AI-native SDLC (playbook)
+
+This repo pairs **harness engineering** (the substrate above) with the **AI-native SDLC
+playbook**, installed as skills in [`.claude/skills/`](.claude/skills/). Begin a change by
+invoking **`ai-native-sdlc`**, which routes to the right stage skill (`sdlc-intent` →
+`sdlc-spec` → `sdlc-plan` → build → `sdlc-pr-review` …); `sdlc-harness-translate` maps
+playbook artifacts onto this repo's harness ones. The intent → spec → plan flow uses the
+docs we already keep — no separate `intent/` tree:
+
+| Playbook artifact | Here |
+|---|---|
+| `intent.md` | `docs/product-specs/<slug>.md` |
+| `spec.md` | `docs/design-docs/<slug>.md` (+ index row, verification status) |
+| `plan.md` | `docs/exec-plans/active/<slug>.md` → `completed/` at merge |
+| policy skill / build hook | a rule in `docs/` + a lint wired into `make ci` |
+| required check | the full gate `make ci`, mirrored in CI |
+
+**Gate posture** (playbook §4 dial): minimal blocking gates — `make ci` green before push,
+human review optional. Moving toward the playbook's code-owner-approval end is a
+change-management decision; record it here if it changes.
+
 ## Conventions
 
 Full list: [`docs/design-docs/conventions.md`](docs/design-docs/conventions.md). In short: add
