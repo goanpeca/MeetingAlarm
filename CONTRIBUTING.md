@@ -7,9 +7,12 @@ natively; Claude Code imports it via `CLAUDE.md`).
 ## First time
 
 ```bash
-brew install swiftformat swiftlint
 make hooks   # installs pre-commit (make scan) + pre-push (make ci)
 ```
+
+The lint/format tools are **pinned** (`scripts/tool-versions.env`, checksum-verified) and
+installed into `.tools/bin` automatically by `make scan` / `make ci` (or run `make tools`), so
+local and CI always run the exact same swiftformat/swiftlint — no `brew install` needed.
 
 ## The loop
 
@@ -21,6 +24,8 @@ make hooks   # installs pre-commit (make scan) + pre-push (make ci)
   to check the tests actually catch regressions. Slow, so it runs weekly in CI
   (`.github/workflows/mutation.yml`, also `workflow_dispatch`) rather than per push; run it
   locally any time. Install once: `brew install muter-mutation-testing/formulae/muter`.
+  CI fails the run below a mutation-score floor (`MUTATION_MIN`); reproduce with
+  `MUTATION_MIN=<n> make mutation`.
 
 Never push red — the pre-push hook runs `make ci`, so fix it locally first. Bypass a hook
 only in a genuine emergency with `--no-verify`.
@@ -28,7 +33,7 @@ only in a genuine emergency with `--no-verify`.
 ## Golden rules (mechanically enforced)
 
 - Files ≤ 250 lines; the pure core stays pure (`check-layers`); every source file appears in
-  the [module map](docs/generated/repo-map.md) (`check-docs`); ≥ 85% coverage on the core.
+  the [module map](docs/generated/repo-map.md) (`check-docs`); ≥ 90% coverage on the core.
 - Commits: one line, < 72 chars, Conventional-Commit prefix (`feat:`/`fix:`/`docs:`/…),
   **no AI attribution of any kind**.
 - Behavior changes update the `[Unreleased]` section of [`CHANGELOG.md`](CHANGELOG.md).

@@ -1,7 +1,7 @@
 # Meeting Alarm
 
 [![CI](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml/badge.svg)](https://github.com/goanpeca/MeetingAlarm/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](docs/QUALITY_SCORE.md)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A590%25-brightgreen)](docs/QUALITY_SCORE.md)
 ![Platform](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-6.3-orange)
 
@@ -41,7 +41,8 @@ Click the menu-bar bell to open the popover:
 
 - macOS 14+ (developed on macOS 26)
 - Xcode 26 / Swift 6.3
-- Optional: `brew install swiftformat swiftlint` for lint/format targets
+- Lint/format tools are pinned and installed automatically by `make scan` / `make ci`
+  (or `make tools`) — nothing to `brew install`
 
 ## Build & run
 
