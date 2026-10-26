@@ -1,0 +1,57 @@
+name: CodeQL
+
+# Static analysis of the app code (Swift) and of the GitHub Actions workflows themselves.
+# Complements zizmor (workflow-specific audit) and the lint/format gate. Results land in the
+# repo's Security -> Code scanning tab. Swift needs a real build, so it uses build-mode: manual.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    if: ${{ github.actor != 'dependabot[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' }}
+    name: Analyze (${{ matrix.language }})
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write # upload SARIF results to code scanning
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: swift
+            build-mode: manual
+          - language: actions
+            build-mode: none
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Pin the toolchain so the analysed build matches ci.yml.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build (Swift)
+        if: matrix.language == 'swift'
+        run: swift build
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
