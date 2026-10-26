@@ -1,0 +1,39 @@
+name: Mutation Testing
+
+# Mutation testing checks that the tests actually fail when the code is broken — it mutates
+# the source and expects a test to catch each change. It is slow, so it runs on a schedule
+# (and on demand) rather than on every push/PR, mirroring quality-scan.yml. Run it locally
+# any time with `make mutation`.
+on:
+  schedule:
+    - cron: "0 6 * * 0" # Sundays 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  mutation:
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      # Pin the toolchain so results are reproducible (macos-latest's Xcode drifts).
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Install Muter
+        run: brew install muter-mutation-testing/formulae/muter
+
+      - name: Run mutation testing
+        run: make mutation
+
+      - name: Upload Muter report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: muter-report
+          path: |
+            muter-report.*
+            **/muter-report.*
+          if-no-files-found: ignore
