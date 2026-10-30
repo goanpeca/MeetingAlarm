@@ -76,6 +76,7 @@ make mutation      # muter mutation testing (slow, on demand; tests the tests)
 make release VERSION=X.Y.Z  # prepare a release: gate + roll CHANGELOG + bump version
 make app           # assemble + ad-hoc-sign MeetingAlarm.app
 make run           # build app bundle and open it
+make install       # build + sign, then install into /Applications (one copy, with icon)
 ```
 
 Run `make hooks` once after cloning: commits are then gated by `make scan` and pushes by

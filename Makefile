@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := build
-.PHONY: tools build run app test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
+.PHONY: tools build run app install test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
 
 APP = MeetingAlarm.app
 
@@ -18,6 +18,10 @@ build:
 ## app: assemble + sign MeetingAlarm.app (auto-creates a stable dev identity)
 app:
 	./scripts/make_app.sh
+
+## install: build + sign, then install into /Applications (one registered copy, with icon)
+install: app
+	./scripts/install.sh
 
 ## run: build the app bundle and launch it
 run: app
