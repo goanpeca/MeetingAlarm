@@ -102,6 +102,12 @@ arbitrary.
   `AppCoordinator+Scheduling.swift:27-28`, and any alarm whose meeting ends while it waits is
   dropped by `AlarmScheduler.swift:43`. This matches the existing rule that auto-arm never
   full-screens a meeting already in progress. No queue that outlives those rules is added.
+- **D6. Every overlay close re-evaluates waiting alarms.** The scheduler's own close callbacks
+  already end in `reschedule()`. The Settings test alarm (`AppCoordinator.testAlarm`) presents
+  through the same `OverlayController` but bypasses the scheduler, so its `onSnooze` /
+  `onDismiss` also call `reschedule()` after stopping the sound. Without this, a real alarm that
+  came due during a test would wait until the next sync (up to 30 s), and a derived alarm whose
+  meeting started in that window would be dropped (D5).
 
 **Rejected**
 
@@ -121,8 +127,9 @@ arbitrary.
 ## Out of scope
 
 - [goanpeca/MeetingAlarm#9](https://github.com/goanpeca/MeetingAlarm/issues/9) (snooze handling).
-- Changing the Settings **Test alarm** (`AppCoordinator.testAlarm`). With D1 a real alarm that
-  comes due while a test overlay is open now waits instead of replacing it; no code change there.
+- Any other change to the Settings **Test alarm** (`AppCoordinator.testAlarm`). With D1 a real
+  alarm that comes due while a test overlay is open waits instead of replacing it; the test
+  overlay's close callbacks therefore call `reschedule()` (D6), and nothing else changes there.
 - Any change to `handled`, `Store`, `activeArmedConfigs`, `OverlayView`, `ChallengeGateView`,
   `OverlayKey`, or the sync interval. `OverlayController` changes only by the one read-only
   property in D1.
@@ -136,7 +143,7 @@ arbitrary.
 - `reschedule` calls `cancelAll()` first; that is unchanged.
 - `AlarmScheduler.swift` and `OverlayController.swift` are excluded from coverage and mutation.
   Only `AlarmMath.fireAction` is unit-tested; the gate wiring, the ordering (D4), and the
-  closure ordering are covered by the manual checks M1–M7 only. Do not claim otherwise in the PR.
+  closure ordering are covered by the manual checks M1–M8 only. Do not claim otherwise in the PR.
 - The red step for T1 is a compile error (the function does not exist yet), not a failing
   assertion.
 - Local builds with only the Command Line Tools (Swift 6.4 / macOS 27 SDK) fail on SwiftUI
@@ -151,6 +158,8 @@ arbitrary.
 - Modify: `Sources/MeetingAlarm/Alarm/OverlayController.swift` — read-only `isPresenting`.
 - Modify: `Sources/MeetingAlarm/Alarm/AlarmScheduler.swift` — sort by target, use `fireAction`,
   gate in `fire`, log waits.
+- Modify: `Sources/MeetingAlarm/AppCoordinator.swift` — test-alarm close callbacks call
+  `reschedule()` (D6).
 - Modify: `docs/design-docs/2026-08-26-meeting-alarm-design.md` — one bullet in §17.
 - Modify: `CHANGELOG.md` — `[Unreleased]` → `### Fixed` entry.
 
@@ -171,7 +180,7 @@ T2 — OverlayController.isPresenting (read-only)
 T3 — Scheduler: sort by target, route through fireAction, gate fire(), log waits
      files:   Sources/MeetingAlarm/Alarm/AlarmScheduler.swift
      depends: [depends on: T1, T2]
-     verify:  swift build -Xswiftc -warnings-as-errors && make scan → OK; manual M1–M7
+     verify:  swift build -Xswiftc -warnings-as-errors && make scan → OK; manual M1–M8
 
 T4 — Docs + changelog
      files:   docs/design-docs/2026-08-26-meeting-alarm-design.md, CHANGELOG.md
@@ -380,6 +389,9 @@ Setup: `make app && open MeetingAlarm.app`; Settings → Dismiss challenge = Mat
 - **M7 (derived alarm dropped, D5):** with Settings → Auto-arm on, leave an explicit alarm A on
   screen past the **start** of an auto-armed meeting B. Expected: after closing A, B does not
   fire (its meeting has started); this is the accepted D5 behaviour.
+- **M8 (test alarm releases the queue, D6):** open Settings → Test alarm and keep it on screen
+  past the fire time of a real armed alarm. Expected: a `waiting` line for the real alarm; when
+  the test overlay is dismissed or snoozed, the real alarm presents immediately.
 
 - [ ] **Step 5: Commit**
 
@@ -442,6 +454,7 @@ git commit -m "docs: record one-overlay-at-a-time scheduling rule"
 | Queued alarm fires after close / snooze | M3, M5 | manual |
 | Wake does not re-present | M6 | manual |
 | D5 limitation behaves as documented | M7 | manual |
+| Test alarm close re-evaluates waiting alarms (D6) | M8 | manual |
 | Esc always dismisses | M4; `OverlayKeyTests` unchanged and green | manual + unit |
 | Gates | `make ci` green | CI |
 
@@ -453,7 +466,7 @@ the manual checks cover it.
 Run: `make ci` (locally prefix `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk`
 when only the Command Line Tools are installed).
 Expected: every step green; the `AlarmMath` suite shows 6 passing tests; coverage gate ≥ 90%.
-Then M1–M7 pass on a locally built `MeetingAlarm.app`.
+Then M1–M8 pass on a locally built `MeetingAlarm.app`.
 
 ## Progress
 
@@ -467,6 +480,9 @@ Then M1–M7 pass on a locally built `MeetingAlarm.app`.
   format, lint (0 violations). Built with the Command Line Tools only, using
   `SDKROOT=…/MacOSX26.5.sdk`, `--build-system native`, and the Swift Testing framework and plugin
   paths from the Command Line Tools. Manual checks M1–M7 not yet run.
+- 2026-10-30 — PR #11 review (Copilot): closing the Settings test alarm did not reschedule, so
+  a real alarm that came due during a test waited until the next sync. Added D6 and M8; the
+  test overlay's close callbacks now call `reschedule()`.
 
 ## Decision log
 
@@ -477,3 +493,5 @@ Then M1–M7 pass on a locally built `MeetingAlarm.app`.
   scheduler.
 - 2026-10-30 — Accepted D5: waiting alarms follow the existing arming rules rather than a
   persistent queue.
+- 2026-10-30 — Added D6 after review: every overlay close, including the test alarm's, ends in
+  `reschedule()`. This reverses the earlier "no code change to the test alarm" scope note.
