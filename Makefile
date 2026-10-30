@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
-.PHONY: tools build run app install test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
+.PHONY: tools build run app install test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation changeset changelog release clean
 
-APP = MeetingAlarm.app
+APP = Meeting Alarm.app
 
 # Pinned swiftformat/swiftlint (scripts/tool-versions.env) live in .tools/bin and win on PATH,
 # so local and CI run the exact same binaries.
@@ -15,7 +15,7 @@ tools:
 build:
 	swift build
 
-## app: assemble + sign MeetingAlarm.app (auto-creates a stable dev identity)
+## app: assemble + sign "Meeting Alarm.app" (auto-creates a stable dev identity)
 app:
 	./scripts/make_app.sh
 
@@ -25,7 +25,7 @@ install: app
 
 ## run: build the app bundle and launch it
 run: app
-	open $(APP)
+	open "$(APP)"
 
 ## test: run the unit tests
 test:
@@ -89,11 +89,19 @@ hooks:
 mutation:
 	./scripts/run-mutation.sh
 
-## release: prepare a release (gate + roll CHANGELOG + bump version). Usage: make release VERSION=X.Y.Z
+## changeset: add a CHANGELOG changeset (changie new) — do this instead of editing CHANGELOG.md
+changeset:
+	changie new
+
+## changelog: regenerate CHANGELOG.md from the changesets (changie merge)
+changelog:
+	changie merge -u "## [Unreleased]"
+
+## release: prepare a release (gate + batch changesets + bump version). Usage: make release VERSION=X.Y.Z
 release:
 	./scripts/release.sh $(VERSION)
 
 ## clean: remove build products
 clean:
 	swift package clean
-	rm -rf $(APP) .build
+	rm -rf "$(APP)" .build

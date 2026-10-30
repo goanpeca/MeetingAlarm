@@ -9,6 +9,7 @@ Package.resolved
 DerivedData/
 
 # Build output
+Meeting Alarm.app/
 MeetingAlarm.app/
 *.dSYM/
 

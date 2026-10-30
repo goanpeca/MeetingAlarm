@@ -14,8 +14,13 @@ if [ -n "$(git status --porcelain)" ]; then
     echo "working tree not clean — commit or stash first."
     exit 1
 fi
-if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
-    echo "CHANGELOG.md has no '## [Unreleased]' section."
+if ! command -v changie >/dev/null; then
+    echo "changie not found — install it: brew install changie"
+    exit 1
+fi
+# Count real changesets only — .changes/unreleased/.gitkeep keeps the dir tracked when empty.
+if [ -z "$(find .changes/unreleased -name '*.yaml' -print -quit 2>/dev/null)" ]; then
+    echo "no changesets in .changes/unreleased — add one with 'make changeset' first."
     exit 1
 fi
 if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
@@ -26,12 +31,9 @@ fi
 echo "==> Verifying the full gate (make ci)"
 make ci
 
-DATE="$(date +%Y-%m-%d)"
-echo "==> Rolling CHANGELOG.md: [Unreleased] -> [${VERSION}] — ${DATE}"
-awk -v v="$VERSION" -v d="$DATE" '
-    /^## \[Unreleased\]/ && !done { print; print ""; print "## [" v "] — " d; done=1; next }
-    { print }
-' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+echo "==> Batching changesets into [${VERSION}] and regenerating CHANGELOG.md (changie)"
+changie batch "$VERSION"
+changie merge -u "## [Unreleased]"
 
 echo "==> Bumping CFBundleShortVersionString to ${VERSION}"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" Resources/Info.plist
@@ -40,7 +42,7 @@ cat <<EOF
 
 ==> Release ${VERSION} prepared (not committed). Review, then:
 
-    git add CHANGELOG.md Resources/Info.plist
+    git add CHANGELOG.md .changes Resources/Info.plist
     git commit -m "chore: release ${VERSION}"
     git tag -a "v${VERSION}" -m "v${VERSION}"
     git push --follow-tags

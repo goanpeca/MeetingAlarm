@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  Initial menu-bar app: day-scoped meeting checklist, per-meeting arming with **Blast** and sensory-safe **Gentle Ramp** presets, full-screen overlay across all displays with optional sound, snooze, dismiss puzzles, and calendar filtering. EventKit + Google calendar sources.
+time: 2026-08-26T00:00:00Z

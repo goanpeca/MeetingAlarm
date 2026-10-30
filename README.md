@@ -19,10 +19,10 @@ Two built-in alert styles (both fully adjustable):
   hyperfocus without a shock. Honors the system **Reduce Motion** setting; **Esc
   always dismisses**.
 
-> Status: **v1 functional.** The menu-bar checklist, the EventKit (macOS Calendar) source,
-> the overlay engine, snooze, and persistence are implemented and tested.
-> Design lives in [`docs/design-docs/`](docs/design-docs/2026-08-26-meeting-alarm-design.md);
-> the build plan is in [`docs/exec-plans/`](docs/exec-plans/).
+> Status: **in development** (no release cut yet). The menu-bar checklist, the EventKit (macOS
+> Calendar) source, the overlay engine, snooze, and persistence are implemented and tested.
+> Each change lives in [`intent/<slug>/`](intent/README.md) (intent → spec → plan); the v1
+> design is [`intent/meeting-alarm-v1/spec.md`](intent/meeting-alarm-v1/spec.md).
 
 ## How you use it
 
@@ -48,7 +48,7 @@ Click the menu-bar bell to open the popover:
 
 ```bash
 make test    # unit tests (requires full Xcode — see below)
-make app     # build + sign MeetingAlarm.app
+make app     # build + sign "Meeting Alarm.app"
 make run     # build the app bundle and open it
 make install # install into /Applications so macOS shows the icon in Menu Bar settings
 ```
@@ -111,7 +111,7 @@ make coverage
 
 Conventions: files ≤ 250 lines, no `print` (use `os.Logger`), docs kept in
 sync. Details in
-[`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md).
+[`docs/core-beliefs.md`](docs/core-beliefs.md).
 
 ## License
 

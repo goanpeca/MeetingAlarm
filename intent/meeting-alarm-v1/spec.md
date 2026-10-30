@@ -3,7 +3,7 @@
 > **Post-v1:** direct Google Calendar (OAuth/PKCE, `GoogleAuth`, Keychain-stored secrets) was
 > removed — the app is **EventKit-only** now, reading Google/iCloud via macOS Internet Accounts.
 > Treat the Google/secrets sections below as historical v1 context; see
-> [Post-v1 Subsystems](2026-08-27-post-v1-subsystems.md).
+> [Post-v1 Subsystems](../post-v1-subsystems/spec.md).
 
 **Date:** 2026-08-26
 **Status:** Draft for review
@@ -74,7 +74,7 @@ meeting-alarm/
 │   └── quality-scan.yml             # scheduled drift scan (harness "recurring task" analog)
 ├── Resources/Info.plist             # LSUIElement, calendar usage strings
 ├── scripts/
-│   ├── make_app.sh                  # assemble + ad-hoc-sign MeetingAlarm.app → open
+│   ├── make_app.sh                  # assemble + ad-hoc-sign "Meeting Alarm.app" → open
 │   ├── check-layers.sh              # custom linter: enforce import direction (repair hints)
 │   └── coverage-gate.sh             # parse llvm-cov; fail below threshold
 ├── docs/
@@ -109,7 +109,7 @@ Services      (Calendar/*, Alarm/*, SoundPlayer)         — may import Models, 
 Runtime/UI    (App, UI/*)                                — may import everything below
 ```
 
-### Golden principles (`docs/design-docs/core-beliefs.md`)
+### Golden principles (`docs/core-beliefs.md`)
 Subjective taste encoded as mechanical, checkable rules, e.g.:
 - **Files ≤ ~250 lines.** Outgrowing it means the file does too much — split it.
 - **Pure logic stays pure.** Fire-time math, presets, JSON→model mapping, and OAuth
@@ -312,14 +312,14 @@ wanted. Both live on the same engine and the user chooses per meeting.
 
 - **Bundle identifier:** `com.goanpeca.MeetingAlarm` (matches the `os.Logger` subsystem).
 - **Build:** `swift build` produces the binary; `scripts/make_app.sh` assembles
-  `MeetingAlarm.app` (`Contents/MacOS`, `Contents/Info.plist`, `Contents/Resources`),
+  `Meeting Alarm.app` (`Contents/MacOS`, `Contents/Info.plist`, `Contents/Resources`),
   **ad-hoc code-signs** it (`codesign --force --deep --sign -`) so EventKit/TCC prompts work,
   and `open`s it. Fully command-line; `Package.swift` also opens directly in Xcode 26.
 - **`Makefile` targets:** `build`, `app`, `run`, `test`, `coverage`, `lint`, `format`,
   `check-layers`, `scan`, `clean`.
 - **Verification during build:**
   1. `swift build` compiles clean (warnings-as-errors); `swift test` passes; coverage gate passes.
-  2. `MeetingAlarm.app` launches; the menu-bar item appears (no dock icon).
+  2. `Meeting Alarm.app` launches; the menu-bar item appears (no dock icon).
   3. **Test Alarm** renders the overlay across the display(s) with sound, and Esc dismisses.
   4. Arming a meeting persists across relaunch.
   5. EventKit list populates after the permission grant. (Google path verified once the user

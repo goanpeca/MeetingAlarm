@@ -1,0 +1,71 @@
+name: Bug report
+description: Something in Meeting Alarm isn't working as expected.
+title: "fix(<area>): <what goes wrong>"
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Concrete steps and logs make this fast to fix — and a confirmed bug
+        becomes a regression test (and, for review misses, an eval case).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Alarm overlay / dismiss / snooze
+        - Scheduling / arming / recurring events
+        - Meetings list / popover / quick panel
+        - Settings
+        - Calendar (EventKit) sync
+        - Install / build / tooling
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Arm a meeting starting in 5 min
+        2. Let the alarm fire, don't dismiss
+        3. Wait for the next calendar sync (~30 s)
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        `log show --last 15m --predicate 'subsystem == "com.goanpeca.MeetingAlarm"' --info`
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Build / macOS version
+      placeholder: "main @ abc1234 · macOS 15.x"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Breaks an invariant (e.g. can't dismiss, missed alarm) = high.
+      options:
+        - High — missed/stuck alarm, data loss, invariant broken
+        - Medium — wrong behavior, workaround exists
+        - Low — cosmetic
+    validations:
+      required: true

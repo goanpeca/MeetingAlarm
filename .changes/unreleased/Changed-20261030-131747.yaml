@@ -1,0 +1,3 @@
+kind: Changed
+body: 'Change records follow the AI-native SDLC playbook layout: each change lives in `intent/<slug>/` (`intent.md`, `spec.md`, `plan.md`), indexed in `intent/README.md`, replacing `docs/design-docs`, `docs/exec-plans`, and `docs/product-specs`.'
+time: 2026-10-30T13:17:47.902814-05:00

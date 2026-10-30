@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Install the built MeetingAlarm.app into /Applications and register it with Launch Services,
+# Install the built "Meeting Alarm.app" into /Applications and register it with Launch Services,
 # so macOS (Control Center / Menu Bar settings, Login Items, Spotlight) resolves the bundle id
 # to ONE copy that carries the current icon. A stale or duplicate copy elsewhere makes the
 # system show a generic icon. Run via `make install` (which builds and signs first).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP="MeetingAlarm.app"
+APP="Meeting Alarm.app"
 DEST="/Applications/$APP"
 LSR=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
@@ -32,6 +32,16 @@ trap - EXIT
 # /Applications (best effort — Spotlight may re-index the build copy later).
 "$LSR" -f "$DEST"
 "$LSR" -u "$PWD/$APP" 2>/dev/null || true
+
+# Retire copies from before the bundle was renamed "Meeting Alarm.app" — a second registered
+# copy under the same bundle id is exactly what made Control Center show a generic icon.
+for OLD in "/Applications/MeetingAlarm.app" "$PWD/MeetingAlarm.app"; do
+    if [ -d "$OLD" ]; then
+        "$LSR" -u "$OLD" 2>/dev/null || true
+        rm -rf "$OLD"
+        echo "install: removed old copy $OLD"
+    fi
+done
 
 echo "install: installed $DEST"
 open "$DEST"

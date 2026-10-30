@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  Global hot key **⌃⌥⌘M** summons a floating quick panel mirroring the menu-bar popover, so the app stays reachable when its menu-bar icon is hidden (e.g. behind the notch).
+time: 2026-10-30T12:00:03Z

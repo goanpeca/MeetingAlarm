@@ -1,0 +1,4 @@
+kind: Fixed
+body: |-
+  Pre-recurring saved snapshots now decode (a non-optional `fromSeries` had broken `ArmedConfig` decoding, which would have dropped all armed meetings + settings on upgrade).
+time: 2026-10-30T12:00:15Z

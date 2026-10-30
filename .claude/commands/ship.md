@@ -1,5 +1,5 @@
 ---
-description: Verify the full gate, then build, sign, and relaunch MeetingAlarm.app
+description: Verify the full gate, then build, sign, and relaunch "Meeting Alarm.app"
 ---
 Build and relaunch the app after verifying the harness gate. Do NOT commit or push unless
 explicitly asked.
@@ -9,5 +9,5 @@ explicitly asked.
    macOS keychain dialog appears ("codesign wants to use key MeetingAlarm Dev"), tell the
    user to click **Always Allow** — needed once, and it keeps the Calendar (TCC) permission
    across rebuilds. If signing falls back to ad-hoc, say so (it resets the Calendar grant).
-3. Relaunch: `pkill -x MeetingAlarm 2>/dev/null; sleep 0.5; open MeetingAlarm.app`.
+3. Relaunch: `pkill -x MeetingAlarm 2>/dev/null; sleep 0.5; open "Meeting Alarm.app"`.
 4. Report what changed and confirm the gate passed.

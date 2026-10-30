@@ -1,0 +1,3 @@
+kind: Added
+body: 'Changesets are managed with [Changie](https://changie.dev): run `make changeset` to add one and `make changelog` to regenerate `CHANGELOG.md`, which is now generated rather than hand-edited.'
+time: 2026-10-30T13:09:10.842463-05:00

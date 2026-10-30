@@ -18,14 +18,14 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 
 ## Start here
 
-- **Design (system of record):** [`docs/design-docs/2026-08-26-meeting-alarm-design.md`](docs/design-docs/2026-08-26-meeting-alarm-design.md)
-  (catalog: [`docs/design-docs/index.md`](docs/design-docs/index.md))
+- **Changes (intent → spec → plan, one folder each):** [`intent/README.md`](intent/README.md)
+  — v1 design: [`intent/meeting-alarm-v1/spec.md`](intent/meeting-alarm-v1/spec.md)
 - **Architecture map & layers:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - **Module map (every file, verified):** [`docs/generated/repo-map.md`](docs/generated/repo-map.md)
-- **Golden principles (mechanical rules):** [`docs/design-docs/core-beliefs.md`](docs/design-docs/core-beliefs.md)
+- **Golden principles (mechanical rules):** [`docs/core-beliefs.md`](docs/core-beliefs.md)
 - **Quality grades & coverage bar:** [`docs/QUALITY_SCORE.md`](docs/QUALITY_SCORE.md)
-- **Known issues:** [`docs/exec-plans/tech-debt-tracker.md`](docs/exec-plans/tech-debt-tracker.md)
-- **Plans & progress:** [`docs/exec-plans/`](docs/exec-plans/)
+- **Known issues:** [`docs/tech-debt-tracker.md`](docs/tech-debt-tracker.md)
+- **Review rules:** [`REVIEW.md`](REVIEW.md) · **Issue forms:** bug, feature (intent), task — [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/)
 - **Human setup (Calendar permission):** [`README.md`](README.md)
 - **Contributing (hooks, the loop):** [`CONTRIBUTING.md`](CONTRIBUTING.md) · docs index: [`docs/README.md`](docs/README.md)
 
@@ -73,8 +73,10 @@ make ci            # the exact gate CI runs — reproduce locally before pushing
 make tools         # install the pinned swiftformat/swiftlint into .tools/bin (auto-run by scan/ci)
 make hooks         # install pre-commit (scan) + pre-push (ci) git hooks
 make mutation      # muter mutation testing (slow, on demand; tests the tests)
-make release VERSION=X.Y.Z  # prepare a release: gate + roll CHANGELOG + bump version
-make app           # assemble + ad-hoc-sign MeetingAlarm.app
+make changeset     # add a CHANGELOG changeset (changie new) — never hand-edit CHANGELOG.md
+make changelog     # regenerate CHANGELOG.md from changesets (changie merge)
+make release VERSION=X.Y.Z  # prepare a release: gate + batch changesets + bump version
+make app           # assemble + ad-hoc-sign "Meeting Alarm.app"
 make run           # build app bundle and open it
 make install       # build + sign, then install into /Applications (one copy, with icon)
 ```
@@ -97,20 +99,18 @@ by `make tools` (run automatically by `make scan` / `make ci`), so local == CI.
 
 ## AI-native SDLC (playbook)
 
-This repo pairs **harness engineering** (the substrate above) with the **AI-native SDLC
-playbook**, installed as skills in [`.claude/skills/`](.claude/skills/). Begin a change by
-invoking **`ai-native-sdlc`**, which routes to the right stage skill (`sdlc-intent` →
-`sdlc-spec` → `sdlc-plan` → build → `sdlc-pr-review` …); `sdlc-harness-translate` maps
-playbook artifacts onto this repo's harness ones. The intent → spec → plan flow uses the
-docs we already keep — no separate `intent/` tree:
+This repo follows the **AI-native SDLC playbook** natively, on top of the **harness
+engineering** substrate above (mechanical gates, `ARCHITECTURE.md`, module map). The playbook's
+skills live in [`.claude/skills/`](.claude/skills/). Begin a change by invoking
+**`ai-native-sdlc`**, which routes to the right stage skill (`sdlc-intent` → `sdlc-spec` →
+`sdlc-plan` → build → `sdlc-pr-review` …).
 
 | Playbook artifact | Here |
 |---|---|
-| `intent.md` | `docs/product-specs/<slug>.md` |
-| `spec.md` | `docs/design-docs/<slug>.md` (+ index row, verification status) |
-| `plan.md` | `docs/exec-plans/active/<slug>.md` → `completed/` at merge |
+| `intent.md` → `spec.md` → `plan.md` | `intent/<slug>/` — indexed with spec status in [`intent/README.md`](intent/README.md) |
 | policy skill / build hook | a rule in `docs/` + a lint wired into `make ci` |
-| review passes | [`REVIEW.md`](REVIEW.md) (bugs / security / compliance), run via `sdlc-pr-review` |
+| review passes | [`REVIEW.md`](REVIEW.md) — risk-tiered, evidence-based ([Anthropic code review](https://claude.dev/blog/solving-code-review-at-anthropic/)), via `sdlc-pr-review` |
+| change records | changesets in `.changes/` → generated `CHANGELOG.md` ([Changie](https://changie.dev)) |
 | config evals | [`evals/`](evals/) + `.github/workflows/agent-evals.yml` (starter — see `evals/README.md`) |
 | required check | the full gate `make ci`, mirrored in CI |
 
@@ -122,7 +122,8 @@ other maintainers.
 
 ## Conventions
 
-Full list: [`docs/design-docs/conventions.md`](docs/design-docs/conventions.md). In short: add
+Full list: [`docs/conventions.md`](docs/conventions.md). In short: add
 tests for pure logic; run `make scan` before committing; commits are **one line, < 72 chars,
 Conventional-Commit prefix**, and **never carry AI attribution** of any kind; if code diverges
-from a `current` design doc, update it or mark it `stale` in the index.
+from a `current` spec, update it or mark it `stale` in [`intent/README.md`](intent/README.md). Behavior
+changes add a changeset (`make changeset`).

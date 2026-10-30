@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  Keyboard shortcuts (⌘←/→ day nav, ⌘T today, ⌘R refresh, ⌘Q quit, Return/Esc in the recurring prompt) and VoiceOver labels + tooltips across the controls; Esc closes the popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware text throughout.
+time: 2026-10-30T12:00:07Z

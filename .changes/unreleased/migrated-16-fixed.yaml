@@ -1,0 +1,4 @@
+kind: Fixed
+body: |-
+  Puzzle input readable in light mode; Dismiss button is neutral grey; edited events refresh even while checked; the color picker opens in front for the menu-bar app.
+time: 2026-10-30T12:00:16Z

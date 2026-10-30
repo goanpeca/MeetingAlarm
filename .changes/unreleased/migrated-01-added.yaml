@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  **Auto-arm** setting (Settings → Arming, **off by default**): when on, every future meeting is armed unless you uncheck it (opt-out), with per-occurrence or whole-series opt-outs; derived arms cover only meetings that haven't started, so it never alarms a meeting you're already in. Off, the app stays opt-in — only the meetings you check are armed.
+time: 2026-10-30T12:00:01Z
