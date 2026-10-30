@@ -461,6 +461,12 @@ Then M1–M7 pass on a locally built `MeetingAlarm.app`.
 - 2026-10-30 — Plan red-teamed (APPROVE WITH CHANGES); folded in: gate on
   `OverlayController.isPresenting` instead of a scheduler flag, earliest-first ordering, D5
   documented, wait logging, manual checks M5–M7, §5 citation.
+- 2026-10-30 — T1–T4 implemented (89f3a15, 68e2b8a, 75ef61e, c83dcd7). T1 red (compile error:
+  `fireAction` missing) then green (6/6 `AlarmMath`). Full gate green locally: build
+  `-warnings-as-errors`, 84 tests, coverage 95.6% (≥ 90%), layers, docs, workflows, links,
+  format, lint (0 violations). Built with the Command Line Tools only, using
+  `SDKROOT=…/MacOSX26.5.sdk`, `--build-system native`, and the Swift Testing framework and plugin
+  paths from the Command Line Tools. Manual checks M1–M7 not yet run.
 
 ## Decision log
 
