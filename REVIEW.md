@@ -29,7 +29,8 @@ Tag each finding with its pass:
 - **Compliance** — the change matches its `intent/<slug>/spec.md` and
   `intent/<slug>/plan.md` (if any), the layer rules in [`ARCHITECTURE.md`](ARCHITECTURE.md),
   and the invariants in [`AGENTS.md`](AGENTS.md) (Esc always dismisses; no `print`; files ≤ 250
-  lines; pure logic stays pure).
+  lines; pure logic stays pure). UI, accessibility, and release changes are also checked
+  against [`docs/references/apple-guidelines.md`](docs/references/apple-guidelines.md).
 
 ## Severity, evidence, and honesty
 
