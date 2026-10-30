@@ -15,11 +15,18 @@ if [ ! -d "$APP" ]; then
     exit 1
 fi
 
-# Replace the running copy cleanly; ditto preserves the code signature and resource forks.
+# Stage the new bundle beside the destination (same volume) first; ditto preserves the code
+# signature and resource forks. Only once the copy is whole do we stop the app and swap, so a
+# failed copy — e.g. a full disk — leaves the working /Applications copy untouched.
+STAGE="$(dirname "$DEST")/.$APP.new.$$"
+trap 'rm -rf "$STAGE"' EXIT
+ditto "$APP" "$STAGE"
+
 pkill -x MeetingAlarm 2>/dev/null || true
 sleep 0.5
 rm -rf "$DEST"
-ditto "$APP" "$DEST"
+mv "$STAGE" "$DEST" # same-volume rename: fast, and the slow/failure-prone copy already ran
+trap - EXIT
 
 # Register the installed copy and drop the build-tree one so the bundle id resolves only to
 # /Applications (best effort — Spotlight may re-index the build copy later).
