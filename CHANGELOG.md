@@ -22,7 +22,7 @@ section in the same change that alters behavior.
 - App icon (ringing bell + sound waves) built from `scripts/generate-icon.swift`.
 - Keyboard shortcuts (⌘←/→ day nav, ⌘T today, ⌘R refresh, ⌘Q quit, Return/Esc in the
   recurring prompt) and VoiceOver labels + tooltips across the controls; Esc closes the
-  popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware list sizing.
+  popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware text throughout.
 - Sharing: `scripts/package.sh` produces `dist/MeetingAlarm.zip` + `SHARE.md` open steps.
 - Harness: verified module map (`docs/architecture/modules.md`) with a `check-docs` drift
   gate, `make ci` CI-parity target, git hooks (`make hooks`), PR template, CONTRIBUTING,
@@ -44,6 +44,10 @@ section in the same change that alters behavior.
   `ArmedConfig` decoding, which would have dropped all armed meetings + settings on upgrade).
 - Puzzle input readable in light mode; Dismiss button is neutral grey; edited events refresh
   even while checked; the color picker opens in front for the menu-bar app.
+- The menu-bar popover no longer detaches from the menu bar: it is now a constant height, since a
+  `MenuBarExtra` window that resizes after it is shown keeps its bottom edge and the top drifts
+  away (switching panes, a day with fewer events, or the calendar loading). The Meetings list
+  scrolls inside the fixed area.
 
 ## [0.1.0] — 2026-08-26
 
