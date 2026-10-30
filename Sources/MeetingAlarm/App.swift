@@ -22,6 +22,12 @@ struct RootView: View {
     @ObservedObject var coordinator: AppCoordinator
     @State private var pane: Pane = .meetings
 
+    /// The popover is a constant size. A MenuBarExtra window that resizes after it is shown
+    /// keeps its bottom edge, so a shrink (switching panes, a day with fewer events, the async
+    /// calendar load, the filter list) pulls the top away from the menu bar. 561pt matches the
+    /// Settings pane, the tallest content; the Meetings list scrolls inside the remainder.
+    static let height: CGFloat = 561
+
     enum Pane: String, CaseIterable, Identifiable {
         case meetings = "Meetings"
         case settings = "Settings"
@@ -55,7 +61,7 @@ struct RootView: View {
             }
             .padding([.bottom, .horizontal], 12)
         }
-        .frame(width: 360)
+        .frame(width: 360, height: Self.height)
         .overlay {
             if coordinator.showAutoArmPrompt {
                 AutoArmPromptView(coordinator: coordinator, store: coordinator.store)

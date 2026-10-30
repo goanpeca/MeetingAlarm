@@ -6,8 +6,6 @@ struct MenuContentView: View {
     @ObservedObject var coordinator: AppCoordinator
     @ObservedObject var store: Store
     @State private var showFilter = false
-    /// Scales the list's viewport with the user's Dynamic Type size so rows aren't clipped.
-    @ScaledMetric private var rowHeight: CGFloat = 46
 
     /// Show account labels only when the day spans more than one account; with a single
     /// account the label is the same on every row and adds nothing.
@@ -54,11 +52,12 @@ struct MenuContentView: View {
                         }
                     }
                 }
-                .frame(height: min(CGFloat(coordinator.meetings.count) * rowHeight + 8, 340))
             }
         }
         .padding(12)
+        // Fill the popover's fixed-height content area; the list scrolls inside it.
         .frame(width: 360)
+        .frame(maxHeight: .infinity, alignment: .top)
         .overlay {
             if let prompt = coordinator.scopePrompt {
                 ScopePromptView(coordinator: coordinator, prompt: prompt)
