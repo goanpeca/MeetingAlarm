@@ -22,6 +22,11 @@ final class OverlayController {
     private var windows: [NSWindow] = []
     private var keyMonitor: Any?
 
+    /// Whether an alarm overlay is currently on screen.
+    var isPresenting: Bool {
+        !windows.isEmpty
+    }
+
     func present(
         profile: SensoryProfile,
         meeting: Meeting,

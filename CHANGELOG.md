@@ -40,6 +40,9 @@ section in the same change that alters behavior.
 
 ### Fixed
 
+- An alarm left on screen is no longer re-presented on every calendar sync, which reset the
+  dismiss puzzle and restarted the sound. Alarms that come due meanwhile wait until it closes,
+  earliest first (#8).
 - Pre-recurring saved snapshots now decode (a non-optional `fromSeries` had broken
   `ArmedConfig` decoding, which would have dropped all armed meetings + settings on upgrade).
 - Puzzle input readable in light mode; Dismiss button is neutral grey; edited events refresh

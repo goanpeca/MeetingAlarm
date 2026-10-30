@@ -397,6 +397,10 @@ A firing alarm offers **Dismiss** plus **snooze** buttons for each configured in
 - **Behavior:** snoozing records `now + interval` in `Store.snoozes[meetingId]`, tears down the
   overlay, and arms a one-shot timer for that target. When it elapses the same alarm re-fires
   with the meeting's profile. Dismiss clears any snooze for that meeting.
+- **One overlay at a time:** while an alarm is on screen, rescheduling (sync, wake, another
+  alarm's snooze or dismiss) never re-presents or replaces it. Other alarms that come due wait
+  and are re-evaluated, earliest first, when the overlay closes; a waiting auto-armed alarm is
+  dropped once its meeting has started, and any alarm is dropped once its meeting has ended.
 - **Pure core:** `AlarmScheduler.snoozeFireTime(from:interval:meetingEnd:now:) -> Date?` computes
   the target and **returns `nil` when it would land at/after the meeting end** (snoozing past
   the meeting is pointless) — unit-tested across the boundaries.

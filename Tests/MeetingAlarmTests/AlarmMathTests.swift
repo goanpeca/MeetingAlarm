@@ -32,4 +32,29 @@ struct AlarmMathTests {
         #expect(AlarmMath
             .snoozeFireTime(from: start, interval: 120, meetingStart: meetingStart) == nil)
     }
+
+    @Test("fireAction schedules a future target, whether or not an overlay is up")
+    func fireActionFuture() {
+        let target = start.addingTimeInterval(90)
+        #expect(AlarmMath.fireAction(target: target, now: start, isPresenting: false)
+            == .schedule(after: 90))
+        #expect(AlarmMath.fireAction(target: target, now: start, isPresenting: true)
+            == .schedule(after: 90))
+    }
+
+    @Test("fireAction fires a due or overdue target when nothing is on screen")
+    func fireActionDue() {
+        #expect(AlarmMath.fireAction(target: start, now: start, isPresenting: false) == .fireNow)
+        #expect(AlarmMath.fireAction(
+            target: start.addingTimeInterval(-60), now: start, isPresenting: false
+        ) == .fireNow)
+    }
+
+    @Test("fireAction waits on a due or overdue target while an overlay is on screen")
+    func fireActionWaits() {
+        #expect(AlarmMath.fireAction(target: start, now: start, isPresenting: true) == .wait)
+        #expect(AlarmMath.fireAction(
+            target: start.addingTimeInterval(-60), now: start, isPresenting: true
+        ) == .wait)
+    }
 }

@@ -17,4 +17,21 @@ enum AlarmMath {
         let target = now.addingTimeInterval(interval)
         return target < meetingStart ? target : nil
     }
+
+    /// Decide whether an alarm fires now, arms a timer, or waits. Only one overlay is shown at
+    /// a time, so a due alarm never replaces (or re-presents) the one on screen.
+    static func fireAction(target: Date, now: Date, isPresenting: Bool) -> FireAction {
+        if target > now {
+            return .schedule(after: target.timeIntervalSince(now))
+        }
+        return isPresenting ? .wait : .fireNow
+    }
+}
+
+/// What the scheduler should do with one alarm right now.
+enum FireAction: Equatable, Sendable {
+    case fireNow
+    case schedule(after: TimeInterval)
+    /// Due, but an overlay is on screen; re-evaluated on the reschedule after it closes.
+    case wait
 }

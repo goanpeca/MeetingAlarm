@@ -153,8 +153,16 @@ final class AppCoordinator: ObservableObject {
         overlay.present(
             profile: profile, meeting: sample, snoozeIntervals: store.snoozeIntervals,
             challenge: store.dismissChallenge,
-            onSnooze: { [weak self] _ in self?.sound.stop() },
-            onDismiss: { [weak self] in self?.sound.stop() }
+            // Reschedule on close: a real alarm that came due meanwhile waited (one overlay at
+            // a time) and must be re-evaluated now, not on the next sync.
+            onSnooze: { [weak self] _ in
+                self?.sound.stop()
+                self?.reschedule()
+            },
+            onDismiss: { [weak self] in
+                self?.sound.stop()
+                self?.reschedule()
+            }
         )
         sound.play(
             profile.sound, volume: profile.volume,
