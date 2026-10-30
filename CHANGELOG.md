@@ -20,6 +20,11 @@ section in the same change that alters behavior.
   the app stays reachable when its menu-bar icon is hidden (e.g. behind the notch).
 - **Launch at login** toggle (Settings → Startup) via `SMAppService`.
 - App icon (ringing bell + sound waves) built from `scripts/generate-icon.swift`.
+- `make install` installs the built app into `/Applications` and registers it with Launch
+  Services, so macOS resolves the bundle id to one copy that carries the icon (a stale or
+  duplicate copy made Control Center's Menu Bar settings show a generic icon). Mutation runs
+  now unregister and delete Muter's `<repo>_mutated` copy, which had been registering a stale
+  `.app` under the same bundle id.
 - Keyboard shortcuts (⌘←/→ day nav, ⌘T today, ⌘R refresh, ⌘Q quit, Return/Esc in the
   recurring prompt) and VoiceOver labels + tooltips across the controls; Esc closes the
   popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware text throughout.

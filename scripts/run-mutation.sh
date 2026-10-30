@@ -17,7 +17,20 @@ fi
 swift package clean
 
 log="$(mktemp)"
-trap 'rm -f "$log"' EXIT
+# Muter works in a sibling copy of the whole project (<repo>_mutated), which also carries a
+# stale MeetingAlarm.app that macOS registers under our bundle id — and then the Menu Bar /
+# Control Center settings can resolve to it instead of the real app. Unregister and delete the
+# copy on the way out, pass or fail.
+mutated="${PWD}_mutated"
+cleanup() {
+    rm -f "$log"
+    if [ -d "$mutated/MeetingAlarm.app" ]; then
+        /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+            -u "$mutated/MeetingAlarm.app" 2>/dev/null || true
+    fi
+    rm -rf "$mutated"
+}
+trap cleanup EXIT
 
 # Tee so the human-readable report streams while we also parse the score from it.
 set +e
