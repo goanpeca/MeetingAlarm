@@ -15,10 +15,11 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 if ! command -v changie >/dev/null; then
-    echo "changie not found — install it: brew install changie (or 'make tools')."
+    echo "changie not found — install it: brew install changie"
     exit 1
 fi
-if [ -z "$(ls -A .changes/unreleased 2>/dev/null)" ]; then
+# Count real changesets only — .changes/unreleased/.gitkeep keeps the dir tracked when empty.
+if [ -z "$(find .changes/unreleased -name '*.yaml' -print -quit 2>/dev/null)" ]; then
     echo "no changesets in .changes/unreleased — add one with 'make changeset' first."
     exit 1
 fi
