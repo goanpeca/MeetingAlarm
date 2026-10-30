@@ -45,8 +45,9 @@ reverts if the system refuses. Also visible under System Settings → General �
 
 Esc closes the popover / cancels the recurring prompt; ⌘←/→ day nav, ⌘T today, ⌘R refresh, ⌘Q
 quit; VoiceOver labels + `.help` tooltips on every icon-only control; a `.announcementRequested`
-when an alarm fires; `@ScaledMetric` list sizing for Dynamic Type. The overlay keeps its own
-Esc-dismiss and white-on-scrim contrast.
+when an alarm fires; the day list scrolls inside a **fixed-height viewport** so the popover
+stays a constant size and attached to the menu bar as rows or Dynamic Type grow. The overlay
+keeps its own Esc-dismiss and white-on-scrim contrast.
 
 ## 5. Smaller decisions
 

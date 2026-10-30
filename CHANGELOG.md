@@ -22,7 +22,7 @@ section in the same change that alters behavior.
 - App icon (ringing bell + sound waves) built from `scripts/generate-icon.swift`.
 - Keyboard shortcuts (⌘←/→ day nav, ⌘T today, ⌘R refresh, ⌘Q quit, Return/Esc in the
   recurring prompt) and VoiceOver labels + tooltips across the controls; Esc closes the
-  popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware list sizing.
+  popover; a VoiceOver announcement when an alarm fires; Dynamic-Type-aware text throughout.
 - Sharing: `scripts/package.sh` produces `dist/MeetingAlarm.zip` + `SHARE.md` open steps.
 - Harness: verified module map (`docs/architecture/modules.md`) with a `check-docs` drift
   gate, `make ci` CI-parity target, git hooks (`make hooks`), PR template, CONTRIBUTING,
