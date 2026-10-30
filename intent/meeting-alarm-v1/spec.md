@@ -3,7 +3,7 @@
 > **Post-v1:** direct Google Calendar (OAuth/PKCE, `GoogleAuth`, Keychain-stored secrets) was
 > removed — the app is **EventKit-only** now, reading Google/iCloud via macOS Internet Accounts.
 > Treat the Google/secrets sections below as historical v1 context; see
-> [Post-v1 Subsystems](2026-08-27-post-v1-subsystems.md).
+> [Post-v1 Subsystems](../post-v1-subsystems/spec.md).
 
 **Date:** 2026-08-26
 **Status:** Draft for review
@@ -109,7 +109,7 @@ Services      (Calendar/*, Alarm/*, SoundPlayer)         — may import Models, 
 Runtime/UI    (App, UI/*)                                — may import everything below
 ```
 
-### Golden principles (`docs/design-docs/core-beliefs.md`)
+### Golden principles (`docs/core-beliefs.md`)
 Subjective taste encoded as mechanical, checkable rules, e.g.:
 - **Files ≤ ~250 lines.** Outgrowing it means the file does too much — split it.
 - **Pure logic stays pure.** Fire-time math, presets, JSON→model mapping, and OAuth

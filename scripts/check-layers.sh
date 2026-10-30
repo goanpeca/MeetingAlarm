@@ -7,7 +7,7 @@
 # and networking frameworks, keeping it unit-testable without a screen, a calendar
 # database, or the network. Services and UI may use platform frameworks freely.
 #
-# See ARCHITECTURE.md and docs/design-docs/core-beliefs.md.
+# See ARCHITECTURE.md and docs/core-beliefs.md.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 

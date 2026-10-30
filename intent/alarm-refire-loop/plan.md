@@ -19,7 +19,7 @@ dismiss puzzle and any typed answer survive until the user closes the overlay.
 it stays the single owner of that state. `AlarmScheduler` consults it and orders due alarms by
 target time. Both are AppKit shells listed in `scripts/non-core-files.txt`.
 
-**Spec:** `docs/design-docs/2026-08-26-meeting-alarm-design.md` §5 (AlarmScheduler and
+**Spec:** `intent/meeting-alarm-v1/spec.md` §5 (AlarmScheduler and
 OverlayController contracts, around line 201) and §17 (Snooze)
 
 ## Context
@@ -160,7 +160,7 @@ arbitrary.
   gate in `fire`, log waits.
 - Modify: `Sources/MeetingAlarm/AppCoordinator.swift` — test-alarm close callbacks call
   `reschedule()` (D6).
-- Modify: `docs/design-docs/2026-08-26-meeting-alarm-design.md` — one bullet in §17.
+- Modify: `intent/meeting-alarm-v1/spec.md` — one bullet in §17.
 - Modify: `CHANGELOG.md` — `[Unreleased]` → `### Fixed` entry.
 
 ## Task breakdown
@@ -183,7 +183,7 @@ T3 — Scheduler: sort by target, route through fireAction, gate fire(), log wai
      verify:  swift build -Xswiftc -warnings-as-errors && make scan → OK; manual M1–M8
 
 T4 — Docs + changelog
-     files:   docs/design-docs/2026-08-26-meeting-alarm-design.md, CHANGELOG.md
+     files:   intent/meeting-alarm-v1/spec.md, CHANGELOG.md
      depends: [independent]
      verify:  make check-links → OK
 ```
@@ -405,7 +405,7 @@ git commit -m "fix: never re-present or preempt an on-screen alarm"
 ## Task 4: Docs + changelog
 
 **Files:**
-- Modify: `docs/design-docs/2026-08-26-meeting-alarm-design.md` (§17 Snooze, after the
+- Modify: `intent/meeting-alarm-v1/spec.md` (§17 Snooze, after the
   **Behavior** bullet)
 - Modify: `CHANGELOG.md`
 
@@ -436,7 +436,7 @@ Expected: OK.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add docs/design-docs/2026-08-26-meeting-alarm-design.md CHANGELOG.md
+git add intent/meeting-alarm-v1/spec.md CHANGELOG.md
 git commit -m "docs: record one-overlay-at-a-time scheduling rule"
 ```
 

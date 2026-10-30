@@ -30,6 +30,7 @@ All notable changes to Meeting Alarm are recorded here. Format follows
 - Default alarm color follows the OS accent color (System Settings → Appearance → Theme).
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 - Review loop adopts the AI-native SDLC playbook and Anthropic code-review practices: `REVIEW.md` tiers review effort (Quick/Standard/Deep), requires file+line evidence, tags inherited findings `Pre-existing`, blocks self-merge on open Important/Security findings, and caps review rounds.
+- Change records follow the AI-native SDLC playbook layout: each change lives in `intent/<slug>/` (`intent.md`, `spec.md`, `plan.md`), indexed in `intent/README.md`, replacing `docs/design-docs`, `docs/exec-plans`, and `docs/product-specs`.
 
 ### Fixed
 

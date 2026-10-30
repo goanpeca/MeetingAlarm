@@ -1,7 +1,7 @@
 # Architecture Overview
 
 A top-level map of the domains and how they layer. The authoritative per-component
-contracts live in the [design doc](docs/design-docs/2026-08-26-meeting-alarm-design.md) §5.
+contracts live in the [design doc](intent/meeting-alarm-v1/spec.md) §5.
 For the exhaustive, mechanically-verified list of every file see the
 [module map](docs/generated/repo-map.md).
 

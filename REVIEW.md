@@ -7,7 +7,7 @@ Human review is optional, not required.
 
 Modeled on the [AI-native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook)
 and [Solving code review at Anthropic](https://claude.dev/blog/solving-code-review-at-anthropic/),
-adapted for solo (see [`docs/exec-plans/active/2026-10-30-sdlc-review-migration.md`](docs/exec-plans/active/2026-10-30-sdlc-review-migration.md)).
+adapted for solo (see [`intent/sdlc-migration/plan.md`](intent/sdlc-migration/plan.md)).
 
 ## Match effort to risk
 
@@ -26,8 +26,8 @@ Tag each finding with its pass:
 
 - **Bugs** — logic errors, broken edge cases, subtle regressions.
 - **Security** — injection, auth gaps, secrets or PII in logs (see [`SECURITY.md`](SECURITY.md)).
-- **Compliance** — the change matches its `docs/design-docs/<slug>.md` and
-  `docs/exec-plans/active/<slug>.md` (if any), the layer rules in [`ARCHITECTURE.md`](ARCHITECTURE.md),
+- **Compliance** — the change matches its `intent/<slug>/spec.md` and
+  `intent/<slug>/plan.md` (if any), the layer rules in [`ARCHITECTURE.md`](ARCHITECTURE.md),
   and the invariants in [`AGENTS.md`](AGENTS.md) (Esc always dismisses; no `print`; files ≤ 250
   lines; pure logic stays pure).
 
