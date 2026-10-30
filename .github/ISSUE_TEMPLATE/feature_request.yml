@@ -1,0 +1,44 @@
+name: Feature / change (intent)
+description: Propose a change. Captured as an intent — it becomes intent/<slug>/intent.md.
+title: "feat(<area>): <outcome you want>"
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This follows the AI-native SDLC playbook: describe the **problem and outcome**, not the
+        implementation. Accepted intents move to `intent/<slug>/intent.md` → `spec.md` → `plan.md`
+        (see [`intent/README.md`](../blob/main/intent/README.md)).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What's painful or missing today, and when does it bite?
+    validations:
+      required: true
+  - type: textarea
+    id: who
+    attributes:
+      label: Who it's for
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: What success looks like
+      description: Observable outcomes — how would you know it worked?
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: |
+        Must hold the invariants — Esc always dismisses, pure core stays pure, no `print`.
+        Note anything touching the alarm overlay/scheduler, signing, workflows, or the Keychain
+        (those get Deep review).
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: What this deliberately won't do.

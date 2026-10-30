@@ -27,6 +27,10 @@ local and CI always run the exact same swiftformat/swiftlint — no `brew instal
   CI fails the run below a mutation-score floor (`MUTATION_MIN`); reproduce with
   `MUTATION_MIN=<n> make mutation`.
 
+Issues use forms in `.github/ISSUE_TEMPLATE/`: **Bug report** (steps, logs, severity) and
+**Feature / change**, which captures an intent that becomes `intent/<slug>/intent.md`.
+Security reports go privately via [`SECURITY.md`](SECURITY.md).
+
 Never push red — the pre-push hook runs `make ci`, so fix it locally first. Bypass a hook
 only in a genuine emergency with `--no-verify`.
 

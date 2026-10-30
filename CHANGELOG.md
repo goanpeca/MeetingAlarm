@@ -22,6 +22,7 @@ All notable changes to Meeting Alarm are recorded here. Format follows
 - Sharing: `scripts/package.sh` produces `dist/MeetingAlarm.zip` + `SHARE.md` open steps.
 - Harness: verified module map (`docs/architecture/modules.md`) with a `check-docs` drift gate, `make ci` CI-parity target, git hooks (`make hooks`), PR template, CONTRIBUTING, and mutation-testing config.
 - Changesets are managed with [Changie](https://changie.dev): run `make changeset` to add one and `make changelog` to regenerate `CHANGELOG.md`, which is now generated rather than hand-edited.
+- GitHub issue forms in `.github/ISSUE_TEMPLATE/`: a bug report (steps, logs, severity) and a feature form that captures a playbook intent; blank issues are off and security reports go to `SECURITY.md`.
 
 ### Changed
 
