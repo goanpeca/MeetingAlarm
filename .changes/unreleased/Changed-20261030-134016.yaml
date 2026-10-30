@@ -1,0 +1,3 @@
+kind: Changed
+body: The app bundle is now named **Meeting Alarm.app** (with a space) in `/Applications` and Finder; `make install` retires any old `MeetingAlarm.app` copy so only one registered copy remains. The executable, process name, and bundle id are unchanged.
+time: 2026-10-30T13:40:16.424975-05:00

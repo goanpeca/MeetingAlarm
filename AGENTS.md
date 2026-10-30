@@ -76,7 +76,7 @@ make mutation      # muter mutation testing (slow, on demand; tests the tests)
 make changeset     # add a CHANGELOG changeset (changie new) — never hand-edit CHANGELOG.md
 make changelog     # regenerate CHANGELOG.md from changesets (changie merge)
 make release VERSION=X.Y.Z  # prepare a release: gate + batch changesets + bump version
-make app           # assemble + ad-hoc-sign MeetingAlarm.app
+make app           # assemble + ad-hoc-sign "Meeting Alarm.app"
 make run           # build app bundle and open it
 make install       # build + sign, then install into /Applications (one copy, with icon)
 ```

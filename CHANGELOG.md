@@ -32,6 +32,7 @@ All notable changes to Meeting Alarm are recorded here. Format follows
 - Overlay text sits on a strengthened dark scrim so it's readable over any color/theme.
 - Review loop adopts the AI-native SDLC playbook and Anthropic code-review practices: `REVIEW.md` tiers review effort (Quick/Standard/Deep), requires file+line evidence, tags inherited findings `Pre-existing`, blocks self-merge on open Important/Security findings, and caps review rounds.
 - Change records follow the AI-native SDLC playbook layout: each change lives in `intent/<slug>/` (`intent.md`, `spec.md`, `plan.md`), indexed in `intent/README.md`, replacing `docs/design-docs`, `docs/exec-plans`, and `docs/product-specs`.
+- The app bundle is now named **Meeting Alarm.app** (with a space) in `/Applications` and Finder; `make install` retires any old `MeetingAlarm.app` copy so only one registered copy remains. The executable, process name, and bundle id are unchanged.
 
 ### Fixed
 

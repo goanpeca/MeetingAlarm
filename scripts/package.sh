@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Package MeetingAlarm.app into a shareable zip under dist/, next to SHARE.md open
+# Package "Meeting Alarm.app" into a shareable zip under dist/, next to SHARE.md open
 # instructions. The bundle is signed with a self-signed/ad-hoc cert (not notarized), so the
 # recipient clears Gatekeeper once — SHARE.md walks them through it. For friction-free
 # distribution, sign with an Apple Developer ID and notarize instead (see SHARE.md).
@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 # Optimized release build + signed bundle.
 CONFIG=release ./scripts/make_app.sh
 
-APP="MeetingAlarm.app"
+APP="Meeting Alarm.app"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${APP}/Contents/Info.plist")"
 OUT="dist"
 ZIP="${OUT}/MeetingAlarm-${VERSION}.zip"

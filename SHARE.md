@@ -6,7 +6,7 @@ process — it takes about a minute.
 
 ## 1. Unzip
 
-Double-click `MeetingAlarm-x.y.z.zip` to get **MeetingAlarm.app**, then drag it into your
+Double-click `MeetingAlarm-x.y.z.zip` to get **Meeting Alarm.app**, then drag it into your
 **Applications** folder (optional, but tidy).
 
 ## 2. Open it the first time
@@ -15,7 +15,7 @@ A normal double-click will say *"MeetingAlarm can't be opened because the develo
 be verified."* That's expected for an app that hasn't been through Apple's paid
 notarization — not a sign anything is wrong. To allow it:
 
-**Right-click** (or Control-click) **MeetingAlarm.app → Open**, then click **Open** in the
+**Right-click** (or Control-click) **Meeting Alarm.app → Open**, then click **Open** in the
 dialog. You only do this the first time; afterwards it opens with a normal double-click.
 
 > If macOS still refuses (recent versions sometimes hide the Open button): open
@@ -25,7 +25,7 @@ dialog. You only do this the first time; afterwards it opens with a normal doubl
 **Terminal alternative** (same result, one command):
 
 ```
-xattr -dr com.apple.quarantine /Applications/MeetingAlarm.app
+xattr -dr com.apple.quarantine "/Applications/Meeting Alarm.app"
 ```
 
 ## 3. Grant Calendar access

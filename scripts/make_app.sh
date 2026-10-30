@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Assemble MeetingAlarm.app from the built binary + Info.plist, code-sign it, and leave
+# Assemble "Meeting Alarm.app" from the built binary + Info.plist, code-sign it, and leave
 # it ready to `open`. Signs with a stable self-signed identity ("MeetingAlarm Dev") so
 # macOS keeps the Calendar (TCC) permission across rebuilds. The identity is created
 # automatically on first run by scripts/ensure-signing-identity.sh; if it can't be
@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 CONFIG="${CONFIG:-debug}"
-APP="MeetingAlarm.app"
+APP="Meeting Alarm.app"
 BIN=".build/${CONFIG}/MeetingAlarm"
 
 echo "==> Building (${CONFIG})"
@@ -37,4 +37,4 @@ else
     codesign --force --deep --sign - "${APP}"
 fi
 
-echo "==> Done: ${APP} (run: open ${APP})"
+echo "==> Done: ${APP} (run: open \"${APP}\")"

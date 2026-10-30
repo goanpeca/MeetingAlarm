@@ -48,7 +48,7 @@ Click the menu-bar bell to open the popover:
 
 ```bash
 make test    # unit tests (requires full Xcode — see below)
-make app     # build + sign MeetingAlarm.app
+make app     # build + sign "Meeting Alarm.app"
 make run     # build the app bundle and open it
 make install # install into /Applications so macOS shows the icon in Menu Bar settings
 ```
