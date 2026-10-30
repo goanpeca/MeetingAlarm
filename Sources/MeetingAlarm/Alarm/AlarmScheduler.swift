@@ -36,31 +36,53 @@ final class AlarmScheduler {
         }
     }
 
-    /// Cancel all timers and re-arm from the current armed set + snoozes.
+    /// One armed alarm with its resolved profile and fire target.
+    private struct Pending {
+        let id: String
+        let config: ArmedConfig
+        let profile: SensoryProfile
+        let target: Date
+    }
+
+    /// Cancel all timers and re-arm from the current armed set + snoozes. Due alarms present
+    /// earliest-first, one at a time; the rest wait for the reschedule after it closes.
     func reschedule(armed: [String: ArmedConfig], snoozes: [String: Date], now: Date) {
         cancelAll()
-        for (id, config) in armed {
-            guard config.meeting.end > now else { continue } // meeting already over
+        let pending = armed.compactMap { id, config -> Pending? in
+            guard config.meeting.end > now else { return nil } // meeting already over
             let profile = resolveProfile(config)
             let target = snoozes[id]
                 ?? AlarmMath.fireTime(
                     meetingStart: config.meeting.start,
                     leadTime: profile.leadTime
                 )
-            if target <= now {
-                fire(id: id, config: config, profile: profile) // overdue → fire immediately
-            } else {
-                let delay = target.timeIntervalSince(now)
-                tasks[id] = Task { [weak self] in
+            return Pending(id: id, config: config, profile: profile, target: target)
+        }
+        for alarm in pending.sorted(by: { $0.target < $1.target }) {
+            let action = AlarmMath.fireAction(
+                target: alarm.target, now: now, isPresenting: overlay.isPresenting
+            )
+            switch action {
+            case .fireNow:
+                fire(id: alarm.id, config: alarm.config, profile: alarm.profile)
+            case let .schedule(after: delay):
+                tasks[alarm.id] = Task { [weak self] in
                     try? await Task.sleep(for: .seconds(delay))
                     guard !Task.isCancelled else { return }
-                    self?.fire(id: id, config: config, profile: profile)
+                    self?.fire(id: alarm.id, config: alarm.config, profile: alarm.profile)
                 }
+            case .wait:
+                logWaiting(alarm.id)
             }
         }
     }
 
     private func fire(id: String, config: ArmedConfig, profile: SensoryProfile) {
+        // One overlay at a time: never re-present or replace the alarm on screen.
+        guard !overlay.isPresenting else {
+            logWaiting(id)
+            return
+        }
         log.info("firing alarm for \(id, privacy: .public)")
         sound.play(
             profile.sound, volume: profile.volume, repeatForever: soundRepeat, gap: soundGap
@@ -79,6 +101,10 @@ final class AlarmScheduler {
                 self?.onDismiss(id)
             }
         )
+    }
+
+    private func logWaiting(_ id: String) {
+        log.info("alarm \(id, privacy: .public) waiting: another alarm is on screen")
     }
 
     private func cancelAll() {
