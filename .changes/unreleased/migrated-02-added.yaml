@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  Recurring-event support: a "Repeats" tag on recurring rows, and an in-popover prompt to arm **this event only** or the **whole series**; series occurrences fire day-to-day as they roll into the rolling scheduling window. Unarming asks skip-one vs. whole-series.
+time: 2026-10-30T12:00:02Z

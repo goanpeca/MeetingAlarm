@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := build
-.PHONY: tools build run app install test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation release clean
+.PHONY: tools build run app install test coverage lint format format-check check-layers check-docs check-workflows check-links scan ci hooks mutation changeset changelog release clean
 
 APP = MeetingAlarm.app
 
@@ -89,7 +89,15 @@ hooks:
 mutation:
 	./scripts/run-mutation.sh
 
-## release: prepare a release (gate + roll CHANGELOG + bump version). Usage: make release VERSION=X.Y.Z
+## changeset: add a CHANGELOG changeset (changie new) — do this instead of editing CHANGELOG.md
+changeset:
+	changie new
+
+## changelog: regenerate CHANGELOG.md from the changesets (changie merge)
+changelog:
+	changie merge -u "## [Unreleased]"
+
+## release: prepare a release (gate + batch changesets + bump version). Usage: make release VERSION=X.Y.Z
 release:
 	./scripts/release.sh $(VERSION)
 

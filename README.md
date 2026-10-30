@@ -19,8 +19,8 @@ Two built-in alert styles (both fully adjustable):
   hyperfocus without a shock. Honors the system **Reduce Motion** setting; **Esc
   always dismisses**.
 
-> Status: **v1 functional.** The menu-bar checklist, the EventKit (macOS Calendar) source,
-> the overlay engine, snooze, and persistence are implemented and tested.
+> Status: **in development** (no release cut yet). The menu-bar checklist, the EventKit (macOS
+> Calendar) source, the overlay engine, snooze, and persistence are implemented and tested.
 > Design lives in [`docs/design-docs/`](docs/design-docs/2026-08-26-meeting-alarm-design.md);
 > the build plan is in [`docs/exec-plans/`](docs/exec-plans/).
 

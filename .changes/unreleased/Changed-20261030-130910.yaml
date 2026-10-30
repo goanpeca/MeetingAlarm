@@ -1,0 +1,3 @@
+kind: Changed
+body: 'Review loop adopts the AI-native SDLC playbook and Anthropic code-review practices: `REVIEW.md` tiers review effort (Quick/Standard/Deep), requires file+line evidence, tags inherited findings `Pre-existing`, blocks self-merge on open Important/Security findings, and caps review rounds.'
+time: 2026-10-30T13:09:10.850639-05:00

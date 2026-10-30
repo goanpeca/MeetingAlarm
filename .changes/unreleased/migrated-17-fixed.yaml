@@ -1,0 +1,4 @@
+kind: Fixed
+body: |-
+  The menu-bar popover no longer detaches from the menu bar: it is now a constant height, since a `MenuBarExtra` window that resizes after it is shown keeps its bottom edge and the top drifts away (switching panes, a day with fewer events, or the calendar loading). The Meetings list scrolls inside the fixed area.
+time: 2026-10-30T12:00:17Z

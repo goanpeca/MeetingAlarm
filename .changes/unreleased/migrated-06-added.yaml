@@ -1,0 +1,4 @@
+kind: Added
+body: |-
+  `make install` installs the built app into `/Applications` and registers it with Launch Services, so macOS resolves the bundle id to one copy that carries the icon (a stale or duplicate copy made Control Center's Menu Bar settings show a generic icon). Mutation runs now unregister and delete Muter's `<repo>_mutated` copy, which had been registering a stale `.app` under the same bundle id.
+time: 2026-10-30T12:00:06Z

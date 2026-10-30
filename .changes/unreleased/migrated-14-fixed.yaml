@@ -1,0 +1,4 @@
+kind: Fixed
+body: |-
+  An alarm left on screen is no longer re-presented on every calendar sync, which reset the dismiss puzzle and restarted the sound. Alarms that come due meanwhile wait until it closes, earliest first (#8).
+time: 2026-10-30T12:00:14Z

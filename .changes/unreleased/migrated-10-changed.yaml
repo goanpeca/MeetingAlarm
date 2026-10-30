@@ -1,0 +1,4 @@
+kind: Changed
+body: |-
+  Toggling **auto-arm** now asks whether to apply the new setting to every future meeting — resetting your individual checked/unchecked choices — or keep those choices as-is.
+time: 2026-10-30T12:00:10Z

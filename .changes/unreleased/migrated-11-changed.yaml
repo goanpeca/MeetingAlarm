@@ -1,0 +1,4 @@
+kind: Changed
+body: |-
+  Scheduling now reads a small **rolling 2-day window** refetched each sync instead of pre-arming a 60-day horizon, so meetings arm as they roll in — removing the series materialization subsystem (`SeriesMaterializer`, `materializeSeries`, `fromSeries`).
+time: 2026-10-30T12:00:11Z
