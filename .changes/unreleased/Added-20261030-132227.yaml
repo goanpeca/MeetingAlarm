@@ -1,3 +1,3 @@
 kind: Added
-body: 'GitHub issue forms in `.github/ISSUE_TEMPLATE/`: a bug report (steps, logs, severity) and a feature form that captures a playbook intent; blank issues are off and security reports go to `SECURITY.md`.'
+body: 'GitHub issue forms in `.github/ISSUE_TEMPLATE/`: a bug report (steps, logs, severity), a task form (what / why / done-when), and a feature form that captures a playbook intent; blank issues are off and security reports go to `SECURITY.md`.'
 time: 2026-10-30T13:22:27.886185-05:00

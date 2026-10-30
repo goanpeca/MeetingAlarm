@@ -25,7 +25,7 @@ and **Gentle Ramp** (predictable, sensory-safe; see the design doc §9).
 - **Golden principles (mechanical rules):** [`docs/core-beliefs.md`](docs/core-beliefs.md)
 - **Quality grades & coverage bar:** [`docs/QUALITY_SCORE.md`](docs/QUALITY_SCORE.md)
 - **Known issues:** [`docs/tech-debt-tracker.md`](docs/tech-debt-tracker.md)
-- **Review rules:** [`REVIEW.md`](REVIEW.md) · **Running board:** [`TASKS.md`](TASKS.md)
+- **Review rules:** [`REVIEW.md`](REVIEW.md) · **Issue forms:** bug, feature (intent), task — [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/)
 - **Human setup (Calendar permission):** [`README.md`](README.md)
 - **Contributing (hooks, the loop):** [`CONTRIBUTING.md`](CONTRIBUTING.md) · docs index: [`docs/README.md`](docs/README.md)
 

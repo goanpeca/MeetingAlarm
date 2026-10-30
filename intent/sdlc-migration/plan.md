@@ -56,7 +56,7 @@ The blog is written for large, multi-reviewer orgs. For a solo repo:
   (plan), and this change; folded the design-docs / exec-plans / product-specs indexes into
   `intent/README.md`; kept repo-wide refs (`core-beliefs`, `conventions`, `tech-debt-tracker`,
   `QUALITY_SCORE`, module map) in `docs/`. Rewired every link (`check-links` green); added a
-  `TASKS.md` running board; README status → "in development".
+  issue forms (bug / feature-intent / task); README status → "in development".
 - [ ] **2 — Incidents → evals.** Seed a code-review eval set from past *confirmed* bugs
   (alarm re-fire loop #8; `ArmedConfig` legacy-decode data loss; `install.sh` delete-then-copy;
   Zoom multi-join dedupe) and score the review passes against it; re-score on any change to the

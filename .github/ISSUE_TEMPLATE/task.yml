@@ -1,0 +1,48 @@
+name: Task
+description: A concrete piece of work — chore, tooling, docs, refactor, or a step of a larger change.
+title: "chore(<area>): <task>"
+labels: [task]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: The work to do, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The reason, or the issue / `intent/<slug>/` it serves.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Checkable acceptance criteria.
+      placeholder: |
+        - [ ] `make ci` green
+        - [ ] ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Alarm / scheduling
+        - UI
+        - Calendar (EventKit)
+        - CI / gates
+        - Tooling / build / release
+        - Docs / process
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: related
+    attributes:
+      label: Related
+      placeholder: "#12, intent/sdlc-migration/plan.md"
